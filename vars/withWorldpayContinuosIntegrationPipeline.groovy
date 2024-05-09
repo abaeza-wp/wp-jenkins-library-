@@ -1,6 +1,6 @@
 import com.worldpay.*
 
-def call(String type, String tenant, String component, Closure body) {
+def call(String type, String tenant, String component) {
 
     def pipelineTypes = [
     java: new SpringBootPipeline(tenant, component),
@@ -13,7 +13,5 @@ def call(String type, String tenant, String component, Closure body) {
     assert pipelineType != null
 
     pipelineType.call()
-
-    body.call() // register pipeline config
 
 }
