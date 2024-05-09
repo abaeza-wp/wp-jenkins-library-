@@ -3,7 +3,7 @@ import com.worldpay.*
 def call(String type, String tenant, String component, Closure body) {
 
     def pipelineTypes = [
-    java: new SpringBootPipelineType(this, tenant, component),
+    java: new SpringBootPipeline(tenant, component),
 //    nodejs: new NodePipelineType(this, product, component),
     ]
 

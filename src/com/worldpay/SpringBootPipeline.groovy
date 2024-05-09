@@ -1,10 +1,10 @@
 package com.worldpay
 
-class SpringBootPipelineType implements Serializable {
+class SpringBootPipeline implements Serializable {
     def tenant
     def component
 
-    SpringBootPipelineType(tenant, component) {
+    SpringBootPipeline(tenant, component) {
         this.tenant = tenant
         this.component = component
 
