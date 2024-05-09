@@ -7,7 +7,8 @@ def call(String type, String tenant, String component, Closure body) {
 //    nodejs: new NodePipelineType(this, product, component),
     ]
 
-    PipelineType pipelineType = pipelineTypes.get(type) as PipelineType
+    //TODO: For now use SpringBootPipeline but this should probably be a generic PipelineType
+    SpringBootPipeline pipelineType = pipelineTypes.get(type)
 
     assert pipelineType != null
 
