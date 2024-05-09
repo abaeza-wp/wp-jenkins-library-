@@ -1,4 +1,4 @@
-package com.wordlpay
+package com.worldpay
 
 abstract class CommonPipelineDsl implements Serializable {
     final PipelineCallbacksConfig callbacks

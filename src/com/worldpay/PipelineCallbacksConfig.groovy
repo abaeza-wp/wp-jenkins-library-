@@ -1,4 +1,4 @@
-package com.wordlpay
+package com.worldpay
 
 class PipelineCallbacksConfig {
   Map<String, Closure> bodies = new HashMap<>()

@@ -1,4 +1,4 @@
-package com.wordlpay
+package com.worldpay
 
 class SpringBootPipelineType implements Serializable {
     def tenant
