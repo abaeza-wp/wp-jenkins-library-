@@ -146,6 +146,7 @@ def call(String type, String tenant, String component, Closure body) {
             {
                 when
                 {
+                    expression { params.release }
                     expression { !params.profile.contains("dev") }
                     anyOf {
 
@@ -172,6 +173,7 @@ def call(String type, String tenant, String component, Closure body) {
             {
                 when
                 {
+                    expression { params.release }
                     anyOf {
                         triggeredBy 'TimerTrigger'
                         triggeredBy cause: 'UserIdCause'
