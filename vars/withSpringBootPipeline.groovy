@@ -272,7 +272,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withReporting("CODE_COVERAGE") {}
+                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
                         }
                     }
 
@@ -280,7 +280,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withReporting("UNIT") {}
+                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
                         }
                     }
 
@@ -295,10 +295,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            script
-                            {
-                                load("deployment/boilerplate/scripts/pipeline/owasp-dependency-checker.groovy").owaspDependencyChecker()
-                            }
+                            withOwaspDependencyScan()
                         }
                     }
 
@@ -306,7 +303,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withReporting("BDD") {}
+                            withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
                         }
                     }
                 }
@@ -324,14 +321,14 @@ def call(String type, String tenant, String component, Closure body) {
                     }
                 }
                 steps {
-                    withReporting("ARCHIVE_REPORTS") {}
+                    withArchiveReportsToS3()
                 }
             }
 
             stage("Archive HTML Reports artifacts")
             {
                 steps {
-                    withReporting("ARCHIVE_HTML_REPORTS") {}
+                    withArchiveHtmlReports()
                 }
             }
 

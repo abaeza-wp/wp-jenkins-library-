@@ -1,39 +1,21 @@
-def call(String reportType) {
-    script {
-        switch (reportType) {
-            case "UNIT":
-                reportUnit()
-                break
-            case "BDD":
-                reportBDD()
-                break
-            case "CODE_COVERAGE":
-                reportCodeCoverage()
-                break
-            case "ARCHIVE_REPORTS":
-                archiveReports()
-                break
-            case "ARCHIVE_HTML_REPORTS":
-                archiveHtmlReports()
-                break
-            default:
-                error "ERROR: Unsupported report type '${reportType}'"
-                break
-        }
+def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
+    script
+    {
+        archiveReportAsPdf(reportName, reportDir, htmlReportFile, outputPdf, waitForJS)
     }
 }
 
 /*
     Used to archive artifacts in an AWS S3 bucket, as to retain them for internal audits and compliance (e.g. PCI-DSS).
 */
-
-def archiveReports() {
+def archiveReports()
+{
     script
     {
         withCredentials([[$class: "AmazonWebServicesCredentialsBinding", accessKeyVariable: "AWS_ACCESS_KEY_ID", credentialsId: "${env.REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID}", secretKeyVariable: "AWS_SECRET_ACCESS_KEY"]])
         {
             def date = new Date().format("yyyy-MM-dd")
-            String[] splitDate = date.split("-")
+            String [] splitDate = date.split("-")
             def year = splitDate[0]
 
             def version = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
@@ -54,21 +36,23 @@ def archiveReports() {
 }
 
 def archiveHtmlReports() {
-    archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+
 }
 
-def publishHtmlReport(reportDir, reportFile, reportName) {
-    publishHTML(target: [
-    allowMissing         : false,
+def publishHtmlReport(reportDir, reportFile, reportName)
+{
+    publishHTML (target: [
+    allowMissing: false,
     alwaysLinkToLastBuild: false,
-    keepAll              : true,
-    reportDir            : "${reportDir}",
-    reportFiles          : "${reportFile}",
-    reportName           : "${reportName}"
+    keepAll: true,
+    reportDir: "${reportDir}",
+    reportFiles: "${reportFile}",
+    reportName: "${reportName}"
     ])
 }
 
-def archiveReportAsPdf(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
+def archiveReportAsPdf(reportName, reportDir, htmlReportFile, outputPdf, waitForJS)
+{
     // Publish on Jenkins
     publishHtmlReport(reportDir, htmlReportFile, reportName)
 
@@ -87,14 +71,17 @@ def archiveReportAsPdf(reportName, reportDir, htmlReportFile, outputPdf, waitFor
     archiveArtifacts artifacts: "${env.SERVICE_NAME}-${outputPdf}"
 }
 
-def reportCodeCoverage() {
+def reportCodeCoverage()
+{
     archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
 }
 
-def reportBDD() {
+def reportBDD()
+{
     archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
 }
 
-def reportUnit() {
+def reportUnit()
+{
     archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
 }

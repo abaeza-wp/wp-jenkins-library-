@@ -1,7 +1,7 @@
 def call() {
     script
     {
-        load("deployment/boilerplate/scripts/pipeline/reporting.groovy").archiveHtmlReports()
+        archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
     }
 }
 
