@@ -211,13 +211,13 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    archiveReports {}
+                    withArchiveReports {}
                 }
             }
 
             stage("Archive HTML Reports artifacts")
             {
-                archiveHtmlReports {}
+                withArchiveHtmlReports {}
             }
 
         }
