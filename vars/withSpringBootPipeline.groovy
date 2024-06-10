@@ -129,7 +129,6 @@ def call(String type, String tenant, String component, Closure body) {
 
         stages
         {
-            withBuildImage(){}
             stage("Build Image")
             {
                 environment
@@ -141,7 +140,7 @@ def call(String type, String tenant, String component, Closure body) {
                 {
                     script
                     {
-                        load("deployment/boilerplate/scripts/build-image.groovy").buildImage()
+                        withBuildImage(){}
                     }
                 }
             }
