@@ -7,6 +7,7 @@ def call(String type, String tenant, String component, Closure body) {
 
     script
     {
+        echo "Running from Shared pipeline"
         // Fetch versioning information
         def gitReference = (env.BRANCH_NAME ? env.BRANCH_NAME : params.gitReference)
         def versionName = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
@@ -29,7 +30,6 @@ def call(String type, String tenant, String component, Closure body) {
         executeImageBuild(profile, kubernetesToken, versionName)
     }
     body.call()
-
 }
 
 
