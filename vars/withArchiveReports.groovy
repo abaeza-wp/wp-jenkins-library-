@@ -1,10 +1,7 @@
 def call() {
-    steps
+    script
     {
-        script
-        {
-            load("deployment/boilerplate/scripts/pipeline/reporting.groovy").archiveReports()
-        }
+        load("deployment/boilerplate/scripts/pipeline/reporting.groovy").archiveReports()
     }
 }
 

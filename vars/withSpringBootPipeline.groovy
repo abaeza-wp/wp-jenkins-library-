@@ -184,6 +184,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
+
                     withKubernetesLogin(type, tenant, component, params.profile) {}
                     withHelmDeployment(type, tenant, component, params.profile) {}
                 }
@@ -191,7 +192,124 @@ def call(String type, String tenant, String component, Closure body) {
 
             stage("Testing")
             {
-                withParallelTesting {}
+                parallel
+                {
+                    stage("Performance")
+                    {
+                        when
+                        {
+                            allOf
+                            {
+                                expression { params.release }
+                                expression { params.profile.contains("staging") }
+                                expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+                            }
+                        }
+                        steps
+                        {
+                            script
+                            {
+                                load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
+                            }
+                        }
+                    }
+
+                    stage("Image Scan (Sysdig)")
+                    {
+                        when
+                        {
+                            allOf
+                            {
+                                expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
+                                expression { params.release }
+                            }
+                        }
+                        steps
+                        {
+                            script
+                            {
+                                load("deployment/boilerplate/scripts/pipeline/sysdig-image-scan.groovy").sysdigImageScan()
+                            }
+                        }
+                    }
+
+                    stage("Static Analysis (Checkmarx)")
+                    {
+                        when
+                        {
+                            expression { env.CHECKMARX_ENABLED.toBoolean() }
+                            expression { params.release }
+                        }
+                        steps
+                        {
+                            script
+                            {
+                                load("deployment/boilerplate/scripts/pipeline/checkmarx.groovy").runCheckmarx()
+                            }
+                        }
+                    }
+
+                    stage("Dependency Analysis (BlackDuck)")
+                    {
+                        when
+                        {
+                            allOf
+                            {
+                                expression { env.BLACKDUCK_ENABLED.toBoolean() }
+                                expression { params.release }
+                            }
+                        }
+                        steps
+                        {
+                            script
+                            {
+                                load("deployment/boilerplate/scripts/pipeline/blackduck.groovy").runBlackduck()
+                            }
+                        }
+                    }
+
+                    stage("Code Coverage Report")
+                    {
+                        steps
+                        {
+                            withReporting("CODE_COVERAGE") {}
+                        }
+                    }
+
+                    stage("Unit Tests Report")
+                    {
+                        steps
+                        {
+                            withReporting("UNIT") {}
+                        }
+                    }
+
+                    stage("OWASP Dependency Checker")
+                    {
+                        when
+                        {
+                            allOf
+                            {
+                                expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
+                            }
+                        }
+                        steps
+                        {
+                            script
+                            {
+                                load("deployment/boilerplate/scripts/pipeline/owasp-dependency-checker.groovy").owaspDependencyChecker()
+                            }
+                        }
+                    }
+
+                    stage("BDD Report")
+                    {
+                        steps
+                        {
+                            withReporting("BDD") {}
+                        }
+                    }
+                }
             }
 
             stage("Archive reports in S3")
@@ -205,12 +323,16 @@ def call(String type, String tenant, String component, Closure body) {
                         expression { params.profile.contains("staging") }
                     }
                 }
-                withArchiveReports {}
+                steps {
+                    withReporting("ARCHIVE_REPORTS") {}
+                }
             }
 
             stage("Archive HTML Reports artifacts")
             {
-                withArchiveHtmlReports {}
+                steps {
+                    withReporting("ARCHIVE_HTML_REPORTS") {}
+                }
             }
 
         }
