@@ -7,8 +7,6 @@ class SpringBootPipeline implements Serializable {
     SpringBootPipeline(tenant, component) {
         this.tenant = tenant
         this.component = component
-
-
     }
 
     def call() {
@@ -116,25 +114,6 @@ class SpringBootPipeline implements Serializable {
                         script
                         {
                             load("deployment/boilerplate/scripts/build-image.groovy").buildImage()
-                        }
-                    }
-                }
-
-                stage("Deploy")
-                {
-                    when
-                    {
-                        expression
-                        {
-                            gitReference = (env.BRANCH_NAME ?  env.BRANCH_NAME : params.gitReference)
-                            return !gitReference.startsWith('PR')
-                        }
-                    }
-                    steps
-                    {
-                        script
-                        {
-                            load("deployment/boilerplate/scripts/deploy.groovy").deploy(params.profile)
                         }
                     }
                 }
@@ -290,6 +269,25 @@ class SpringBootPipeline implements Serializable {
                     }
                 }
 
+            }
+        }
+
+        stage("Deploy")
+        {
+            when
+            {
+                expression
+                {
+                    gitReference = (env.BRANCH_NAME ?  env.BRANCH_NAME : params.gitReference)
+                    return !gitReference.startsWith('PR')
+                }
+            }
+            steps
+            {
+                script
+                {
+                    load("deployment/boilerplate/scripts/deploy.groovy").deploy(params.profile)
+                }
             }
         }
 
