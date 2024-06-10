@@ -35,10 +35,6 @@ def archiveReports()
     }
 }
 
-def archiveHtmlReports() {
-
-}
-
 def publishHtmlReport(reportDir, reportFile, reportName)
 {
     publishHTML (target: [
@@ -69,19 +65,4 @@ def archiveReportAsPdf(reportName, reportDir, htmlReportFile, outputPdf, waitFor
 
     // Archive artifacts
     archiveArtifacts artifacts: "${env.SERVICE_NAME}-${outputPdf}"
-}
-
-def reportCodeCoverage()
-{
-    archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-}
-
-def reportBDD()
-{
-    archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
-}
-
-def reportUnit()
-{
-    archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
 }
