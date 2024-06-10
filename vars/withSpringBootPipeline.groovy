@@ -192,30 +192,30 @@ def call(String type, String tenant, String component, Closure body) {
                 }
             }
 
-            stage("Testing")
+            stage("Performance")
+            {
+                when
+                {
+                    allOf
+                    {
+                        expression { params.release }
+                        expression { params.profile.contains("staging") }
+                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+                    }
+                }
+                steps
+                {
+                    script
+                    {
+                        load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
+                    }
+                }
+            }
+
+            stage("Security Testing")
             {
                 parallel
                 {
-                    stage("Performance")
-                    {
-                        when
-                        {
-                            allOf
-                            {
-                                expression { params.release }
-                                expression { params.profile.contains("staging") }
-                                expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps
-                        {
-                            script
-                            {
-                                load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
-                            }
-                        }
-                    }
-
                     stage("Image Scan (Sysdig)")
                     {
                         when
@@ -223,7 +223,6 @@ def call(String type, String tenant, String component, Closure body) {
                             allOf
                             {
                                 expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
-                                expression { params.release }
                             }
                         }
                         steps
@@ -240,7 +239,6 @@ def call(String type, String tenant, String component, Closure body) {
                         when
                         {
                             expression { env.CHECKMARX_ENABLED.toBoolean() }
-                            expression { params.release }
                         }
                         steps
                         {
@@ -258,7 +256,6 @@ def call(String type, String tenant, String component, Closure body) {
                             allOf
                             {
                                 expression { env.BLACKDUCK_ENABLED.toBoolean() }
-                                expression { params.release }
                             }
                         }
                         steps
@@ -267,22 +264,6 @@ def call(String type, String tenant, String component, Closure body) {
                             {
                                 load("deployment/boilerplate/scripts/pipeline/blackduck.groovy").runBlackduck()
                             }
-                        }
-                    }
-
-                    stage("Code Coverage Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                        }
-                    }
-
-                    stage("Unit Tests Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
                         }
                     }
 
@@ -298,6 +279,29 @@ def call(String type, String tenant, String component, Closure body) {
                         steps
                         {
                             withOwaspDependencyScan()
+                        }
+                    }
+
+                    stage("OWASP Report")
+                    {
+                        steps
+                        {
+                            withArchiveReportAsPdf("OWASP Dependency Checker", "${env.SERVICE_NAME}/build/reports", "dependency-check-report.html", "owasp-report.pdf", false) {}
+                        }
+                    }
+                    stage("Code Coverage Report")
+                    {
+                        steps
+                        {
+                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                        }
+                    }
+
+                    stage("Unit Tests Report")
+                    {
+                        steps
+                        {
+                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
                         }
                     }
 
