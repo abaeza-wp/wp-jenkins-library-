@@ -138,10 +138,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    script
-                    {
-                        withBuildImage(){}
-                    }
+                    withBuildImage(type, tenant, component) {}
                 }
             }
 

@@ -1,4 +1,4 @@
-def call() {
+def call(String type, String tenant, String component, Closure body) {
 /*
     Used to build the container image.
 
@@ -28,6 +28,8 @@ def call() {
         // Build the project, as well as the image using Google Jib
         executeImageBuild(profile, kubernetesToken, versionName)
     }
+    body.call()
+
 }
 
 
