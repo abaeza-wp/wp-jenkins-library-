@@ -21,5 +21,6 @@ def call() {
             ./gradlew ${env.SERVICE_NAME}:dependencyCheckAnalyze
         """
         }
+        withArchiveReportAsPdf("OWASP Dependency Checker", "${env.SERVICE_NAME}/build/reports", "dependency-check-report.html", "owasp-report.pdf", false)
     }
 }

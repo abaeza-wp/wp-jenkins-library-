@@ -138,7 +138,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withBuildImage(type, tenant, component) {}
+                    withBuildImage(type, tenant, component)
                 }
             }
 
@@ -163,8 +163,8 @@ def call(String type, String tenant, String component, Closure body) {
                 steps
                 {
 
-                    withKubernetesLogin(type, tenant, component, params.profile) {}
-                    withHelmDeployment(type, tenant, component, params.profile) {}
+                    withKubernetesLogin(type, tenant, component, params.profile)
+                    withHelmDeployment(type, tenant, component, params.profile)
                 }
             }
 
@@ -187,8 +187,8 @@ def call(String type, String tenant, String component, Closure body) {
                 steps
                 {
 
-                    withKubernetesLogin(type, tenant, component, params.profile) {}
-                    withHelmDeployment(type, tenant, component, params.profile) {}
+                    withKubernetesLogin(type, tenant, component, params.profile)
+                    withHelmDeployment(type, tenant, component, params.profile)
                 }
             }
 
@@ -279,16 +279,10 @@ def call(String type, String tenant, String component, Closure body) {
                         steps
                         {
                             withOwaspDependencyScan()
+
                         }
                     }
 
-                    stage("OWASP Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("OWASP Dependency Checker", "${env.SERVICE_NAME}/build/reports", "dependency-check-report.html", "owasp-report.pdf", false) {}
-                        }
-                    }
                     stage("Code Coverage Report")
                     {
                         steps

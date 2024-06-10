@@ -1,10 +1,10 @@
-def call(String type, String tenant, String component, Closure body) {
 /*
     Used to build the container image.
 
     Scroll further down to the executeImageBuild function to customise the built steps.
 */
 
+def call(String type, String tenant, String component, Closure body) {
     script
     {
         // Fetch versioning information
@@ -69,5 +69,3 @@ def isCreateNamespace(profile) {
     profile.deploy.create_namespace.enabled != null &&
     profile.deploy.create_namespace.enabled;
 }
-
-return this
