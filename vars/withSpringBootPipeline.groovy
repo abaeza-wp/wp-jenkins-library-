@@ -184,12 +184,8 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    script
-                    {
-                        load("deployment/boilerplate/scripts/kubernetes-login.groovy").kubernetesLogin()
-
-                        load("deployment/boilerplate/scripts/deploy-via-helm.groovy").deploy(params.profile)
-                    }
+                    withKubernetesLogin(type, tenant, component, params.profile) {}
+                    withHelmDeployment(type, tenant, component, params.profile) {}
                 }
             }
 
@@ -209,10 +205,7 @@ def call(String type, String tenant, String component, Closure body) {
                         expression { params.profile.contains("staging") }
                     }
                 }
-                steps
-                {
-                    withArchiveReports {}
-                }
+                withArchiveReports {}
             }
 
             stage("Archive HTML Reports artifacts")
