@@ -1,4 +1,24 @@
+def getProfiles() {
+    return [
+    "dev-euwest1",
+    "staging-euwest1",
+    "staging-useast1",
+    ]
+}
+
+def tokenNameOf(namespace, profileName) {
+    def tokenSuffix = profileName.replace('-live', '')
+    .replace('-try', '')
+
+    return "svc_token-${namespace}-${tokenSuffix}"
+}
+
+def cronExpression() {
+    return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
+}
+
 def call(String type, String tenant, String component, Closure body) {
+
     pipeline
     {
         agent
