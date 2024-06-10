@@ -138,7 +138,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withBuildImage(type, tenant, component)
+                    withBuildImage(type, tenant, component){}
                 }
             }
 
@@ -163,8 +163,8 @@ def call(String type, String tenant, String component, Closure body) {
                 steps
                 {
 
-                    withKubernetesLogin(type, tenant, component, params.profile)
-                    withHelmDeployment(type, tenant, component, params.profile)
+                    withKubernetesLogin(type, tenant, component, params.profile){}
+                    withHelmDeployment(type, tenant, component, params.profile){}
                 }
             }
 
@@ -187,8 +187,8 @@ def call(String type, String tenant, String component, Closure body) {
                 steps
                 {
 
-                    withKubernetesLogin(type, tenant, component, params.profile)
-                    withHelmDeployment(type, tenant, component, params.profile)
+                    withKubernetesLogin(type, tenant, component, params.profile){}
+                    withHelmDeployment(type, tenant, component, params.profile){}
                 }
             }
 
@@ -278,7 +278,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withOwaspDependencyScan()
+                            withOwaspDependencyScan(){}
 
                         }
                     }
@@ -287,7 +287,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false){}
                         }
                     }
 
@@ -295,7 +295,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false){}
                         }
                     }
 
@@ -303,7 +303,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                            withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true){}
                         }
                     }
                 }
@@ -321,14 +321,14 @@ def call(String type, String tenant, String component, Closure body) {
                     }
                 }
                 steps {
-                    withArchiveReportsToS3()
+                    withArchiveReportsToS3(){}
                 }
             }
 
             stage("Archive HTML Reports artifacts")
             {
                 steps {
-                    withArchiveHtmlReports()
+                    withArchiveHtmlReports(){}
                 }
             }
 
