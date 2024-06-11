@@ -144,6 +144,9 @@ def call(arguments) {
 					archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
 					archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
 					archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+					//Archive all HTML reports
+					archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+
 				}
 			}
 
@@ -262,12 +265,6 @@ def call(arguments) {
 				}
 				steps {
 					archiveReportsToS3()
-				}
-			}
-
-			stage("Archive HTML Reports artifacts") {
-				steps {
-					archiveHtmlReports()
 				}
 			}
 		}
