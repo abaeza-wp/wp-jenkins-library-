@@ -7,19 +7,21 @@
 def call(Closure body) {
     script
     {
-        // Read deployment profile
-        def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+        withCredentials([
+        string(credentialsId: "${env.CURRENT_USER_KUBERNETES_TOKEN}", variable: "KUBERNETES_TOKEN")
+        ])
+        {
+            // Read deployment profile
+            def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
 
-        // Login to the cluster
-        def kubernetesToken = load("deployment/boilerplate/scripts/kubernetes-login.groovy").kubernetesLogin()
+            // Create Kubernetes namespace (dev cluster only)
+            if (isCreateNamespace(profile)) {
+                load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
+            }
 
-        // Create Kubernetes namespace (dev cluster only)
-        if (isCreateNamespace(profile)) {
-            load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
+            // Build the project, as well as the image using Google Jib
+            executeImageBuild(profile, "${KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
         }
-
-        // Build the project, as well as the image using Google Jib
-        executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
     }
     body.call()
 }

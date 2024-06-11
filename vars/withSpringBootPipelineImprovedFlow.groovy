@@ -168,7 +168,9 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withBuildImageOnly {}
+                    withKubernetesLogin(params.profile) {
+                        withBuildImageOnly {}
+                    }
                 }
             }
 
@@ -257,7 +259,9 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withSysdigScan {}
+                            withKubernetesLogin(params.profile) {
+                                withSysdigScan {}
+                            }
                         }
                     }
 

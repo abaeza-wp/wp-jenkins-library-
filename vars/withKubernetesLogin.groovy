@@ -6,7 +6,7 @@
     (oc command) can be used.
 */
 
-def call(String profile, Closure body) {
+def call(Closure body) {
     script
     {
         withCredentials([
@@ -15,26 +15,24 @@ def call(String profile, Closure body) {
         {
             echo "Logging into cluster..."
 
-            def profileConfig = readYaml(file: "deployment/profiles/${profile}.yml")
+            def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
 
             def params = ""
-            def ignoreTls = profileConfig.deploy.ignore_tls
+            def ignoreTls = profile.deploy.ignore_tls
             if (ignoreTls) {
                 params += "--insecure-skip-tls-verify"
             }
 
-            if (profileConfig.deploy.cluster_username) {
-                sh "oc login ${profileConfig.deploy.cluster} ${params} --username=${profileConfig.deploy.cluster_username} --password=${JENKINS_TOKEN}"
+            if (profile.deploy.cluster_username) {
+                sh "oc login ${profile.deploy.cluster} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
             } else {
-                sh "oc login ${profileConfig.deploy.cluster} ${params} --token=${JENKINS_TOKEN}"
+                sh "oc login ${profile.deploy.cluster} ${params} --token=${JENKINS_TOKEN}"
             }
 
             // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
-            sh "oc project ${profileConfig.deploy.namespace} || true"
+            sh "oc project ${profile.deploy.namespace} || true"
 
-            // Fetch token for image builds
-            def kubernetesToken = sh(script: "oc whoami -t", returnStdout: true).trim()
-            return kubernetesToken
+            env.CURRENT_USER_KUBERNETES_TOKEN = sh(script: "oc whoami -t", returnStdout: true).trim()
         }
     }
     body.call()

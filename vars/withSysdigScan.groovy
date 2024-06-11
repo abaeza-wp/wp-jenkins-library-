@@ -8,14 +8,16 @@ def call(Closure body) {
     script
     {
         withCredentials([
-        string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: "SYSDIG_API_KEY")
+        string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: "SYSDIG_API_KEY"),
+        string(credentialsId: "${env.CURRENT_USER_KUBERNETES_TOKEN}", variable: "KUBERNETES_TOKEN")
         ])
         {
             echo "Running Sysdig scan..."
 
-            def kubernetesToken = load("deployment/boilerplate/scripts/kubernetes-login.groovy").kubernetesLogin()
 
             def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+            def hasSysdigScanPassed = false
+            def resultsUrl = ""
 
             registry = "${profile.build.docker_registry}"
             namespace = "${profile.deploy.namespace}"
@@ -30,7 +32,7 @@ def call(Closure body) {
                 sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
                 REGISTRY_USER=${profile.deploy.cluster_username} \
-                REGISTRY_PASSWORD=${kubernetesToken} \
+                REGISTRY_PASSWORD=${KUBERNETES_TOKEN} \
                 \
                 sysdig-cli-scanner \
                     --apiurl=https://secure.sysdig.com ${imageUrl} \
