@@ -16,6 +16,10 @@ def call(Closure body) {
             BUILD_TAG_OR_BRANCH: ${env.BUILD_TAG_OR_BRANCH}
             GIT_REF: ${env.GIT_REF}
         """
+
+        // Set job title
+        currentBuild.displayName = "#${currentBuild.number} : ${params.profile} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
+
     }
     body.call()
 }

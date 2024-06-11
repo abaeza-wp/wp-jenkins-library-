@@ -4,16 +4,9 @@
     Scroll further down to the executeImageBuild function to customise the built steps.
 */
 
-def call(String type, String tenant, String component, Closure body) {
+def call(Closure body) {
     script
     {
-        // Fetch versioning information
-        def gitReference = (env.BRANCH_NAME ? env.BRANCH_NAME : params.gitReference)
-        def versionName = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
-
-        // Set job title
-        currentBuild.displayName = "#${currentBuild.number} : ${params.profile} : ${gitReference} : ${versionName}"
-
         // Read deployment profile
         def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
 
@@ -26,7 +19,7 @@ def call(String type, String tenant, String component, Closure body) {
         }
 
         // Build the project, as well as the image using Google Jib
-        executeImageBuild(profile, kubernetesToken, versionName)
+        executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
     }
     body.call()
 }
