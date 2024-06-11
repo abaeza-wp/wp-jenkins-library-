@@ -35,7 +35,7 @@ def executeImageBuild(profile, kubernetesToken, versionName) {
     def profiles = ""
 
     if (params.release) {
-        profiles += "-Prelease";
+        profiles += "-Prelease"
     }
 
     /**
@@ -59,5 +59,5 @@ def executeImageBuild(profile, kubernetesToken, versionName) {
 def isCreateNamespace(profile) {
     return profile.deploy.create_namespace != null &&
     profile.deploy.create_namespace.enabled != null &&
-    profile.deploy.create_namespace.enabled;
+    profile.deploy.create_namespace.enabled
 }
