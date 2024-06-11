@@ -138,6 +138,7 @@ def call(arguments) {
 			stage("Set Build Information") {
 				steps {
 					setBuildInformation()
+					switchEnvironment("dev")
 				}
 			}
 			stage("Build & Test App") {
