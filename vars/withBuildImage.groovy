@@ -15,8 +15,10 @@ def call(Closure body) {
             load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
         }
 
+        def kubernetesToken = kubernetesLogin(params.profile)
+
         // Build the project, as well as the image using Google Jib
-        executeImageBuild(profile, "${env.CURRENT_USER_KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
+        executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
     }
     body.call()
 }
