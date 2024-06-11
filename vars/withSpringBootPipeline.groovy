@@ -206,10 +206,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    script
-                    {
-                        load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
-                    }
+                    withPerformanceTest(params.profile)
                 }
             }
 
@@ -228,7 +225,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withSysdigScan {}
+                            withSysdigScan(params.profile)
                         }
                     }
 
