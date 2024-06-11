@@ -127,8 +127,7 @@ def call(String type, String tenant, String component, Closure body) {
             )
         }
 
-        stages
-        {
+        stages {
             stage("Set Build Information") {
                 steps {
                     setBuildInformation {}
@@ -294,30 +293,30 @@ def call(String type, String tenant, String component, Closure body) {
                     }
                 }
             }
-        }
 
-        stage("Archive reports in S3")
-        {
-            when
+            stage("Archive reports in S3")
             {
-                allOf
+                when
                 {
-                    expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                    expression { params.release }
-                    expression { params.profile.contains("staging") }
+                    allOf
+                    {
+                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+                        expression { params.release }
+                        expression { params.profile.contains("staging") }
+                    }
+                }
+                steps {
+                    archiveReportsToS3()
                 }
             }
-            steps {
-                archiveReportsToS3()
-            }
-        }
 
-        stage("Archive HTML Reports artifacts")
-        {
-            steps {
-                archiveHtmlReports()
+            stage("Archive HTML Reports artifacts")
+            {
+                steps {
+                    archiveHtmlReports()
+                }
             }
         }
+        body.call()
     }
-    body.call()
 }
