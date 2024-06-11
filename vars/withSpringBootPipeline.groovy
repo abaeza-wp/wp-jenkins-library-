@@ -129,9 +129,9 @@ def call(String type, String tenant, String component, Closure body) {
 
         stages
         {
-            stage("Set Build Config") {
+            stage("Set Build Information") {
                 steps {
-                    setBuildEnvironment {}
+                    setBuildInformation {}
                 }
             }
             stage("Build Image")
@@ -143,7 +143,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withBuildImage(type, tenant, component) {}
+                    withBuildImage {}
                 }
             }
 

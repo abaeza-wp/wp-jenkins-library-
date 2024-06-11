@@ -7,6 +7,8 @@ def call(Closure body) {
         env.BUILD_TAG_OR_BRANCH = sh(script: "git describe --contains --all HEAD", returnStdout: true).replaceAll('/', '-').trim()
         env.GIT_REF = (env.BRANCH_NAME ? env.BRANCH_NAME : params.gitReference)
 
+        env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
+
         echo """
             Build Information:
 
@@ -15,6 +17,8 @@ def call(Closure body) {
             BUILD_COMMIT_HASH: ${env.BUILD_COMMIT_HASH}
             BUILD_TAG_OR_BRANCH: ${env.BUILD_TAG_OR_BRANCH}
             GIT_REF: ${env.GIT_REF}
+            
+            IS_PR_BUILD = ${env.IS_PR_BUILD}
         """
 
         // Set job title
