@@ -186,7 +186,7 @@ def call(arguments) {
                     SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
                 }
                 steps {
-                    helmDeployment(params.profile)
+                    helmDeployment()
                 }
             }
 
@@ -203,7 +203,7 @@ def call(arguments) {
                     SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
                 }
                 steps {
-                    helmDeployment(params.profile)
+                    helmDeployment()
                 }
             }
 
@@ -297,7 +297,7 @@ def call(arguments) {
                     SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
                 }
                 steps {
-                    helmDeployment(params.profile)
+                    helmDeployment()
                 }
             }
 
@@ -316,7 +316,7 @@ def call(arguments) {
                     SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
                 }
                 steps {
-                    helmDeployment(params.profile)
+                    helmDeployment()
                 }
             }
             stage("Performance Testing") {
