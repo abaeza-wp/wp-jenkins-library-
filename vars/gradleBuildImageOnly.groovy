@@ -12,7 +12,7 @@ def call() {
 		createDevKubernetesNamespace(profile)
 	}
 
-	def kubernetesToken = kubernetesLogin(params.profile)
+	def kubernetesToken = kubernetesLogin()
 
 	def profiles = ""
 

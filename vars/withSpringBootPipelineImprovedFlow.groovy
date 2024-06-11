@@ -6,6 +6,13 @@ def getProfiles() {
 	]
 }
 
+def getAwsRegions() {
+	return [
+		"eu-west-1",
+		"us-east-1",
+	]
+}
+
 def tokenNameOf(namespace, profileName) {
 	def tokenSuffix = profileName.replace('-live', '')
 			.replace('-try', '')
@@ -115,7 +122,11 @@ def call(arguments) {
 					choices: getProfiles(),
 					description: "The target deployment profile."
 					)
-
+			choice(
+					name: "awsRegion",
+					choices: getAwsRegions(),
+					description: "The target deployment aws region."
+					)
 			booleanParam(
 					name: "release",
 					defaultValue: true,
@@ -146,7 +157,6 @@ def call(arguments) {
 					archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
 					//Archive all HTML reports
 					archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
-
 				}
 			}
 

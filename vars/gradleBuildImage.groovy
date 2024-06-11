@@ -12,7 +12,7 @@ def call() {
 		createDevKubernetesNamespace(profile)
 	}
 
-	def kubernetesToken = kubernetesLogin(params.profile)
+	def kubernetesToken = kubernetesLogin()
 
 	// Build the project, as well as the image using Google Jib
 	executeImageBuild(profile, kubernetesToken)

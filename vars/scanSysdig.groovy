@@ -14,7 +14,7 @@ def call(String profileName) {
 		def hasSysdigScanPassed = false
 		def resultsUrl = ""
 
-		def kubernetesToken = kubernetesLogin(params.profile)
+		def kubernetesToken = kubernetesLogin()
 
 		registry = "${profile.build.docker_registry}"
 		namespace = "${profile.deploy.namespace}"

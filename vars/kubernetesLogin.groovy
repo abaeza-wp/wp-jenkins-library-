@@ -1,3 +1,5 @@
+import com.worldpay.pipeline.BuildConfigurationMapper
+
 /*
  Used to login to a Kubernetes (GKOP) cluster, and provide a temporary short-lived Kubernetes token (for usage with
  CLI tools).
@@ -5,7 +7,7 @@
  (oc command) can be used.
  */
 
-def call(String profileName) {
+def call() {
 	withCredentials([
 		string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
 	]) {
@@ -19,10 +21,11 @@ def call(String profileName) {
 			params += "--insecure-skip-tls-verify"
 		}
 
+		def clusterApi = BuildConfigurationMapper.getCurrentBuildConfig().cluster.api
 		if (profile.deploy.cluster_username) {
-			sh "oc login ${profile.deploy.cluster} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
+			sh "oc login ${clusterApi} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
 		} else {
-			sh "oc login ${profile.deploy.cluster} ${params} --token=${JENKINS_TOKEN}"
+			sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"
 		}
 
 		// Set namespace for service (fail-safe) - allowed to fail as may not exist yet
