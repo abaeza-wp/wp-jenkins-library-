@@ -143,9 +143,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withBuildImage {}
-                    }
+                    withBuildImage {}
                 }
             }
 
@@ -169,9 +167,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withHelmDeployment(type, tenant, component, params.profile) {}
-                    }
+                    withHelmDeployment(type, tenant, component, params.profile) {}
                 }
             }
 
@@ -193,9 +189,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withHelmDeployment(params.profile) {}
-                    }
+                    withHelmDeployment(params.profile) {}
                 }
             }
 
@@ -234,9 +228,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withKubernetesLogin(params.profile) {
-                                withSysdigScan {}
-                            }
+                            withSysdigScan {}
                         }
                     }
 
