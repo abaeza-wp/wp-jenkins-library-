@@ -2,7 +2,7 @@ def call(Closure body) {
     script
     {
         env.APP_VERSION = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
-        env.BUILD_APP_VERSION = (env.APP_VERSION.startsWith("PR-") ? env.BRANCH_NAME : env.APP_VERSION)
+        env.BUILD_APP_VERSION = (env.BRANCH_NAME.startsWith("PR-") ? env.BRANCH_NAME : env.APP_VERSION)
         env.BUILD_COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
         env.BUILD_TAG_OR_BRANCH = sh(script: "git describe --contains --all HEAD", returnStdout: true).replaceAll('/', '-').trim()
         env.GIT_REF = (env.BRANCH_NAME ? env.BRANCH_NAME : params.gitReference)
