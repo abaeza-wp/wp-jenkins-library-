@@ -14,7 +14,7 @@ class BuildConfigurationMapper {
 			case "dev-eu-west-1":
 				currentBuildConfig = new BuildConfig(
 				"dev-euwest1",
-				new GkopCluster("dev", "eu-west-1", "7z55k", "api.eu-west-1-7z55k.dev.msp.worldpay.io:6443", "dev-euwest1")
+				new GkopCluster("dev", "eu-west-1", "7z55k", "api.eu-west-1-7z55k.dev.msp.worldpay.io:6443")
 				)
 
 			case "dev-us-east-1":
