@@ -1,0 +1,52 @@
+plugins {
+	id 'groovy'
+	id 'com.diffplug.spotless' version '6.25.0'
+}
+
+repositories {
+	mavenCentral()
+}
+
+test {
+	useJUnitPlatform()
+}
+
+
+dependencies {
+}
+
+
+sourceSets {
+	main {
+		groovy {
+			srcDirs = ['src', 'vars']
+		}
+	}
+	test {
+		groovy {
+			srcDirs = ['test']
+		}
+		resources {
+			srcDirs = ['testResources']
+		}
+	}
+}
+
+spotless {
+	groovy {
+		// Use the default importOrder configuration
+		importOrder()
+		// removes semicolons at the end of lines
+		removeSemicolons()
+		// the Groovy Eclipse formatter extends the Java Eclipse formatter,
+		// so it formats Java files by default (unless `excludeJava` is used).
+		greclipse() // has its own section below
+
+		// excludes all Java sources within the Groovy source dirs from formatting
+		excludeJava()
+	}
+	groovyGradle {
+		target '*.gradle' // default target of groovyGradle
+		greclipse()
+	}
+}
