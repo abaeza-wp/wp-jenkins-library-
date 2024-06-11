@@ -4,8 +4,6 @@
 */
 
 def call(Closure body) {
-    def hasSysdigScanPassed = false
-    def resultsUrl = ""
 
     script
     {
@@ -65,11 +63,11 @@ def call(Closure body) {
                 unstable("Sysdig scan failed")
             }
             finally {
-//                sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
+                sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
             }
         }
     }
-    body.call(hasSysdigScanPassed, resultsUrl)
+    body.call()
 }
 
 /*
