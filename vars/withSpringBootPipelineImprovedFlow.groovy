@@ -1,3 +1,5 @@
+import com.worldpay.PipelineRunner
+
 def getProfiles() {
 	return [
 		"dev-euwest1",
@@ -17,7 +19,10 @@ def cronExpression() {
 	return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
 }
 
-def call(String type, String tenant, String component, Closure body) {
+def call(params) {
+	String tenant = params.tenant
+	String component = params.component
+
 	pipeline {
 		agent {
 			kubernetes {
@@ -62,7 +67,7 @@ def call(String type, String tenant, String component, Closure body) {
 
 			// The name of the service
 			SERVICE_NAME = "${config.service.name}"
-			FULL_APP_NAME = "${config.service.tenant}-${config.service.name}"
+			FULL_APP_NAME = "${tenant}-${component}"
 
 			// Checkmarx
 			CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
@@ -123,7 +128,7 @@ def call(String type, String tenant, String component, Closure body) {
 		stages {
 			stage("Set Build Information") {
 				steps {
-					setBuildInformation {}
+					setBuildInformation()
 				}
 			}
 			stage("Build & Test App") {
@@ -269,5 +274,4 @@ def call(String type, String tenant, String component, Closure body) {
 			}
 		}
 	}
-	body.call()
 }

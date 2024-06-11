@@ -1,3 +1,5 @@
+import com.worldpay.PipelineRunner
+
 def getProfiles() {
 	return [
 		"dev-euwest1",
@@ -17,7 +19,9 @@ def cronExpression() {
 	return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
 }
 
-def call(String type, String tenant, String component, Closure body) {
+def call(params, Closure body) {
+	String tenant = params.tenant
+	String component = params.component
 
 	pipeline {
 		agent {
@@ -62,8 +66,8 @@ def call(String type, String tenant, String component, Closure body) {
 			config = readYaml(file: "deployment/jenkins.yaml")
 
 			// The name of the service
-			SERVICE_NAME = "${config.service.name}"
-			FULL_APP_NAME = "${config.service.tenant}-${config.service.name}"
+			SERVICE_NAME = "${component}"
+			FULL_APP_NAME = "${tenant}-${component}"
 
 			// Checkmarx
 			CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
