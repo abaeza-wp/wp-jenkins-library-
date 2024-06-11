@@ -141,6 +141,11 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
+                    echo "BRANCH_NAME: ${env.BRANCH_NAME}"
+                    echo "BUILD_APP_VERSION: ${env.BUILD_APP_VERSION}"
+                    echo "BUILD_COMMIT_HASH: ${env.BUILD_COMMIT_HASH}"
+                    echo "BUILD_TAG_OR_BRANCH: ${env.BUILD_TAG_OR_BRANCH}"
+                    echo "GIT_REF: ${env.GIT_REF}"
                     withBuildImage(type, tenant, component) {}
                 }
             }
