@@ -1,7 +1,7 @@
 import com.worldpay.pipeline.BuildConfigurationMapper
 
 def call(String environment) {
-    var currentBuildConfig = BuildConfigurationMapper.getClusterInformationForAwsRegion(environment, "${params.awsRegion}")
+    def currentBuildConfig = BuildConfigurationMapper.getClusterInformationForAwsRegion(environment, "${params.awsRegion}")
     echo """
     Successfully switched environment context to:
 
