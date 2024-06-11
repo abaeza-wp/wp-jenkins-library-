@@ -6,18 +6,16 @@ def call() {
 		String[] splitDate = date.split("-")
 		def year = splitDate[0]
 
-		def version = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
-
 		def hash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 		def tagOrBranch = sh(script: "git describe --contains --all HEAD", returnStdout: true).replaceAll('/', '-').trim()
 
 		sh """
-                s3cmd put FILE *.pdf s3://${env.REPORT_ARCHIVING_BUCKET_NAME}/${env.SERVICE_NAME}/${year}/${version}/
+                s3cmd put FILE *.pdf s3://${env.REPORT_ARCHIVING_BUCKET_NAME}/${env.SERVICE_NAME}/${year}/${env.BUILD_APP_VERSION}/
             """
 
 		// Archive the sysdig report which is in JSON format
 		sh """
-                s3cmd put FILE *sysdig-scan-result.json s3://${env.REPORT_ARCHIVING_BUCKET_NAME}/${env.SERVICE_NAME}/${year}/${version}/
+                s3cmd put FILE *sysdig-scan-result.json s3://${env.REPORT_ARCHIVING_BUCKET_NAME}/${env.SERVICE_NAME}/${year}/${env.BUILD_APP_VERSION}/
             """
 	}
 }

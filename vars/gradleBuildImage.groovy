@@ -9,7 +9,7 @@ def call() {
 
 	// Create Kubernetes namespace (dev cluster only)
 	if (isCreateNamespace(profile)) {
-		load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
+		createDevKubernetesNamespace(profile)
 	}
 
 	def kubernetesToken = kubernetesLogin(params.profile)
