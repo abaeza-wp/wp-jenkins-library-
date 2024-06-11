@@ -2,7 +2,7 @@
     Used to send slack notifications with the outcome of blackduck scan
 */
 
-def call(outcome, Closure body) {
+def call(Boolean outcome, Closure body) {
     script
     {
         def message = [

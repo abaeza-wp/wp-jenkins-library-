@@ -1,7 +1,8 @@
 /*
     Used to send slack notifications with the outcome of sysdig scan
 */
-def call(outcome, reportLocation) {
+
+def call(Boolean outcome, String reportLocation) {
     script
     {
         def message = [
@@ -30,7 +31,6 @@ def call(outcome, reportLocation) {
 
         sendSlackNotification(message)
     }
-    body.call()
 }
 
 

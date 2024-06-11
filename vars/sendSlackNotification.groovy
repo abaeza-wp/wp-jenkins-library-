@@ -52,5 +52,4 @@ def call(String message) {
             }
         }
     }
-    body.call()
 }
