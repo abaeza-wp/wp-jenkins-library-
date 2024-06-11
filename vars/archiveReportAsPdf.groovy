@@ -1,4 +1,4 @@
-def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS, Closure body) {
+def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
     // Publish on Jenkins
     publishHtmlReport(reportDir, htmlReportFile, reportName)
 
