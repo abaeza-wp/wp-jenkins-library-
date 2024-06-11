@@ -4,23 +4,19 @@
     Scroll further down to the executeImageBuild function to customise the built steps.
 */
 
-def call(Closure body) {
-    script
-    {
-        // Read deployment profile
-        def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+def call() {
+    // Read deployment profile
+    def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
 
-        // Create Kubernetes namespace (dev cluster only)
-        if (isCreateNamespace(profile)) {
-            load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
-        }
-
-        def kubernetesToken = kubernetesLogin(params.profile)
-
-        // Build the project, as well as the image using Google Jib
-        executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
+    // Create Kubernetes namespace (dev cluster only)
+    if (isCreateNamespace(profile)) {
+        load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
     }
-    body.call()
+
+    def kubernetesToken = kubernetesLogin(params.profile)
+
+    // Build the project, as well as the image using Google Jib
+    executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
 }
 
 

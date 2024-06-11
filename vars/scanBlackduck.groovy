@@ -4,15 +4,13 @@
 */
 
 def call(Closure body) {
-    script
-    {
-        def scanDir = "blackduckscan"
+    def scanDir = "blackduckscan"
 
-        withCredentials([string(credentialsId: "${env.BLACKDUCK_API_CREDENTIAL_ID}", variable: "BLACKDUCK_TOKEN")])
-        {
-            // JENKINS_NODE_COOKIES=dontKillMe nohup bash ... & is all used to get detect.sh to run in the background.
-            // See more here: https://stackoverflow.com/a/37161006/901641
-            sh """
+    withCredentials([string(credentialsId: "${env.BLACKDUCK_API_CREDENTIAL_ID}", variable: "BLACKDUCK_TOKEN")])
+    {
+        // JENKINS_NODE_COOKIES=dontKillMe nohup bash ... & is all used to get detect.sh to run in the background.
+        // See more here: https://stackoverflow.com/a/37161006/901641
+        sh """
                 rm -rf ${scanDir}
                 mkdir ${scanDir}
                 cp ${env.BLACKDUCK_FATJAR} ${scanDir}
@@ -30,11 +28,9 @@ def call(Closure body) {
                     --detect.risk.report.pdf=true \\
                     --detect.risk.report.pdf.path=${scanDir} >blackDuckScan.log 2>&1 &
             """
-        }
-
-        checkBlackDuckResults()
     }
-    body.call()
+
+    checkBlackDuckResults()
 }
 
 

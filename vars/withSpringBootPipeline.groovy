@@ -131,7 +131,7 @@ def call(String type, String tenant, String component, Closure body) {
         {
             stage("Set Build Information") {
                 steps {
-                    setBuildInformation {}
+                    setBuildInformation()
                 }
             }
             stage("Build Image")
@@ -143,7 +143,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withBuildImage(params.profile)
+                    gradleBuildImage()
                 }
             }
 
@@ -225,7 +225,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withSysdigScan(params.profile)
+                            scanSysdig(params.profile)
                         }
                     }
 
@@ -237,7 +237,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withCheckmarxScan {}
+                            scanCheckmarx()
                         }
                     }
 
@@ -252,7 +252,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withBlackduckScan {}
+                            scanBlackduck()
                         }
                     }
 
@@ -267,7 +267,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withOwaspDependencyScan {}
+                            scanOwaspDependency()
                         }
                     }
 
@@ -309,7 +309,7 @@ def call(String type, String tenant, String component, Closure body) {
                     }
                 }
                 steps {
-                    withArchiveReportsToS3 {}
+                    archiveReportsToS3()
                 }
             }
 
@@ -322,7 +322,6 @@ def call(String type, String tenant, String component, Closure body) {
 
         }
     }
-
     body.call()
 }
 
