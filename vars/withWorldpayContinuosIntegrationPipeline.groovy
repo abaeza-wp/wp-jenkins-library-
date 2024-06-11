@@ -17,18 +17,10 @@ def call(String type, String tenant, String component, Closure body) {
 
 	switch (type) {
 		case "java":
-			withSpringBootPipeline(
-			pipelineCallbacksRunner: callbacksRunner,
-			tenant: tenant,
-			component: component
-			)
+			withSpringBootPipeline(tenant: tenant, component: component)
 			break
 		case "java-improved-flow":
-			withSpringBootPipelineImprovedFlow(
-			pipelineCallbacksRunner: callbacksRunner,
-			tenant: tenant,
-			component: component
-			)
+			withSpringBootPipelineImprovedFlow(tenant: tenant, component: component)
 			break
 		default:
 			error "ERROR: Unsupported pipeline type used '${type}'"
