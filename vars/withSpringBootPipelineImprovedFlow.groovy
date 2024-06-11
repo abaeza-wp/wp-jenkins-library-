@@ -135,7 +135,7 @@ def call(arguments) {
 		}
 
 		stages {
-			stage("Set Build Information") {
+			stage("[Dev] Set Build Information") {
 				steps {
 					setBuildInformation()
 					switchEnvironment("dev")
@@ -266,7 +266,7 @@ def call(arguments) {
 				}
 			}
 
-			stage("Set Build Information") {
+			stage("[Staging] Set Build Information") {
 				when {
 					allOf {
 						expression { params.release }
