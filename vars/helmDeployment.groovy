@@ -6,21 +6,21 @@ import com.worldpay.pipeline.BuildConfigurationMapper
 
 def call() {
 
-    def chartLocation = "./charts/${env.FULL_APP_NAME}"
-    def appVersion = "${env.BUILD_APP_VERSION}"
+	def chartLocation = "./charts/${env.FULL_APP_NAME}"
+	def appVersion = "${env.BUILD_APP_VERSION}"
 
-    def awsRegion = BuildConfigurationMapper.currentBuildConfig.cluster.awsRegion
-    def environment = BuildConfigurationMapper.currentBuildConfig.cluster.environment
-    def clusterName = BuildConfigurationMapper.currentBuildConfig.cluster.clusterName
+	def awsRegion = BuildConfigurationMapper.currentBuildConfig.cluster.awsRegion
+	def environment = BuildConfigurationMapper.currentBuildConfig.cluster.environment
+	def clusterName = BuildConfigurationMapper.currentBuildConfig.cluster.clusterName
 
-    echo "Packaging helm release..."
-    sh """
+	echo "Packaging helm release..."
+	sh """
             helm package ${chartLocation} --dependency-update --app-version=${appVersion}
         """
 
-    echo "Updating Kubernetes resources via Helm..."
-    // Install or upgrade via helm
-    sh """
+	echo "Updating Kubernetes resources via Helm..."
+	// Install or upgrade via helm
+	sh """
             helm upgrade ${env.FULL_APP_NAME} ./${env.FULL_APP_NAME}-1.0.0.tgz \\
             --set global.awsRegion=${awsRegion} \\
             --set global.environment=${environment} \\
