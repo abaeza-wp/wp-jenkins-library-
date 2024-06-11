@@ -87,6 +87,6 @@ def checkBlackDuckResults() {
         error "Black Duck scan seems to be stuck. Check the logs."
     }
     finally {
-        load("deployment/boilerplate/scripts/pipeline/slack-notification.groovy").sendSlackNotificationForBlackduckScan(hasBlackduckScanPassed)
+        sendSlackNotificationBlackduck(hasBlackduckScanPassed)
     }
 }
