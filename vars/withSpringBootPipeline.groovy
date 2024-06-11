@@ -275,7 +275,6 @@ def call(String type, String tenant, String component, Closure body) {
                         steps
                         {
                             withOwaspDependencyScan {}
-
                         }
                     }
 
