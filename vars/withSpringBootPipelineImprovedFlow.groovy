@@ -134,7 +134,7 @@ def call(String type, String tenant, String component, Closure body) {
                     setBuildInformation {}
                 }
             }
-            stage("Build Image")
+            stage("Build App")
             {
                 environment
                 {
