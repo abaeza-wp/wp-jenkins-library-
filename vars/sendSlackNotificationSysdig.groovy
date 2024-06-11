@@ -21,7 +21,7 @@ def call(Boolean outcome, String reportLocation, Closure body) {
             message.emoji = ":+1:"
             message.color = "#31AD72"
             message.header = "Success"
-            message.text = "${scanMessage} has completed successfully."
+            message.text = "${scanMessage} has completed successfully\n."
         } else {
             message.emoji = ":-1:"
             message.color = "#EA5E1A"
