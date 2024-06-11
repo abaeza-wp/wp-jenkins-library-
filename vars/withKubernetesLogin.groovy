@@ -6,7 +6,7 @@
     (oc command) can be used.
 */
 
-def call(Closure body) {
+def call(String profileName, Closure body) {
     script
     {
         withCredentials([
@@ -15,7 +15,7 @@ def call(Closure body) {
         {
             echo "Logging into cluster..."
 
-            def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+            def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
 
             def params = ""
             def ignoreTls = profile.deploy.ignore_tls
