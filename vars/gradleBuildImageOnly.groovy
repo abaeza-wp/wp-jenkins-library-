@@ -1,5 +1,5 @@
 /*
-    Used to build the container image and run tests.
+    Used to build the container image.
 
     Scroll further down to the executeImageBuild function to customise the built steps.
 */
@@ -15,18 +15,6 @@ def call() {
 
     def kubernetesToken = kubernetesLogin(params.profile)
 
-    // Build the project, as well as the image using Google Jib
-    executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
-}
-
-
-/*
-    Used to execute the container build.
-
-    If you really need to deviate with building the image, change the function below...
-*/
-
-def executeImageBuild(profile, kubernetesToken, versionName) {
     def profiles = ""
 
     if (params.release) {
@@ -43,7 +31,7 @@ def executeImageBuild(profile, kubernetesToken, versionName) {
      Note: Will only build the image and skip checks usually must run after 'withGradleBuildOnly'
      */
     sh """
-            ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib \
+            ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib -x check \
                 -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${versionName} \
                 -Djib.to.auth.username=${profile.deploy.ocp_username} \
                 -Djib.to.auth.password=${kubernetesToken} \
@@ -51,10 +39,4 @@ def executeImageBuild(profile, kubernetesToken, versionName) {
                 -Djib.container.filesModificationTime=${env.GIT_COMMIT_TIMESTAMP} \
                 ${profiles}
         """
-}
-
-def isCreateNamespace(profile) {
-    return profile.deploy.create_namespace != null &&
-    profile.deploy.create_namespace.enabled != null &&
-    profile.deploy.create_namespace.enabled
 }

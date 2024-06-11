@@ -143,9 +143,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withGradleBuildOnly {
-
-                    }
+                    gradleBuildOnly()
                 }
             }
 
@@ -153,9 +151,9 @@ def call(String type, String tenant, String component, Closure body) {
             {
                 steps
                 {
-                    withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false) {}
-                    withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true) {}
-                    withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false) {}
+                    archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false) {}
+                    archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true) {}
+                    archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false) {}
                 }
             }
 
@@ -168,9 +166,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withBuildImageOnly {}
-                    }
+                    gradleBuildImageOnly()
                 }
             }
 
@@ -194,12 +190,9 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withHelmDeployment(type, tenant, component, params.profile) {}
-                    }
+                    helmDeployment(params.profile)
                 }
             }
-
 
             stage("Deploy Live Functional Environment")
             {
@@ -218,9 +211,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withKubernetesLogin(params.profile) {
-                        withHelmDeployment(params.profile) {}
-                    }
+                    helmDeployment(params.profile)
                 }
             }
 
@@ -237,10 +228,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    script
-                    {
-                        load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
-                    }
+                    withPerformanceTest(params.profile)
                 }
             }
 
@@ -259,9 +247,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withKubernetesLogin(params.profile) {
-                                withSysdigScan {}
-                            }
+                            scanSysdig(params.profile)
                         }
                     }
 
@@ -273,7 +259,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withCheckmarxScan {}
+                            scanCheckmarx()
                         }
                     }
 
@@ -288,7 +274,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withBlackduckScan {}
+                            scanBlackduck()
                         }
                     }
 
@@ -303,62 +289,35 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withOwaspDependencyScan {}
-                        }
-                    }
-
-                    stage("Code Coverage Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false) {}
-                        }
-                    }
-
-                    stage("Unit Tests Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false) {}
-                        }
-                    }
-
-                    stage("BDD Report")
-                    {
-                        steps
-                        {
-                            withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true) {}
+                            scanOwaspDependency()
                         }
                     }
                 }
             }
+        }
 
-            stage("Archive reports in S3")
+        stage("Archive reports in S3")
+        {
+            when
             {
-                when
+                allOf
                 {
-                    allOf
-                    {
-                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                        expression { params.release }
-                        expression { params.profile.contains("staging") }
-                    }
-                }
-                steps {
-                    withArchiveReportsToS3 {}
+                    expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+                    expression { params.release }
+                    expression { params.profile.contains("staging") }
                 }
             }
-
-            stage("Archive HTML Reports artifacts")
-            {
-                steps {
-                    withArchiveHtmlReports {}
-                }
+            steps {
+                archiveReportsToS3()
             }
+        }
 
+        stage("Archive HTML Reports artifacts")
+        {
+            steps {
+                archiveHtmlReports()
+            }
         }
     }
-
     body.call()
 }
-
