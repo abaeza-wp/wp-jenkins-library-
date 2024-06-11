@@ -13,6 +13,9 @@ def call() {
 	]) {
 		echo "Logging into cluster..."
 
+		def clusterApi = BuildConfigurationMapper.getCurrentBuildConfig().cluster.api
+		def profileName = BuildConfigurationMapper.getCurrentBuildConfig().profileName
+
 		def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
 
 		def params = ""
@@ -21,7 +24,7 @@ def call() {
 			params += "--insecure-skip-tls-verify"
 		}
 
-		def clusterApi = BuildConfigurationMapper.getCurrentBuildConfig().cluster.api
+
 		if (profile.deploy.cluster_username) {
 			sh "oc login ${clusterApi} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
 		} else {
