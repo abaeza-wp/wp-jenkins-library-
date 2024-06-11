@@ -1,4 +1,4 @@
-def call(Closure body) {
+def call() {
     script
     {
         env.APP_VERSION = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
@@ -26,6 +26,5 @@ def call(Closure body) {
         currentBuild.displayName = "#${currentBuild.number} : ${params.profile} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
 
     }
-    body.call()
 }
 
