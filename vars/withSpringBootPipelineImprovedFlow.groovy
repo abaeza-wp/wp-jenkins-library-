@@ -18,7 +18,6 @@ def cronExpression() {
 }
 
 def call(String type, String tenant, String component, Closure body) {
-
 	pipeline {
 		agent {
 			kubernetes {
@@ -269,6 +268,6 @@ def call(String type, String tenant, String component, Closure body) {
 				}
 			}
 		}
-		body.call()
 	}
+	body.call()
 }
