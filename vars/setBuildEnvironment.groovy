@@ -1,4 +1,4 @@
-def call() {
+def call(Closure body) {
     script
     {
         env.BUILD_APP_VERSION = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
@@ -14,5 +14,6 @@ def call() {
         echo "GIT_REF: ${env.GIT_REF}"
         echo "==========================================================================================="
     }
+    body.call()
 }
 
