@@ -7,29 +7,24 @@ def call(Closure body) {
 
     script
     {
-        withCredentials([
-        string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: "SYSDIG_API_KEY"),
-        string(credentialsId: "${env.CURRENT_USER_KUBERNETES_TOKEN}", variable: "KUBERNETES_TOKEN")
-        ])
-        {
-            echo "Running Sysdig scan..."
+        echo "Running Sysdig scan..."
 
 
-            def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
-            def hasSysdigScanPassed = false
-            def resultsUrl = ""
+        def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+        def hasSysdigScanPassed = false
+        def resultsUrl = ""
 
-            registry = "${profile.build.docker_registry}"
-            namespace = "${profile.deploy.namespace}"
-            imageName = "${env.SERVICE_NAME}"
-            imageTag = "${env.BUILD_APP_VERSION}"
+        registry = "${profile.build.docker_registry}"
+        namespace = "${profile.deploy.namespace}"
+        imageName = "${env.SERVICE_NAME}"
+        imageTag = "${env.BUILD_APP_VERSION}"
 
-            imageUrl = "${registry}/${namespace}/${imageName}:${imageTag}"
-            echo "Image URL: ${imageUrl}"
+        imageUrl = "${registry}/${namespace}/${imageName}:${imageTag}"
+        echo "Image URL: ${imageUrl}"
 
-            try {
-                echo "Executing sysdig scan..."
-                sh """
+        try {
+            echo "Executing sysdig scan..."
+            sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
                 REGISTRY_USER=${profile.deploy.cluster_username} \
                 REGISTRY_PASSWORD=${KUBERNETES_TOKEN} \
@@ -43,30 +38,29 @@ def call(Closure body) {
                     --skiptlsverify
             """
 
-                sh """
+            sh """
                 mv scan-result.json ${env.SERVICE_NAME}-sysdig-scan-result.json
             """
-                archiveArtifacts artifacts: "${env.SERVICE_NAME}-sysdig-scan-result.json"
+            archiveArtifacts artifacts: "${env.SERVICE_NAME}-sysdig-scan-result.json"
 
-                echo "Checking status.policy in the sysdig report"
-                def scanOutput = readJSON file: "./${env.SERVICE_NAME}-sysdig-scan-result.json"
+            echo "Checking status.policy in the sysdig report"
+            def scanOutput = readJSON file: "./${env.SERVICE_NAME}-sysdig-scan-result.json"
 
-                hasSysdigScanPassed = scanOutput.policies.status == "accepted" || scanOutput.policies.status == "passed"
-                echo "Report URL: ${scanOutput.info.resultURL}"
-                resultsUrl = scanOutput.info.resultURL
+            hasSysdigScanPassed = scanOutput.policies.status == "accepted" || scanOutput.policies.status == "passed"
+            echo "Report URL: ${scanOutput.info.resultURL}"
+            resultsUrl = scanOutput.info.resultURL
 
-                if (!hasSysdigScanPassed) {
-                    unstable("Sysdig scan failed - policy violation")
-                }
-
+            if (!hasSysdigScanPassed) {
+                unstable("Sysdig scan failed - policy violation")
             }
-            catch (err) {
-                echo "Caught: ${err}"
-                unstable("Sysdig scan failed")
-            }
-            finally {
-                sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
-            }
+
+        }
+        catch (err) {
+            echo "Caught: ${err}"
+            unstable("Sysdig scan failed")
+        }
+        finally {
+            sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
         }
     }
     body.call()

@@ -7,21 +7,16 @@
 def call(Closure body) {
     script
     {
-        withCredentials([
-        string(credentialsId: "${env.CURRENT_USER_KUBERNETES_TOKEN}", variable: "KUBERNETES_TOKEN")
-        ])
-        {
-            // Read deployment profile
-            def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+        // Read deployment profile
+        def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
 
-            // Create Kubernetes namespace (dev cluster only)
-            if (isCreateNamespace(profile)) {
-                load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
-            }
-
-            // Build the project, as well as the image using Google Jib
-            executeImageBuild(profile, "${KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
+        // Create Kubernetes namespace (dev cluster only)
+        if (isCreateNamespace(profile)) {
+            load("deployment/boilerplate/scripts/create-dev-namespace.groovy").createDevNamespace(profile)
         }
+
+        // Build the project, as well as the image using Google Jib
+        executeImageBuild(profile, "${KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
     }
     body.call()
 }
@@ -32,6 +27,7 @@ def call(Closure body) {
 
     If you really need to deviate with building the image, change the function below...
 */
+
 def executeImageBuild(profile, kubernetesToken, versionName) {
     def profiles = ""
 
