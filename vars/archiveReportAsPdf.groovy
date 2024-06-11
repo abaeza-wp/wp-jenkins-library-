@@ -11,7 +11,7 @@ def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
 
 	//Set log level to FATAL only to reduce noise
 	sh """
-        google-chrome --headless --disable-gpu --no-sandbox --log-level=3 --print-to-pdf=${env.SERVICE_NAME}-${outputPdf} ${reportDir}/${htmlReportFile}
+        google-chrome --headless --disable-gpu --no-sandbox --print-to-pdf=${env.SERVICE_NAME}-${outputPdf} ${reportDir}/${htmlReportFile}
     """
 
 	// Archive artifacts
