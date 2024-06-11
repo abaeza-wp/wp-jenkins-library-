@@ -19,12 +19,12 @@ def call(Boolean outcome, String reportLocation) {
         message.emoji = ":+1:"
         message.color = "#31AD72"
         message.header = "Success"
-        message.text = "${scanMessage} has completed successfully.\n"
+        message.text = "${scanMessage} has completed successfully."
     } else {
         message.emoji = ":-1:"
         message.color = "#EA5E1A"
         message.header = "Failed"
-        message.text = "${scanMessage} has failed.\n"
+        message.text = "${scanMessage} has failed."
     }
 
     sendSlackNotification(message)
