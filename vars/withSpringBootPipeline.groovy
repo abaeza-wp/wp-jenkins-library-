@@ -131,7 +131,7 @@ def call(String type, String tenant, String component, Closure body) {
         {
             stage("Set Build Information") {
                 steps {
-                    setBuildInformation
+                    setBuildInformation {}
                 }
             }
             stage("Build Image")
