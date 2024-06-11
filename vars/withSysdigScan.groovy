@@ -86,7 +86,7 @@ def sendSlackNotificationSysdig(Boolean outcome, String reportLocation) {
     location: "Report can be retrieved from here:\n${reportLocation}"
     ]
 
-    var scanMessage = "Sysdig Scan for *${env.SERVICE_NAME}* build *No.${env.BUILD_NUMBER}* for *${env.BUILD_APP_VERSION}* : *${env.BUILD_COMMIT_HASH}*"
+    def scanMessage = "Sysdig Scan for *${env.SERVICE_NAME}* build *No.${env.BUILD_NUMBER}* for *${env.BUILD_APP_VERSION}* : *${env.BUILD_COMMIT_HASH}*"
 
     if (outcome) {
         message.emoji = ":+1:"

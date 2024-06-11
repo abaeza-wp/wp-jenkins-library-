@@ -106,7 +106,7 @@ def sendSlackNotificationBlackduck(Boolean outcome) {
     location: "Report can be retrieved from here:\n${env.BUILD_URL}artifact/${env.SERVICE_NAME}-blackduck-report.pdf"
     ]
 
-    var scanMessage = "Blackduck Scan for *${env.SERVICE_NAME}* build *No.${env.BUILD_NUMBER}* for *${env.BUILD_APP_VERSION}* : *${env.BUILD_COMMIT_HASH}*"
+    def scanMessage = "Blackduck Scan for *${env.SERVICE_NAME}* build *No.${env.BUILD_NUMBER}* for *${env.BUILD_APP_VERSION}* : *${env.BUILD_COMMIT_HASH}*"
     if (outcome) {
         message.emoji = ":duck:"
         message.color = "#31AD72"
