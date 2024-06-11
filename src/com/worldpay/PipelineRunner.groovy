@@ -16,6 +16,7 @@ class PipelineRunner implements Serializable {
     }
 
     void setConfig(PipelineCallbacksConfig config) {
+        println(config)
         if (config == null) {
             this.config = config
         } else {
