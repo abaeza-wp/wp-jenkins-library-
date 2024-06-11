@@ -18,6 +18,8 @@ def call(Closure body) {
             def hasSysdigScanPassed = false
             def resultsUrl = ""
 
+            def kubernetesToken = kubernetesLogin(params.profile)
+
             registry = "${profile.build.docker_registry}"
             namespace = "${profile.deploy.namespace}"
             imageName = "${env.SERVICE_NAME}"
@@ -31,7 +33,7 @@ def call(Closure body) {
                 sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
                 REGISTRY_USER=${profile.deploy.cluster_username} \
-                REGISTRY_PASSWORD=${env.CURRENT_USER_KUBERNETES_TOKEN} \
+                REGISTRY_PASSWORD=${kubernetesToken} \
                 \
                 sysdig-cli-scanner \
                     --apiurl=https://secure.sysdig.com ${imageUrl} \
