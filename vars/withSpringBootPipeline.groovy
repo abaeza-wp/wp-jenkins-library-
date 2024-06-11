@@ -167,7 +167,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withHelmDeployment(type, tenant, component, params.profile) {}
+                    helmDeployment(params.profile)
                 }
             }
 
@@ -189,7 +189,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
                 steps
                 {
-                    withHelmDeployment(params.profile) {}
+                    helmDeployment(params.profile)
                 }
             }
 
@@ -278,7 +278,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false) {}
+                            archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
                         }
                     }
 
@@ -286,7 +286,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false) {}
+                            archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
                         }
                     }
 
@@ -294,7 +294,7 @@ def call(String type, String tenant, String component, Closure body) {
                     {
                         steps
                         {
-                            withArchiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true) {}
+                            archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
                         }
                     }
                 }
