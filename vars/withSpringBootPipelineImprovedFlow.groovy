@@ -134,7 +134,7 @@ def call(String type, String tenant, String component, Closure body) {
                     setBuildInformation {}
                 }
             }
-            stage("Build App")
+            stage("Build & Test App")
             {
                 environment
                 {
@@ -149,7 +149,7 @@ def call(String type, String tenant, String component, Closure body) {
                 }
             }
 
-            stage("Archive Test Report")
+            stage("Archive Test Reports")
             {
                 steps
                 {
