@@ -111,7 +111,7 @@ def sendSlackNotificationBlackduck(Boolean outcome) {
         message.emoji = ":duck:"
         message.color = "#31AD72"
         message.header = "Success"
-        message.text = "${scanMessage} has completed successfully."
+        message.text = "${scanMessage} has completed successfully.\n"
     } else {
         message.emoji = ":duck:"
         message.color = "#EA5E1A"

@@ -4,6 +4,9 @@
 */
 
 def call(Closure body) {
+    def hasSysdigScanPassed = false
+    def resultsUrl = ""
+
     script
     {
         withCredentials([
@@ -15,8 +18,6 @@ def call(Closure body) {
             def kubernetesToken = load("deployment/boilerplate/scripts/kubernetes-login.groovy").kubernetesLogin()
 
             def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
-            def hasSysdigScanPassed = false
-            def resultsUrl = ""
 
             registry = "${profile.build.docker_registry}"
             namespace = "${profile.deploy.namespace}"
@@ -64,11 +65,11 @@ def call(Closure body) {
                 unstable("Sysdig scan failed")
             }
             finally {
-                sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
+//                sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)
             }
         }
     }
-    body.call()
+    body.call(hasSysdigScanPassed, resultsUrl)
 }
 
 /*
@@ -92,7 +93,7 @@ def sendSlackNotificationSysdig(Boolean outcome, String reportLocation) {
         message.emoji = ":+1:"
         message.color = "#31AD72"
         message.header = "Success"
-        message.text = "${scanMessage} has completed successfully."
+        message.text = "${scanMessage} has completed successfully.\n"
     } else {
         message.emoji = ":-1:"
         message.color = "#EA5E1A"
