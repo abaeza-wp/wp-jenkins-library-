@@ -16,7 +16,7 @@ def call(Closure body) {
         }
 
         // Build the project, as well as the image using Google Jib
-        executeImageBuild(profile, "${KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
+        executeImageBuild(profile, "${env.CURRENT_USER_KUBERNETES_TOKEN}", env.BUILD_APP_VERSION)
     }
     body.call()
 }

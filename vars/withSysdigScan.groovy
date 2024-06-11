@@ -27,7 +27,7 @@ def call(Closure body) {
             sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
                 REGISTRY_USER=${profile.deploy.cluster_username} \
-                REGISTRY_PASSWORD=${KUBERNETES_TOKEN} \
+                REGISTRY_PASSWORD=${env.CURRENT_USER_KUBERNETES_TOKEN} \
                 \
                 sysdig-cli-scanner \
                     --apiurl=https://secure.sysdig.com ${imageUrl} \
