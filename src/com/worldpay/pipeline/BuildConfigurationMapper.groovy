@@ -46,12 +46,6 @@ class BuildConfigurationMapper {
 				error "Unsupported GKOP aws region: ${awsRegion} for Environment ${environment}, If you think this is a mistake please consider raising an issue."
 		}
 
-		echo """
-			Switched to:
-			Environment: ${currentBuildConfig.cluster.environment}
-			AWS Region: ${currentBuildConfig.cluster.awsRegion}
-			Profile Name: ${currentBuildConfig.profileName}
-		"""
 		return currentBuildConfig
 	}
 
