@@ -16,13 +16,7 @@ class PipelineRunner implements Serializable {
     }
 
     void setConfig(PipelineCallbacksConfig config) {
-        println(config)
-        if (config == null) {
-            this.config = config
-        } else {
-            throw new Exception("PipelineRunner Callback Config was set previously and should not be re-declared")
-        }
-
+        this.config = config
     }
 
     void callAfterSuccess(String stage) {
