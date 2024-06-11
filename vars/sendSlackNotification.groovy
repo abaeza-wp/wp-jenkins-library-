@@ -2,7 +2,7 @@
     Used to send a slack notification
 */
 
-def call(String message) {
+def call(Object message) {
     def payload = "{" +
     "\"channel\":\"${message.channel}\"," +
     "\"username\":\"${message.username}\"," +
