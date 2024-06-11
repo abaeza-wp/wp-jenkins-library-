@@ -2,12 +2,12 @@
     Used to update the Kubernetes resources, in all environments (including production).
 */
 
-def call(String type, String tenant, String component, String profileName, Closure body) {
+def call(String profileName, Closure body) {
     script
     {
 
         def chartLocation = "./charts/${env.FULL_APP_NAME}"
-        def appVersion = load("deployment/boilerplate/scripts/get-version.groovy").getVersion()
+        def appVersion = "${env.BUILD_APP_VERSION}"
 
         def deploymentOptions = readYaml(file: "deployment/options.yml")
         def targetConfiguration = deploymentOptions.options[profileName]

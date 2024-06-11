@@ -6,7 +6,7 @@
     (oc command) can be used.
 */
 
-def call(String type, String tenant, String component, String profile) {
+def call(String profile, Closure body) {
     script
     {
         withCredentials([
@@ -37,4 +37,5 @@ def call(String type, String tenant, String component, String profile) {
             return kubernetesToken
         }
     }
+    body.call()
 }
