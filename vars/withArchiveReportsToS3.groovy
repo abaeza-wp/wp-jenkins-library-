@@ -1,4 +1,4 @@
-def call() {
+def call(Closure body) {
     script
     {
         withCredentials([[$class: "AmazonWebServicesCredentialsBinding", accessKeyVariable: "AWS_ACCESS_KEY_ID", credentialsId: "${env.REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID}", secretKeyVariable: "AWS_SECRET_ACCESS_KEY"]])
@@ -22,5 +22,6 @@ def call() {
             """
         }
     }
+    body.call()
 }
 

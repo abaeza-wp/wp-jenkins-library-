@@ -1,4 +1,4 @@
-def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
+def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS, Closure body) {
     script
     {
         // Publish on Jenkins
@@ -18,6 +18,7 @@ def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
         // Archive artifacts
         archiveArtifacts artifacts: "${env.SERVICE_NAME}-${outputPdf}"
     }
+    body.call()
 }
 
 def publishHtmlReport(reportDir, reportFile, reportName) {

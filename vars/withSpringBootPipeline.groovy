@@ -232,10 +232,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            script
-                            {
-                                load("deployment/boilerplate/scripts/pipeline/sysdig-image-scan.groovy").sysdigImageScan()
-                            }
+                            withSysdigScan {}
                         }
                     }
 
@@ -280,7 +277,7 @@ def call(String type, String tenant, String component, Closure body) {
                         }
                         steps
                         {
-                            withOwaspDependencyScan() {}
+                            withOwaspDependencyScan {}
 
                         }
                     }
@@ -323,14 +320,14 @@ def call(String type, String tenant, String component, Closure body) {
                     }
                 }
                 steps {
-                    withArchiveReportsToS3() {}
+                    withArchiveReportsToS3 {}
                 }
             }
 
             stage("Archive HTML Reports artifacts")
             {
                 steps {
-                    withArchiveHtmlReports() {}
+                    withArchiveHtmlReports {}
                 }
             }
 

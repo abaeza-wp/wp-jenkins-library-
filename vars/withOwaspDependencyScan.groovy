@@ -3,7 +3,7 @@
     of dependency vulnerability management.
 */
 
-def call() {
+def call(Closure body) {
     script {
 
         // Pull NVD files from s3
