@@ -15,7 +15,7 @@ def call() {
 	def kubernetesToken = kubernetesLogin(params.profile)
 
 	// Build the project, as well as the image using Google Jib
-	executeImageBuild(profile, kubernetesToken, env.BUILD_APP_VERSION)
+	executeImageBuild(profile, kubernetesToken)
 }
 
 
@@ -24,7 +24,7 @@ def call() {
  If you really need to deviate with building the image, change the function below...
  */
 
-def executeImageBuild(profile, kubernetesToken, versionName) {
+def executeImageBuild(profile, kubernetesToken) {
 	def profiles = ""
 
 	if (params.release) {
@@ -41,7 +41,7 @@ def executeImageBuild(profile, kubernetesToken, versionName) {
 	 */
 	sh """
             ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib \
-                -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${versionName} \
+                -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${env.BUILD_APP_VERSION} \
                 -Djib.to.auth.username=${profile.deploy.ocp_username} \
                 -Djib.to.auth.password=${kubernetesToken} \
                 -Djib.container.creationTime=${env.GIT_COMMIT_TIMESTAMP} \

@@ -30,7 +30,7 @@ def call() {
 	 */
 	sh """
             ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib -x check \
-                -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${versionName} \
+                -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${env.BUILD_APP_VERSION} \
                 -Djib.to.auth.username=${profile.deploy.ocp_username} \
                 -Djib.to.auth.password=${kubernetesToken} \
                 -Djib.container.creationTime=${env.GIT_COMMIT_TIMESTAMP} \
