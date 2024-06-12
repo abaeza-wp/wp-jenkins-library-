@@ -1,5 +1,3 @@
-import com.worldpay.pipeline.BuildConfigurationMapper
-
 def call() {
 	warnAboutExperimentalPipelines()
 

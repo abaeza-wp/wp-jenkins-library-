@@ -1,6 +1,6 @@
 package com.worldpay.pipeline
 
-class BuildConfigurationMapper {
+class BuildConfigurationContext {
 
 	private static BuildConfig currentBuildConfig
 

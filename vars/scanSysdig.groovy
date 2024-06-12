@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationMapper
+import com.worldpay.pipeline.BuildConfigurationContext
 
 /*
  Used to scan the built container image using Sysdig Secure, for the purpose of image dependency vulnerability
@@ -11,7 +11,7 @@ def call() {
 	]) {
 		echo "Running Sysdig scan..."
 
-		def profileName = BuildConfigurationMapper.getCurrentBuildConfig().profileName
+		def profileName = BuildConfigurationContext.getCurrentBuildConfig().profileName
 
 		def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
 		def hasSysdigScanPassed = false

@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationMapper
+import com.worldpay.pipeline.BuildConfigurationContext
 
 /*
  Used to update the Kubernetes resources, in all environments (including production).
@@ -9,9 +9,9 @@ def call() {
 	def chartLocation = "./charts/${env.FULL_APP_NAME}"
 	def appVersion = "${env.BUILD_APP_VERSION}"
 
-	def awsRegion = BuildConfigurationMapper.currentBuildConfig.cluster.awsRegion
-	def environment = BuildConfigurationMapper.currentBuildConfig.cluster.environment
-	def clusterName = BuildConfigurationMapper.currentBuildConfig.cluster.clusterName
+	def awsRegion = BuildConfigurationContext.currentBuildConfig.cluster.awsRegion
+	def environment = BuildConfigurationContext.currentBuildConfig.cluster.environment
+	def clusterName = BuildConfigurationContext.currentBuildConfig.cluster.clusterName
 
 	echo "Packaging helm release..."
 	sh """

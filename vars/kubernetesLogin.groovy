@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationMapper
+import com.worldpay.pipeline.BuildConfigurationContext
 
 /*
  Used to login to a Kubernetes (GKOP) cluster, and provide a temporary short-lived Kubernetes token (for usage with
@@ -13,8 +13,8 @@ def call() {
 	]) {
 		echo "Logging into cluster..."
 
-		def clusterApi = BuildConfigurationMapper.getCurrentBuildConfig().cluster.api
-		def profileName = BuildConfigurationMapper.getCurrentBuildConfig().profileName
+		def clusterApi = BuildConfigurationContext.getCurrentBuildConfig().cluster.api
+		def profileName = BuildConfigurationContext.getCurrentBuildConfig().profileName
 
 		def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
 
