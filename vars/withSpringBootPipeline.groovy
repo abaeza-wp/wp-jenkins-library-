@@ -186,7 +186,7 @@ def call(arguments) {
 					}
 				}
 				steps {
-					withPerformanceTest(params.profile)
+					withPerformanceTest()
 				}
 			}
 
@@ -199,7 +199,7 @@ def call(arguments) {
 							}
 						}
 						steps {
-							scanSysdig(params.profile)
+							scanSysdig()
 						}
 					}
 
