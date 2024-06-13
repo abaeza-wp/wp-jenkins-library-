@@ -180,7 +180,7 @@ def call(arguments) {
                 }
                 steps {
                     script {
-                        withHelmDeploymentDynamicStage("dev")
+                        parallel withHelmDeploymentDynamicStage("dev")
                     }
                 }
             }
