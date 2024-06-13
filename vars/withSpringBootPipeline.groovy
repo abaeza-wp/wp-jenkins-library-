@@ -164,23 +164,6 @@ def call(arguments) {
 				}
 			}
 
-			stage("Deploy Live Functional Environment") {
-				when {
-					expression { params.release }
-					anyOf {
-						triggeredBy 'TimerTrigger'
-						triggeredBy cause: 'UserIdCause'
-					}
-				}
-				environment {
-					DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "live"
-					SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
-				}
-				steps {
-					helmDeployment()
-				}
-			}
-
 			stage("Performance") {
 				when {
 					allOf {
