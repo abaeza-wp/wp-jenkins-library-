@@ -180,7 +180,7 @@ def call(arguments) {
                 }
                 steps {
                     script {
-                        parallel withHelmDeploymentDynamicStage("dev")
+                        withHelmDeploymentDynamicStage("Dev")
                     }
                 }
             }
@@ -258,8 +258,7 @@ def call(arguments) {
                     switchEnvironment("staging")
                 }
             }
-
-            stage("[Staging] Deploy Try Functional Environment") {
+            stage("[Staging] Deployment") {
                 when {
                     allOf {
                         expression { params.release }
@@ -269,31 +268,10 @@ def call(arguments) {
                         }
                     }
                 }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "try"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
-                }
                 steps {
-                    helmDeployment()
-                }
-            }
-
-            stage("[Staging] Deploy Live Functional Environment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+                    script {
+                        withHelmDeploymentDynamicStage("Staging")
                     }
-                }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "live"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
-                }
-                steps {
-                    helmDeployment()
                 }
             }
             stage("Performance Testing") {
