@@ -5,12 +5,14 @@ class GkopCluster {
 	private String awsRegion
 	private String clusterName
 	private String api
+	private String imageRegistry
 
-	GkopCluster(String environment, String awsRegion, String clusterName, String api) {
+	GkopCluster(String environment, String awsRegion, String clusterName, String api, String imageRegistry) {
 		this.environment = environment
 		this.awsRegion = awsRegion
 		this.clusterName = clusterName
 		this.api = api
+		this.imageRegistry = imageRegistry
 	}
 
 	String getEnvironment() {
@@ -27,5 +29,9 @@ class GkopCluster {
 
 	String getApi() {
 		return api
+	}
+
+	String getImageRegistry() {
+		return imageRegistry
 	}
 }

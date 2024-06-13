@@ -7,7 +7,7 @@ import com.worldpay.pipeline.BuildConfigurationContext
  (oc command) can be used.
  */
 
-def call() {
+def call(credentialsId) {
 	withCredentials([
 		string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
 	]) {
