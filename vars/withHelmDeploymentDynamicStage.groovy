@@ -13,13 +13,6 @@ def call(environmentName) {
 	if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
 		for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
 			stage("[${environmentName}] Deploy ${fEnv} Functional Environment") {
-				when {
-					expression { params.release }
-					anyOf {
-						triggeredBy 'TimerTrigger'
-						triggeredBy cause: 'UserIdCause'
-					}
-				}
 				environment {
 					DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "$fEnv"
 					SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"

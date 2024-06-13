@@ -171,6 +171,13 @@ def call(arguments) {
                 }
             }
             stage("[Dev] Deployment") {
+                when {
+                    expression { params.release }
+                    anyOf {
+                        triggeredBy 'TimerTrigger'
+                        triggeredBy cause: 'UserIdCause'
+                    }
+                }
                 steps {
                     script {
                         withHelmDeploymentDynamicStage("dev")
