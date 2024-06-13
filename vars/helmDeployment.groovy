@@ -1,10 +1,16 @@
 import com.worldpay.pipeline.BuildConfigurationContext
 
+
+def call() {
+    //convenience call when not using functional environments
+    call(null)
+}
+
 /*
  Used to update the Kubernetes resources, in all environments (including production).
  */
 
-def call() {
+def call(String functionalEnvironment) {
 
     def chartLocation = "./charts/${env.FULL_APP_NAME}"
     def appVersion = "${env.BUILD_APP_VERSION}"
@@ -12,25 +18,32 @@ def call() {
     def awsRegion = BuildConfigurationContext.currentBuildConfig.cluster.awsRegion
     def environment = BuildConfigurationContext.currentBuildConfig.cluster.environment
     def clusterName = BuildConfigurationContext.currentBuildConfig.cluster.clusterName
-    def functionalEnvironment = "${env.DEPLOYMENT_FUNCTIONAL_ENVIRONMENT}"
 
     echo "Packaging helm release..."
     sh """
             helm package ${chartLocation} --dependency-update --app-version=${appVersion}
-        """
+    """
 
-    def namespace = "${env.FULL_APP_NAME}-${functionalEnvironment}"
     def options = [
         "--set global.awsRegion=${awsRegion}",
         "--set global.environment=${environment}",
         "--set global.clusterName=${clusterName}",
-        "--set global.functionalEnvironment=${functionalEnvironment}",
         "--set java.imageTag=${appVersion}",
-        "--namespace ${namespace}"
     ]
 
+    if (functionalEnvironment != null) {
+        options.add("--set global.functionalEnvironment=${functionalEnvironment}")
+        options.add("--namespace=${env.FULL_APP_NAME}-${functionalEnvironment}")
+    }
+
     if (env.IS_PR_BUILD) {
-        options.add("--set java.fullnameOverride=${env.FULL_APP_NAME}-${functionalEnvironment}-${env.BRANCH_NAME}")
+        if (functionalEnvironment != null) {
+            options.add("--set java.fullnameOverride=${env.FULL_APP_NAME}-${functionalEnvironment}-${env.BRANCH_NAME}")
+            options.add("--namespace=${env.FULL_APP_NAME}-${functionalEnvironment}")
+        } else {
+            options.add("--set java.fullnameOverride=${env.FULL_APP_NAME}-${env.BRANCH_NAME}")
+            options.add("--namespace=${env.FULL_APP_NAME}")
+        }
     }
 
     def optionsString = (options + [
@@ -44,11 +57,12 @@ def call() {
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-            helm upgrade ${env.FULL_APP_NAME} ./${env.FULL_APP_NAME}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} 
+            helm upgrade ${env.FULL_APP_NAME} ./${env.FULL_APP_NAME}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run 
     """
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
+
     def valuesFilesFound = [
         "${chartLocation}/values.yaml"] //This is the default values file.
     //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.staging.yaml, values.prod.yaml

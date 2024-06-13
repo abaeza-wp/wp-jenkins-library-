@@ -20,10 +20,6 @@ def tokenNameOf(namespace, profileName) {
     return "svc_token-${namespace}-${tokenSuffix}"
 }
 
-def cronExpression() {
-    return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
-}
-
 def call(arguments) {
     String tenant = arguments.tenant
     String component = arguments.component
@@ -59,11 +55,6 @@ def call(arguments) {
                         cpu: 0.25
                  """
             }
-        }
-
-        triggers {
-            // it automatically runs every Monday at around midnight
-            cron(cronExpression())
         }
 
         environment {
@@ -141,6 +132,7 @@ def call(arguments) {
                     switchEnvironment("dev")
                 }
             }
+
             stage("Build & Test App") {
                 environment {
                     // Need full path of current workspace for setting path of nvm on $PATH
@@ -150,7 +142,6 @@ def call(arguments) {
                     gradleBuildOnly()
                 }
             }
-
             stage("Archive Test Reports") {
                 steps {
                     archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
@@ -160,7 +151,6 @@ def call(arguments) {
                     archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
                 }
             }
-
             stage("Build Image") {
                 environment {
                     // Need full path of current workspace for setting path of nvm on $PATH
@@ -170,27 +160,7 @@ def call(arguments) {
                     gradleBuildImageOnly()
                 }
             }
-
-            stage("[Dev] Deploy Try Functional Environment") {
-                when {
-                    expression { params.release }
-                    expression { !params.profile.contains("dev") }
-                    anyOf {
-
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
-                    }
-                }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "try"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
-                }
-                steps {
-                    helmDeployment()
-                }
-            }
-
-            stage("[Dev] Deploy Live Functional Environment") {
+            stage("[Dev] Deployment") {
                 when {
                     expression { params.release }
                     anyOf {
@@ -198,12 +168,10 @@ def call(arguments) {
                         triggeredBy cause: 'UserIdCause'
                     }
                 }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "live"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
-                }
                 steps {
-                    helmDeployment()
+                    script {
+                        withHelmDeploymentDynamicStage("Dev")
+                    }
                 }
             }
 
@@ -212,9 +180,7 @@ def call(arguments) {
                     stage("Image Scan (Sysdig)") {
                         when {
                             allOf {
-                                expression {
-                                    env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean()
-                                }
+                                expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
                             }
                         }
                         steps {
@@ -224,9 +190,7 @@ def call(arguments) {
 
                     stage("Static Analysis (Checkmarx)") {
                         when {
-                            expression {
-                                env.CHECKMARX_ENABLED.toBoolean()
-                            }
+                            expression { env.CHECKMARX_ENABLED.toBoolean() }
                         }
                         steps {
                             scanCheckmarx()
@@ -236,9 +200,7 @@ def call(arguments) {
                     stage("Dependency Analysis (BlackDuck)") {
                         when {
                             allOf {
-                                expression {
-                                    env.BLACKDUCK_ENABLED.toBoolean()
-                                }
+                                expression { env.BLACKDUCK_ENABLED.toBoolean() }
                             }
                         }
                         steps {
@@ -249,9 +211,7 @@ def call(arguments) {
                     stage("OWASP Dependency Checker") {
                         when {
                             allOf {
-                                expression {
-                                    env.OWASP_DEPENDENCY_ENABLED.toBoolean()
-                                }
+                                expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
                             }
                         }
                         steps {
@@ -260,15 +220,12 @@ def call(arguments) {
                     }
                 }
             }
-
             stage("Archive reports in S3") {
                 when {
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
-                        expression {
-                            params.profile.contains("staging")
-                        }
+                        expression { params.profile.contains("staging") }
                     }
                 }
                 steps {
@@ -291,8 +248,7 @@ def call(arguments) {
                     switchEnvironment("staging")
                 }
             }
-
-            stage("[Staging] Deploy Try Functional Environment") {
+            stage("[Staging] Deployment") {
                 when {
                     allOf {
                         expression { params.release }
@@ -302,31 +258,10 @@ def call(arguments) {
                         }
                     }
                 }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "try"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
-                }
                 steps {
-                    helmDeployment()
-                }
-            }
-
-            stage("[Staging] Deploy Live Functional Environment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+                    script {
+                        withHelmDeploymentDynamicStage("Staging")
                     }
-                }
-                environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "live"
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
-                }
-                steps {
-                    helmDeployment()
                 }
             }
             stage("Performance Testing") {
