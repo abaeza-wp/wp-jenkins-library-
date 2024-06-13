@@ -41,7 +41,7 @@ spotless {
 		removeSemicolons()
 		// the Groovy Eclipse formatter extends the Java Eclipse formatter,
 		// so it formats Java files by default (unless `excludeJava` is used).
-		greclipse()
+		greclipse().configFile rootProject.files('greclipse.properties')
 
 		// excludes all Java sources within the Groovy source dirs from formatting
 		excludeJava()
