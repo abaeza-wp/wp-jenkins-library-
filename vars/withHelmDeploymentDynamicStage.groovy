@@ -14,10 +14,9 @@ def call(environmentName) {
         for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
             stage("[${environmentName}][${fEnv}] Deploy Application") {
                 environment {
-                    DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "${fEnv}"
                     SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
                 }
-                helmDeployment()
+                helmDeployment("${fEnv}")
             }
         }
     } else {
