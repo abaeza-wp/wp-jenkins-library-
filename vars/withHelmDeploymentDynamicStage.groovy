@@ -9,22 +9,27 @@ import com.worldpay.pipeline.BuildConfigurationContext
  * }
  */
 
+def call() {
+    call(null)
+}
+
 def call(environmentName) {
-	if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
-		for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
-			stage("[${environmentName}][${fEnv}] Deploy Application") {
-				environment {
-					SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
-				}
-				helmDeployment("${fEnv}")
-			}
-		}
-	} else {
-		stage("[${environmentName}] Deploy Application") {
-			environment {
-				SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${params.profile}"
-			}
-			helmDeployment()
-		}
-	}
+    def stageName = environmentName != null ? "[${environmentName}] Deploy Application" : "Deploy Application"
+    if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
+        for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
+            stage("${stageName} [${fEnv}]") {
+                environment {
+                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
+                }
+                helmDeployment("${fEnv}")
+            }
+        }
+    } else {
+        stage("${stageName}") {
+            environment {
+                SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${params.profile}"
+            }
+            helmDeployment()
+        }
+    }
 }

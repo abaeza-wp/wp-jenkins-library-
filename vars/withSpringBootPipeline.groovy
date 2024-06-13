@@ -149,25 +149,20 @@ def call(arguments) {
 				}
 			}
 
-			stage("Deploy Try Functional Environment") {
+			stage("Deployment") {
 				when {
 					expression { params.release }
-					expression { !params.profile.contains("dev") }
 					anyOf {
-
 						triggeredBy 'TimerTrigger'
 						triggeredBy cause: 'UserIdCause'
 					}
 				}
-				environment {
-					DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "try"
-					SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-try-${params.profile}"
-				}
 				steps {
-					helmDeployment()
+					script {
+						withHelmDeploymentDynamicStage()
+					}
 				}
 			}
-
 
 			stage("Deploy Live Functional Environment") {
 				when {
