@@ -2,6 +2,8 @@ package com.worldpay.pipeline
 
 class BuildConfigurationContext {
 
+	private static Boolean useFunctionalEnvironments
+	private static List<String> functionalEnvironments
 	private static BuildConfig currentBuildConfig
 
 	/**
@@ -51,5 +53,24 @@ class BuildConfigurationContext {
 
 	static BuildConfig getCurrentBuildConfig() {
 		return currentBuildConfig
+	}
+
+	static Boolean shouldUseFunctionalEnvironments() {
+		return useFunctionalEnvironments
+	}
+
+	static List<String> getFunctionalEnvironments() {
+		return functionalEnvironments
+	}
+
+	static void readJenkinsConfig(config) {
+		//If functional environments were defined
+		if (config.functionalEnvironments == null){
+			useFunctionalEnvironments = false
+			functionalEnvironments = []
+		}else {
+			useFunctionalEnvironments = true
+			functionalEnvironments = config.functionalEnvironments
+		}
 	}
 }

@@ -1,3 +1,5 @@
+import com.worldpay.pipeline.BuildConfigurationContext
+
 def call() {
 	warnAboutExperimentalPipelines()
 
@@ -8,7 +10,10 @@ def call() {
 	env.GIT_COMMIT_TIMESTAMP = sh(script: 'git show -s --format=%cI HEAD', returnStdout: true).trim()
 
 	env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
+	// Read Jenkins configuration
+	config = readYaml(file: "deployment/jenkins.yaml")
 
+	BuildConfigurationContext.readJenkinsConfig(config)
 	echo """
             Build Information:
 
