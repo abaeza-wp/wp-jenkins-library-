@@ -12,7 +12,7 @@ import com.worldpay.pipeline.BuildConfigurationContext
 def call(environmentName) {
 	if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
 		for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
-			stage("[${environmentName}] Deploy ${fEnv} Functional Environment") {
+			stage("[${environmentName}][${fEnv}] Deploy Application") {
 				environment {
 					DEPLOYMENT_FUNCTIONAL_ENVIRONMENT = "$fEnv"
 					SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
