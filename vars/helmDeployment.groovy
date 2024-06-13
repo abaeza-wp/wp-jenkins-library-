@@ -62,6 +62,7 @@ def call(String functionalEnvironment) {
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
+
 	def valuesFilesFound = [
 		"${chartLocation}/values.yaml"] //This is the default values file.
 	//Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.staging.yaml, values.prod.yaml

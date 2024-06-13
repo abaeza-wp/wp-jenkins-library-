@@ -46,9 +46,9 @@ class BuildConfigurationContext {
 			default:
 				error "Unsupported GKOP aws region: ${awsRegion} for Environment ${environment}, If you think this is a mistake please consider raising an issue."
 		}
+        return currentBuildConfig
+    }
 
-		return currentBuildConfig
-	}
 
 	static BuildConfig getCurrentBuildConfig() {
 		return currentBuildConfig

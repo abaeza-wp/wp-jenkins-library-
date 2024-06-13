@@ -1,6 +1,7 @@
 package com.worldpay.pipeline
 
 class GkopCluster {
+
 	private String environment
 	private String awsRegion
 	private String clusterName
@@ -15,17 +16,18 @@ class GkopCluster {
 		this.imageRegistry = imageRegistry
 	}
 
-	String getEnvironment() {
-		return environment
-	}
+    String getEnvironment() {
+        return environment
+    }
 
-	String getAwsRegion() {
-		return awsRegion
-	}
+    String getAwsRegion() {
+        return awsRegion
+    }
 
-	String getClusterName() {
-		return clusterName
-	}
+    String getClusterName() {
+        return clusterName
+    }
+
 
 	String getApi() {
 		return api
@@ -34,4 +36,5 @@ class GkopCluster {
 	String getImageRegistry() {
 		return imageRegistry
 	}
+
 }

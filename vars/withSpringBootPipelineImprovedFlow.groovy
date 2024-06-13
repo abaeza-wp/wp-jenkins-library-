@@ -1,35 +1,35 @@
 def getProfiles() {
-	return [
-		"dev-euwest1",
-		"staging-euwest1",
-		"staging-useast1",
-	]
+    return [
+        "dev-euwest1",
+        "staging-euwest1",
+        "staging-useast1",
+    ]
 }
 
 def getAwsRegions() {
-	return [
-		"eu-west-1",
-		"us-east-1",
-	]
+    return [
+        "eu-west-1",
+        "us-east-1",
+    ]
 }
 
 def tokenNameOf(namespace, profileName) {
-	def tokenSuffix = profileName.replace('-live', '')
-			.replace('-try', '')
+    def tokenSuffix = profileName.replace('-live', '')
+            .replace('-try', '')
 
-	return "svc_token-${namespace}-${tokenSuffix}"
+    return "svc_token-${namespace}-${tokenSuffix}"
 }
 
 def call(arguments) {
-	String tenant = arguments.tenant
-	String component = arguments.component
+    String tenant = arguments.tenant
+    String component = arguments.component
 
-	pipeline {
-		agent {
-			kubernetes {
-				label 'hydra'
-				defaultContainer 'hydra'
-				yaml """
+    pipeline {
+        agent {
+            kubernetes {
+                label 'hydra'
+                defaultContainer 'hydra'
+                yaml """
                 spec:
                   containers:
                   - name: hydra
