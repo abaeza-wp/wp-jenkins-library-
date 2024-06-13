@@ -149,20 +149,20 @@ def call(arguments) {
                 }
             }
 
-			stage("Deployment") {
-				when {
-					expression { params.release }
-					anyOf {
-						triggeredBy 'TimerTrigger'
-						triggeredBy cause: 'UserIdCause'
-					}
-				}
-				steps {
-					script {
-						withHelmDeploymentDynamicStage()
-					}
-				}
-			}
+            stage("Deployment") {
+                when {
+                    expression { params.release }
+                    anyOf {
+                        triggeredBy 'TimerTrigger'
+                        triggeredBy cause: 'UserIdCause'
+                    }
+                }
+                steps {
+                    script {
+                        withHelmDeploymentDynamicStage()
+                    }
+                }
+            }
 
             stage("Performance") {
                 when {

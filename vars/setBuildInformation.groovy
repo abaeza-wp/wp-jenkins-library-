@@ -9,12 +9,12 @@ def call() {
     env.GIT_REF = (env.BRANCH_NAME ? env.BRANCH_NAME : params.gitReference)
     env.GIT_COMMIT_TIMESTAMP = sh(script: 'git show -s --format=%cI HEAD', returnStdout: true).trim()
 
-	env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
-	// Read Jenkins configuration
-	config = readYaml(file: "deployment/jenkins.yaml")
+    env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
+    // Read Jenkins configuration
+    config = readYaml(file: "deployment/jenkins.yaml")
 
-	BuildConfigurationContext.readJenkinsConfig(config)
-	echo """
+    BuildConfigurationContext.readJenkinsConfig(config)
+    echo """
             Build Information:
 
             BRANCH_NAME: ${env.BRANCH_NAME}
