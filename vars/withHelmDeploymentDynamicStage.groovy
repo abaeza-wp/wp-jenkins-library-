@@ -24,15 +24,8 @@ def call(environmentName) {
 		}
 	} else {
 		stage("[${environmentName}] Deploy Application") {
-			when {
-				expression { params.release }
-				anyOf {
-					triggeredBy 'TimerTrigger'
-					triggeredBy cause: 'UserIdCause'
-				}
-			}
 			environment {
-				SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-live-${params.profile}"
+				SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${params.profile}"
 			}
 			steps {
 				helmDeployment()
