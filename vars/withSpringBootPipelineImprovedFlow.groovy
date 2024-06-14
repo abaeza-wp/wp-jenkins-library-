@@ -108,7 +108,9 @@ def call() {
 
         stages {
             stage("Prepare") {
-                setBuildInformation()
+                steps {
+                    setBuildInformation()
+                }
             }
             stage("[Dev] Switch environment") {
                 steps {
@@ -226,7 +228,6 @@ def call() {
                         }
                     }
                     steps {
-                        setBuildInformation()
                         switchEnvironment("staging", "${params.awsRegion}")
                     }
                 }
