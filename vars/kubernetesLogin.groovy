@@ -8,16 +8,16 @@ import com.worldpay.pipeline.BuildContext
  */
 
 def call() {
-    call(false, null)
+    call(false, null, null)
 }
 
 def call(String clusterUsername) {
-    call(false, clusterUsername)
+    call(false, clusterUsername, null)
 }
 
-def call(Boolean ignoreTls, String clusterUsername) {
+def call(Boolean ignoreTls, String clusterUsername, String namespace) {
     withCredentials([
-        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+    string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
@@ -35,10 +35,10 @@ def call(Boolean ignoreTls, String clusterUsername) {
             sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"
         }
 
-        //TODO: Maybe clean up as this will be ensured by helm
-        // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
-        //        sh "oc project ${namespace} || true"
-
+        if (namespace) {
+            // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
+            sh "oc project ${namespace} || true"
+        }
         kubernetesToken = sh(script: "oc whoami -t", returnStdout: true).trim()
         return kubernetesToken
     }

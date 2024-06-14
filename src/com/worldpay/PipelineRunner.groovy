@@ -42,7 +42,7 @@ class PipelineRunner implements Serializable {
             body.call()
             return true
         }
-        return false;
+        return false
     }
 
     void runWithCallbacks(String stage, Closure body) {

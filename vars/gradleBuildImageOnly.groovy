@@ -7,7 +7,7 @@ import com.worldpay.pipeline.BuildContext
 
 def call(Boolean isRelease, String clusterUsername, String namespace, String ignoreTls) {
     def ignoreTlsBoolean = ignoreTls as Boolean
-    def kubernetesToken = kubernetesLogin(ignoreTlsBoolean, clusterUsername)
+    def kubernetesToken = kubernetesLogin(ignoreTlsBoolean, clusterUsername, namespace)
 
     def profiles = ""
 
