@@ -1,14 +1,6 @@
 import com.worldpay.pipeline.BuildContext
 import com.worldpay.pipeline.TokenHelper
 
-def getProfiles() {
-    return [
-    "dev-euwest1",
-    "staging-euwest1",
-    "staging-useast1",
-    ]
-}
-
 def getAwsRegions() {
     return [
     "eu-west-1",
@@ -50,11 +42,6 @@ def call() {
             }
         }
         parameters {
-            choice(
-            name: "profile",
-            choices: getProfiles(),
-            description: "The target deployment profile."
-            )
             choice(
             name: "awsRegion",
             choices: getAwsRegions(),
@@ -220,7 +207,10 @@ def call() {
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
-                        expression { params.profile.contains("staging") }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
