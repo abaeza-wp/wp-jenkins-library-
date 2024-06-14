@@ -21,27 +21,27 @@ class BuildContext {
             case "dev-eu-west-1":
                 currentBuildProfile = new BuildProfile(
                 "dev-euwest1",
-                new GkopCluster("dev", "eu-west-1", "7z55k", "api.eu-west-1-7z55k.dev.msp.worldpay.io:6443", "default-route-openshift-image-registry.apps.eu-west-1-7z55k.dev.msp.worldpay.io:6443"))
+                new GkopCluster("dev", "eu-west-1", "7z55k", "api.eu-west-1-7z55k.dev.msp.worldpay.io:6443", "default-route-openshift-image-registry.apps.eu-west-1-7z55k.dev.msp.worldpay.io"))
                 break
             case "dev-us-east-1":
                 currentBuildProfile = new BuildProfile(
                 "dev-useast1",
-                new GkopCluster("dev", "us-east-1", "2m2bt", "api.us-east-1-2m2bt.dev.msp.worldpay.io:6443", "default-route-openshift-image-registry.apps.us-east-1-2m2bt.dev.msp.worldpay.io:6443"))
+                new GkopCluster("dev", "us-east-1", "2m2bt", "api.us-east-1-2m2bt.dev.msp.worldpay.io:6443", "default-route-openshift-image-registry.apps.us-east-1-2m2bt.dev.msp.worldpay.io"))
                 break
             case "staging-eu-west-1":
                 currentBuildProfile = new BuildProfile(
                 "staging-euwest1",
-                new GkopCluster("stage", "eu-west-1", "hf2js", "api.eu-west-1-hf2js.stage.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.eu-west-1-hf2js.stage.msp.worldpay.io:443"))
+                new GkopCluster("stage", "eu-west-1", "hf2js", "api.eu-west-1-hf2js.stage.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.eu-west-1-hf2js.stage.msp.worldpay.io"))
                 break
             case "staging-us-east-1":
                 currentBuildProfile = new BuildProfile(
                 "staging-useast1",
-                new GkopCluster("stage", "us-east-1", "aq0mb", "api.us-east-1-aq0mb.stage.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.us-east-1-aq0mb.stage.msp.worldpay.io:443"))
+                new GkopCluster("stage", "us-east-1", "aq0mb", "api.us-east-1-aq0mb.stage.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.us-east-1-aq0mb.stage.msp.worldpay.io"))
                 break
             case "prod-eu-west-1":
                 currentBuildProfile = new BuildProfile(
                 "prod-euwest1",
-                new GkopCluster("prod", "eu-west-1", "i8tjd", "api.eu-west-1-i8tjd.prod.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.eu-west-1-i8tjd.prod.msp.worldpay.io:443"))
+                new GkopCluster("prod", "eu-west-1", "i8tjd", "api.eu-west-1-i8tjd.prod.msp.worldpay.io:443", "default-route-openshift-image-registry.apps.eu-west-1-i8tjd.prod.msp.worldpay.io"))
                 break
             case "prod-us-east-1":
                 currentBuildProfile = new BuildProfile(
