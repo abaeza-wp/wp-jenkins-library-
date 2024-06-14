@@ -8,16 +8,16 @@ import com.worldpay.pipeline.BuildContext
  */
 
 def call() {
-    call(false, null, null)
+    call(null, null, false)
 }
 
 def call(String clusterUsername) {
-    call(false, clusterUsername, null)
+    call(clusterUsername, null, false)
 }
 
-def call(Boolean ignoreTls, String clusterUsername, String namespace) {
+def call(String clusterUsername, String namespace, Boolean ignoreTls) {
     withCredentials([
-        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+    string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
