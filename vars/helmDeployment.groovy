@@ -58,7 +58,7 @@ def call(String functionalEnvironment) {
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-            helm upgrade ${appName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run 
+            helm upgrade ${appName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
     """
 }
 
