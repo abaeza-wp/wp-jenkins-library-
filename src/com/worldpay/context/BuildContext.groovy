@@ -12,7 +12,7 @@ class BuildContext {
     private static String imageTag
 
     private static BuildProfile currentBuildProfile
-    private static Map<String, BuildProfile> gkopSupportedRegions
+    private static Map<String, BuildProfile> gkopSupportedRegions = getGkopSupportedRegions()
 
     /**
      * For supported regions see: https://github.worldpay.com/pages/Engineering/portal/engineering/developer-platforms/kubernetes/guides/clusters/
@@ -21,7 +21,7 @@ class BuildContext {
      */
     static BuildProfile getBuildProfileForAwsRegion(String environment, String awsRegion) {
         def lookupKey = "${environment}-${awsRegion}"
-        def cluster = gkopSupportedRegions.get(lookupKey)
+        def cluster = gkopSupportedRegions[lookupKey]
 
         if (cluster == null) {
             error "Unsupported GKOP aws region: ${awsRegion} for Environment ${environment}, Used ${lookupKey} as lookup key, If you think this is a mistake please consider raising an issue."
@@ -76,8 +76,6 @@ class BuildContext {
             useFunctionalEnvironments = true
             this.functionalEnvironments = functionalEnvironments
         }
-
-        gkopSupportedRegions = getGkopSupportedRegions()
     }
 
     static void setImageTag(String imageTag) {
