@@ -3,16 +3,16 @@ import com.worldpay.pipeline.TokenHelper
 
 def getProfiles() {
     return [
-        "dev-euwest1",
-        "staging-euwest1",
-        "staging-useast1",
+    "dev-euwest1",
+    "staging-euwest1",
+    "staging-useast1",
     ]
 }
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -51,20 +51,20 @@ def call() {
         }
         parameters {
             choice(
-                    name: "profile",
-                    choices: getProfiles(),
-                    description: "The target deployment profile."
-                    )
+            name: "profile",
+            choices: getProfiles(),
+            description: "The target deployment profile."
+            )
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
@@ -107,9 +107,6 @@ def call() {
             REPORT_ARCHIVING_BUCKET_NAME = "${config.reportArchiving.awsBucket.name}"
             REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID = "${config.reportArchiving.awsBucket.credentialId}"
 
-            // Credential used for deployments
-            SVC_TOKEN = TokenHelper.tokenNameOf("dev", BuildContext.getFullName(), "${params.awsRegion}")
-
             // Slack notifications
             SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
             SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
@@ -119,6 +116,8 @@ def call() {
             IMAGE_BUILD_USERNAME = "${config.ci.cluster_username}"
             IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
             IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignoreTls}"
+            // Credential used for initial image building and deployment
+            SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
         }
 
         stages {

@@ -1,6 +1,9 @@
 package com.worldpay.pipeline
 
 class TokenHelper {
+    static String devTokenName(namespace, awsRegion) {
+        return tokenNameOf("dev", namespace, awsRegion)
+    }
     static String tokenNameOf(environment, appName, awsRegion, String functionalEnvironment) {
         return tokenNameOf(environment, "${appName}-${functionalEnvironment}", awsRegion)
     }
