@@ -1,4 +1,4 @@
-package com.worldpay.pipeline
+package com.worldpay.utils
 
 class TokenHelper {
     static String devTokenName(namespace, awsRegion) {

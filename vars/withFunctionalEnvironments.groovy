@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 /**
  *
@@ -10,7 +10,7 @@ import com.worldpay.pipeline.BuildContext
  */
 
 def call(block) {
-    if (BuildContext.currentBuildProfile.useFunctionalEnvironments) {
+    if (BuildContext.useFunctionalEnvironments) {
         return block.call()
     }
 }

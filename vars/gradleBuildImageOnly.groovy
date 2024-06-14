@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 /*
  Used to build the container image.

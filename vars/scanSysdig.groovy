@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 /*
  Used to scan the built container image using Sysdig Secure, for the purpose of image dependency vulnerability

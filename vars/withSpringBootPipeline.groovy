@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 def getProfiles() {
     return [

@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 /*
  Used to login to a Kubernetes (GKOP) cluster, and provide a temporary short-lived Kubernetes token (for usage with

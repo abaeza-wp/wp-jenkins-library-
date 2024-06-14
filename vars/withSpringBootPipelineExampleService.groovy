@@ -5,44 +5,37 @@ def tokenNameOf(namespace, profileName) {
     return "svc_token-${namespace}-${tokenSuffix}"
 }
 
-def getProfiles()
-{
+def getProfiles() {
     return [
-    "dev-euwest1-try",
-    "dev-euwest1-live",
-    "staging-euwest1-try",
-    "staging-euwest1-live",
-    "staging-useast1-try",
-    "staging-useast1-live"
+        "dev-euwest1-try",
+        "dev-euwest1-live",
+        "staging-euwest1-try",
+        "staging-euwest1-live",
+        "staging-useast1-try",
+        "staging-useast1-live"
     ]
 }
 
 
 def call() {
 
-/*
-########################################################################################################################
-    WARNING: you should not need to change anything beyond this point!!!
+    /*
+     ########################################################################################################################
+     WARNING: you should not need to change anything beyond this point!!!
+     Please configure via jenkins.yaml.
+     Otherwise, synchronising with the template in the future will be harder.
+     ########################################################################################################################
+     */
 
-    Please configure via jenkins.yaml.
-
-    Otherwise, synchronising with the template in the future will be harder.
-########################################################################################################################
-*/
-
-    pipeline
-    {
-        agent
-        {
-            kubernetes
-            {
+    pipeline {
+        agent {
+            kubernetes {
                 label "hpp"
                 defaultContainer "hpp"
                 yaml libraryResource("agents/k8s/hpp.yaml")
             }
         }
-        environment
-        {
+        environment {
             // Read Jenkins configuration
             config = readYaml (file: "deployment/jenkins.yaml")
 
@@ -91,181 +84,136 @@ def call() {
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
         }
 
-        parameters
-        {
+        parameters {
             choice(
-            name: "profile",
-            choices: getProfiles(),
-            description: "The target deployment profile."
-            )
+                    name: "profile",
+                    choices: getProfiles(),
+                    description: "The target deployment profile."
+                    )
 
             booleanParam(
-            name: "release",
-            defaultValue: true,
-            description: "Runs additional scans for release deployments, not needed for development"
-            )
+                    name: "release",
+                    defaultValue: true,
+                    description: "Runs additional scans for release deployments, not needed for development"
+                    )
         }
 
-        stages
-        {
-            stage("Build Image")
-            {
-                environment
-                {
+        stages {
+            stage("Build Image") {
+                environment {
                     // Need full path of current workspace for setting path of nvm on $PATH
                     WORKSPACE = pwd()
                 }
-                steps
-                {
-                    script
-                    {
+                steps {
+                    script {
                         load("deployment/boilerplate/scripts/build-image.groovy").buildImage()
                     }
                 }
             }
 
-            stage("Deploy")
-            {
-                when
-                {
+            stage("Deploy") {
+                when {
                     anyOf {
                         triggeredBy 'TimerTrigger'
                         triggeredBy cause: 'UserIdCause'
                     }
                 }
-                steps
-                {
-                    script
-                    {
+                steps {
+                    script {
                         load("deployment/boilerplate/scripts/deploy.groovy").deploy(params.profile)
                     }
                 }
             }
 
-            stage("Testing")
-            {
-                parallel
-                {
-                    stage("Performance")
-                    {
-                        when
-                        {
-                            allOf
-                            {
+            stage("Testing") {
+                parallel {
+                    stage("Performance") {
+                        when {
+                            allOf {
                                 expression { params.release }
                                 expression { params.profile.contains("staging") }
                                 expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
                             }
                         }
-                        steps
-                        {
-                            script
-                            {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/performance-test.groovy").performanceTest()
                             }
                         }
                     }
 
-                    stage("Image Scan (Sysdig)")
-                    {
-                        when
-                        {
-                            allOf
-                            {
+                    stage("Image Scan (Sysdig)") {
+                        when {
+                            allOf {
                                 expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
                                 expression { params.release }
                             }
                         }
-                        steps
-                        {
-                            script
-                            {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/sysdig-image-scan.groovy").sysdigImageScan()
                             }
                         }
                     }
 
-                    stage("Static Analysis (Checkmarx)")
-                    {
-                        when
-                        {
+                    stage("Static Analysis (Checkmarx)") {
+                        when {
                             expression { env.CHECKMARX_ENABLED.toBoolean() }
                             expression { params.release }
                         }
-                        steps
-                        {
-                            script
-                            {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/checkmarx.groovy").runCheckmarx()
                             }
                         }
                     }
 
-                    stage("Dependency Analysis (BlackDuck)")
-                    {
-                        when
-                        {
-                            allOf
-                            {
+                    stage("Dependency Analysis (BlackDuck)") {
+                        when {
+                            allOf {
                                 expression { env.BLACKDUCK_ENABLED.toBoolean() }
                                 expression { params.release }
                             }
                         }
-                        steps
-                        {
-                            script
-                            {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/blackduck.groovy").runBlackduck()
                             }
                         }
                     }
 
-                    stage("Code Coverage Report")
-                    {
-                        steps
-                        {
-                            script
-                            {
+                    stage("Code Coverage Report") {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/reporting.groovy").reportCodeCoverage()
                             }
                         }
                     }
 
-                    stage("Unit Tests Report")
-                    {
-                        steps
-                        {
-                            script
-                            {
+                    stage("Unit Tests Report") {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/reporting.groovy").reportUnit()
                             }
                         }
                     }
 
-                    stage("OWASP Dependency Checker")
-                    {
-                        when
-                        {
-                            allOf
-                            {
+                    stage("OWASP Dependency Checker") {
+                        when {
+                            allOf {
                                 expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
                             }
                         }
-                        steps
-                        {
-                            script
-                            {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/owasp-dependency-checker.groovy").owaspDependencyChecker()
                             }
                         }
                     }
 
-                    stage("BDD Report")
-                    {
-                        steps
-                        {
-                            script
-                            {
+                    stage("BDD Report") {
+                        steps {
+                            script {
                                 load("deployment/boilerplate/scripts/pipeline/reporting.groovy").reportBDD()
                             }
                         }
@@ -273,37 +221,28 @@ def call() {
                 }
             }
 
-            stage("Archive reports in S3")
-            {
-                when
-                {
-                    allOf
-                    {
+            stage("Archive reports in S3") {
+                when {
+                    allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
                         expression { params.profile.contains("staging") }
                     }
                 }
-                steps
-                {
-                    script
-                    {
+                steps {
+                    script {
                         load("deployment/boilerplate/scripts/pipeline/reporting.groovy").archiveReports()
                     }
                 }
             }
 
-            stage("Archive HTML Reports artifacts")
-            {
-                steps
-                {
-                    script
-                    {
+            stage("Archive HTML Reports artifacts") {
+                steps {
+                    script {
                         load("deployment/boilerplate/scripts/pipeline/reporting.groovy").archiveHtmlReports()
                     }
                 }
             }
-
         }
     }
 }

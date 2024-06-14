@@ -1,4 +1,4 @@
-package com.worldpay.pipeline
+package com.worldpay.context
 
 class BuildProfile {
     private Object profileName

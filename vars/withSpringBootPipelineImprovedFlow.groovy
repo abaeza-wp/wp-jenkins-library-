@@ -1,10 +1,10 @@
-import com.worldpay.pipeline.BuildContext
-import com.worldpay.pipeline.TokenHelper
+import com.worldpay.context.BuildContext
+import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -43,15 +43,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
@@ -107,13 +107,15 @@ def call() {
         }
 
         stages {
-            stage("[Dev] Set Build Information") {
+            stage("Prepare") {
+                setBuildInformation()
+            }
+            stage("[Dev] Switch environment") {
                 steps {
                     switchEnvironment("dev", "${params.awsRegion}")
-                    setBuildInformation()
+
                 }
             }
-
             stage("Build & Test App") {
                 environment {
                     // Need full path of current workspace for setting path of nvm on $PATH
@@ -201,66 +203,56 @@ def call() {
                     }
                 }
             }
-            stage("Archive reports in S3") {
-                when {
-                    allOf {
-                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
+            onMainBranch {
+                stage("Archive reports in S3") {
+                    when {
+                        allOf {
+                            expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+                            expression { params.release }
+                            anyOf {
+                                branch 'master'
+                                branch 'main'
+                            }
                         }
                     }
+                    steps {
+                        archiveReportsToS3()
+                    }
                 }
-                steps {
-                    archiveReportsToS3()
-                }
-            }
 
-            stage("[Staging] Set Build Information") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
+                stage("[Staging] Switch environment") {
+                    when {
+                        allOf {
+                            expression { params.release }
+                        }
+                    }
+                    steps {
+                        setBuildInformation()
+                        switchEnvironment("staging", "${params.awsRegion}")
+                    }
+                }
+                stage("[Staging] Deployment") {
+                    when {
+                        allOf {
+                            expression { params.release }
+                        }
+                    }
+                    steps {
+                        script {
+                            withHelmDeploymentDynamicStage()
                         }
                     }
                 }
-                steps {
-                    setBuildInformation()
-                    switchEnvironment("staging", "${params.awsRegion}")
-                }
-            }
-            stage("[Staging] Deployment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
+                stage("Performance Testing") {
+                    when {
+                        allOf {
+                            expression { params.release }
+                            expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
                         }
                     }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
+                    steps {
+                        withPerformanceTest()
                     }
-                }
-            }
-            stage("Performance Testing") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    withPerformanceTest()
                 }
             }
         }

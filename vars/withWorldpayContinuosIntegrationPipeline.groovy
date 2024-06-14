@@ -1,7 +1,7 @@
 import com.worldpay.AppPipelineDsl
 import com.worldpay.PipelineCallbacksConfig
 import com.worldpay.PipelineRunner
-import com.worldpay.pipeline.BuildContext
+import com.worldpay.context.BuildContext
 
 def call(String type, String tenant, String component, Closure body) {
     call(type, tenant, component, null, body)
