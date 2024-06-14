@@ -1,5 +1,7 @@
 package com.worldpay.context
 
+import com.cloudbees.groovy.cps.NonCPS
+
 class BuildContext {
 
     private static String tenant
@@ -85,6 +87,7 @@ class BuildContext {
         return imageTag
     }
 
+    @NonCPS
     static Map<String, BuildProfile> getGkopSupportedRegions() {
         return [
         "dev-eu-west-1": new BuildProfile("dev-euwest1", new GkopCluster("dev", "eu-west-1", "7z55k", "api.eu-west-1-7z55k.dev.msp.worldpay.io:6443", "default-route-openshift-image-registry.apps.eu-west-1-7z55k.dev.msp.worldpay.io")),
