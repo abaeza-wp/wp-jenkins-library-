@@ -2,15 +2,15 @@ import com.worldpay.pipeline.BuildContext
 
 def getProfiles() {
     return [
-    "dev-euwest1",
-    "staging-euwest1",
-    "staging-useast1",
+        "dev-euwest1",
+        "staging-euwest1",
+        "staging-useast1",
     ]
 }
 
 def tokenNameOf(namespace, profileName) {
     def tokenSuffix = profileName.replace('-live', '')
-    .replace('-try', '')
+            .replace('-try', '')
 
     return "svc_token-${namespace}-${tokenSuffix}"
 }
@@ -51,15 +51,15 @@ def call() {
         }
         parameters {
             choice(
-            name: "profile",
-            choices: getProfiles(),
-            description: "The target deployment profile."
-            )
+                    name: "profile",
+                    choices: getProfiles(),
+                    description: "The target deployment profile."
+                    )
             booleanParam(
-            name: "release",
-            defaultValue: true,
-            description: "Runs additional scans for release deployments, not needed for development"
-            )
+                    name: "release",
+                    defaultValue: true,
+                    description: "Runs additional scans for release deployments, not needed for development"
+                    )
         }
         environment {
             // Read Jenkins configuration
@@ -177,7 +177,6 @@ def call() {
                         }
                         steps {
                             scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
-
                         }
                     }
 

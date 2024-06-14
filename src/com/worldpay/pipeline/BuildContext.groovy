@@ -55,14 +55,12 @@ class BuildContext {
     }
 
     static String mapAwsRegionFromProfile(String profileName) {
-        switch ("${profileName}") {
-            case profileName.contains("euwest1"):
-                return "eu-west-1"
-            case profileName.contains("useast1"):
-                return "us-east-1"
-            default:
-                error "Could not get AWS region for profile name ${profileName}"
+        if (profileName.contains("euwest1")) {
+            return "eu-west-1"
+        } else if (profileName.contains("useast1")) {
+            return "us-east-1"
         }
+        error "Could not get AWS region for profile name ${profileName}"
     }
 
 

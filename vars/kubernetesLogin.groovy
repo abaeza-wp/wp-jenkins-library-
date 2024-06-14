@@ -17,7 +17,7 @@ def call(String clusterUsername) {
 
 def call(String clusterUsername, String namespace, Boolean ignoreTls) {
     withCredentials([
-    string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
