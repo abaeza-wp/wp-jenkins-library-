@@ -5,9 +5,9 @@ import com.worldpay.pipeline.BuildContext
  Scroll further down to the executeImageBuild function to customise the built steps.
  */
 
-def call(Boolean isRelease, String clusterUsername, String namespace, Boolean ignoreTls) {
-
-    def kubernetesToken = kubernetesLogin(ignoreTls, clusterUsername)
+def call(Boolean isRelease, String clusterUsername, String namespace, String ignoreTls) {
+    def ignoreTlsBoolean = ignoreTls as Boolean
+    def kubernetesToken = kubernetesLogin(ignoreTlsBoolean, clusterUsername)
 
     def profiles = ""
 
