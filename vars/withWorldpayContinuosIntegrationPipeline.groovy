@@ -29,6 +29,9 @@ def call(String type, String tenant, String component, List<String> functionalEn
         case "java-improved-flow":
             withSpringBootPipelineImprovedFlow()
             break
+        case "java-example-service":
+            withSpringBootPipelineExampleService()
+            break
         default:
             error "ERROR: Unsupported pipeline type used '${type}'"
             break
