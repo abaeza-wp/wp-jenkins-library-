@@ -10,8 +10,6 @@ class BuildContext {
     private static String imageTag
 
     private static BuildProfile currentBuildProfile
-    private static KubernetesConfig kubernetesConfig
-
 
     /**
      * For supported regions see: https://github.worldpay.com/pages/Engineering/portal/engineering/developer-platforms/kubernetes/guides/clusters/
