@@ -1,10 +1,6 @@
 import com.worldpay.pipeline.BuildContext
 
 def call() {
-    call(null)
-}
-
-def call(String profileName) {
     warnAboutExperimentalPipelines()
 
     env.APP_VERSION = getVersion()
@@ -29,5 +25,5 @@ def call(String profileName) {
     //Save Image tag in context
     BuildContext.imageTag = "${env.BUILD_APP_VERSION}"
     // Set job title
-    currentBuild.displayName = "#${currentBuild.number} : ${profileName} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
+    currentBuild.displayName = "#${currentBuild.number} : ${BuildContext.currentBuildProfile.cluster.environment}-${BuildContext.currentBuildProfile.cluster.awsRegion} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
 }

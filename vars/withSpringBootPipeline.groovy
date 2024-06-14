@@ -121,8 +121,8 @@ def call() {
         stages {
             stage("Set Build Information") {
                 steps {
-                    setBuildInformation("${env.AWS_REGION}")
                     switchEnvironment("dev", "${env.AWS_REGION}")
+                    setBuildInformation()
                 }
             }
             stage("Build Image") {
