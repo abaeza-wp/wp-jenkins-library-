@@ -3,9 +3,9 @@ import com.worldpay.utils.TokenHelper
 
 /**
  *
- * Runs the block of code if the current configuration defines functional environments
+ * Runs the helm deployment stage and detects if it should use funtional environments
  * Usage:
- * withFunctionalEnvironments {
+ * withHelmDeploymentDynamicStage {
  *   ...
  * }
  */

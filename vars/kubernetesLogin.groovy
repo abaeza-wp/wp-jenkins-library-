@@ -29,7 +29,7 @@ def call(String clusterUsername, String namespace, Boolean ignoreTls) {
         }
 
 
-        if (BuildContext.currentBuildProfile.cluster.isDev()) {
+        if (clusterUsername != null) {
             sh "oc login ${clusterApi} ${params} --username=${clusterUsername} --password=${JENKINS_TOKEN}"
         } else {
             sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"
