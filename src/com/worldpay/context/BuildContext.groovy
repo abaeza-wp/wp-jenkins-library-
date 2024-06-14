@@ -12,7 +12,7 @@ class BuildContext {
     private static String imageTag
 
     private static BuildProfile currentBuildProfile
-    private static Map<String, BuildProfile> gkopSupportedRegions = getGkopSupportedRegions()
+    private static Map<String, BuildProfile> gkopSupportedRegions
 
     /**
      * For supported regions see: https://github.worldpay.com/pages/Engineering/portal/engineering/developer-platforms/kubernetes/guides/clusters/
@@ -76,6 +76,8 @@ class BuildContext {
             useFunctionalEnvironments = true
             this.functionalEnvironments = functionalEnvironments
         }
+
+        gkopSupportedRegions = getGkopSupportedRegions()
     }
 
     static void setImageTag(String imageTag) {
