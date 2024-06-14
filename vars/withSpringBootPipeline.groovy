@@ -1,25 +1,18 @@
+import com.worldpay.pipeline.BuildContext
+
 def getProfiles() {
     return [
-        "dev-euwest1",
-        "staging-euwest1",
-        "staging-useast1",
+    "dev-euwest1",
+    "staging-euwest1",
+    "staging-useast1",
     ]
 }
-def getAwsRegions() {
-    return [
-        "eu-west-1",
-        "us-east-1",
-    ]
-}
+
 def tokenNameOf(namespace, profileName) {
     def tokenSuffix = profileName.replace('-live', '')
-            .replace('-try', '')
+    .replace('-try', '')
 
     return "svc_token-${namespace}-${tokenSuffix}"
-}
-
-def cronExpression() {
-    return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
 }
 
 def call() {
@@ -56,12 +49,18 @@ def call() {
                  """
             }
         }
-
-        triggers {
-            // it automatically runs every Monday at around midnight
-            cron(cronExpression())
+        parameters {
+            choice(
+            name: "profile",
+            choices: getProfiles(),
+            description: "The target deployment profile."
+            )
+            booleanParam(
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
-
         environment {
             // Read Jenkins configuration
             config = readYaml(file: "deployment/jenkins.yaml")
@@ -110,31 +109,20 @@ def call() {
             SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
             SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
-        }
 
-        parameters {
-            choice(
-                    name: "profile",
-                    choices: getProfiles(),
-                    description: "The target deployment profile."
-                    )
-            choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
-            booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            //Add AWS region from profile name to make compatible
+            AWS_REGION = BuildContext.mapAwsRegionFromProfile("${params.profile}")
+
+            //Image Build (dev)
+            IMAGE_BUILD_NAMESPACE = "${profileConfig.deploy.namespace}"
+            IMAGE_BUILD_IGNORE_TLS = "${profileConfig.deploy.ignore_tls}"
         }
 
         stages {
             stage("Set Build Information") {
                 steps {
-                    setBuildInformation()
-                    switchEnvironment("dev", "${params.awsRegion}")
+                    setBuildInformation("${env.AWS_REGION}")
+                    switchEnvironment("dev", "${env.AWS_REGION}")
                 }
             }
             stage("Build Image") {
@@ -188,7 +176,8 @@ def call() {
                             }
                         }
                         steps {
-                            scanSysdig()
+                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
+
                         }
                     }
 

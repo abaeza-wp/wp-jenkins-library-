@@ -100,7 +100,6 @@ def call() {
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
 
             //Image Build (dev)
-            IMAGE_BUILD_USERNAME = "${config.ci.cluster_username}"
             IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
             IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignoreTls}"
             // Credential used for initial image building and deployment
