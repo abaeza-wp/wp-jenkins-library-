@@ -107,14 +107,10 @@ def call() {
         }
 
         stages {
-            stage("Prepare") {
-                steps {
-                    setBuildInformation()
-                }
-            }
-            stage("[Dev] Switch environment") {
+            stage("Prepare Dev Build Environment") {
                 steps {
                     switchEnvironment("dev", "${params.awsRegion}")
+                    setBuildInformation()
                 }
             }
             stage("Build & Test App") {
@@ -220,7 +216,7 @@ def call() {
                 }
             }
 
-            stage("[Staging] Switch environment") {
+            stage("Prepare Staging Build Environment") {
                 when {
                     allOf {
                         expression { params.release }
