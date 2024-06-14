@@ -220,6 +220,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
@@ -230,6 +234,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
@@ -243,6 +251,10 @@ def call() {
                     allOf {
                         expression { params.release }
                         expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
