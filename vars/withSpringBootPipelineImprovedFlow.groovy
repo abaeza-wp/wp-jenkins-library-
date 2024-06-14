@@ -204,55 +204,53 @@ def call() {
                     }
                 }
             }
-            onMainBranch {
-                stage("Archive reports in S3") {
-                    when {
-                        allOf {
-                            expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                            expression { params.release }
-                            anyOf {
-                                branch 'master'
-                                branch 'main'
-                            }
+            stage("Archive reports in S3") {
+                when {
+                    allOf {
+                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+                        expression { params.release }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
                         }
                     }
-                    steps {
-                        archiveReportsToS3()
-                    }
                 }
+                steps {
+                    archiveReportsToS3()
+                }
+            }
 
-                stage("[Staging] Switch environment") {
-                    when {
-                        allOf {
-                            expression { params.release }
-                        }
-                    }
-                    steps {
-                        switchEnvironment("staging", "${params.awsRegion}")
+            stage("[Staging] Switch environment") {
+                when {
+                    allOf {
+                        expression { params.release }
                     }
                 }
-                stage("[Staging] Deployment") {
-                    when {
-                        allOf {
-                            expression { params.release }
-                        }
-                    }
-                    steps {
-                        script {
-                            withHelmDeploymentDynamicStage()
-                        }
+                steps {
+                    switchEnvironment("staging", "${params.awsRegion}")
+                }
+            }
+            stage("[Staging] Deployment") {
+                when {
+                    allOf {
+                        expression { params.release }
                     }
                 }
-                stage("Performance Testing") {
-                    when {
-                        allOf {
-                            expression { params.release }
-                            expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                        }
+                steps {
+                    script {
+                        withHelmDeploymentDynamicStage()
                     }
-                    steps {
-                        withPerformanceTest()
+                }
+            }
+            stage("Performance Testing") {
+                when {
+                    allOf {
+                        expression { params.release }
+                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
                     }
+                }
+                steps {
+                    withPerformanceTest()
                 }
             }
         }

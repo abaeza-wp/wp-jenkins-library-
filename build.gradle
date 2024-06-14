@@ -16,8 +16,11 @@ test {
 
 
 dependencies {
+
 	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.21'
-	implementation group: 'com.cloudbees', name: 'groovy-cps', version: '3894.3896.vca_2c931e7935'
+	implementation group: 'com.cloudbees', name: 'groovy-cps', version: '3894.3896.vca_2c931e7935', ext: 'jar'
+	implementation group: 'org.jenkinsci.plugins', name: 'pipeline-model-definition', version: '2.2198.v41dd8ef6dd56', ext: 'jar'
+	// https://mvnrepository.com/artifact/org.jenkinsci.plugins/pipeline-model-api
 }
 
 
