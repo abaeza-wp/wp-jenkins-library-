@@ -73,7 +73,7 @@ def call() {
 
             // The name of the service
             SERVICE_NAME = "${BuildContext.getComponentName()}"
-            FULL_APP_NAME = "${tenant}-${component}"
+            FULL_APP_NAME = "${BuildContext.getFullName()}"
 
             // Checkmarx
             CHECKMARX_ENABLED = "${config.checkmarx.enabled}"

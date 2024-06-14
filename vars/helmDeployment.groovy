@@ -12,7 +12,7 @@ def call() {
 
 def call(String functionalEnvironment) {
 
-    def appName = "${env.SERVICE_NAME}"
+    def appName = BuildContext.getFullName()
     def chartLocation = "./charts/${appName}"
     def appVersion = "${BuildContext.getImageTag()}"
 
