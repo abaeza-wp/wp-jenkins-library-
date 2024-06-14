@@ -188,7 +188,7 @@ def call() {
                             expression { env.CHECKMARX_ENABLED.toBoolean() }
                         }
                         steps {
-                            scanCheckmarx("${env.BUILD_APP_VERSION}")
+                            scanCheckmarx()
                         }
                     }
 

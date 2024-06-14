@@ -11,6 +11,10 @@ def call() {
     call(false, null)
 }
 
+def call(String clusterUsername) {
+    call(false, clusterUsername)
+}
+
 def call(Boolean ignoreTls, String clusterUsername) {
     withCredentials([
         string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
