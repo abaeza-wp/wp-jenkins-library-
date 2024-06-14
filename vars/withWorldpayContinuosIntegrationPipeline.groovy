@@ -1,8 +1,15 @@
 import com.worldpay.AppPipelineDsl
 import com.worldpay.PipelineCallbacksConfig
 import com.worldpay.PipelineRunner
+import com.worldpay.pipeline.BuildContext
 
 def call(String type, String tenant, String component, Closure body) {
+    call(type, tenant, component, null, body)
+}
+
+def call(String type, String tenant, String component, List<String> functionalEnvironments, Closure body) {
+
+    BuildContext.initialize(tenant, component, functionalEnvironments)
 
     def callbacks = new PipelineCallbacksConfig()
     PipelineRunner.getRunner().setConfig(callbacks)
@@ -17,10 +24,10 @@ def call(String type, String tenant, String component, Closure body) {
 
     switch (type) {
         case "java":
-            withSpringBootPipeline(tenant: tenant, component: component)
+            withSpringBootPipeline()
             break
         case "java-improved-flow":
-            withSpringBootPipelineImprovedFlow(tenant: tenant, component: component)
+            withSpringBootPipelineImprovedFlow()
             break
         default:
             error "ERROR: Unsupported pipeline type used '${type}'"

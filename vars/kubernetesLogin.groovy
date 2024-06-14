@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.pipeline.BuildContext
 
 /*
  Used to login to a Kubernetes (GKOP) cluster, and provide a temporary short-lived Kubernetes token (for usage with
@@ -8,31 +8,32 @@ import com.worldpay.pipeline.BuildConfigurationContext
  */
 
 def call() {
+    call(false, null)
+}
+
+def call(Boolean ignoreTls, String clusterUsername) {
     withCredentials([
         string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
-        def clusterApi = BuildConfigurationContext.getCurrentBuildConfig().cluster.api
-        def profileName = BuildConfigurationContext.getCurrentBuildConfig().profileName
-
-        def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
+        def clusterApi = BuildContext.getCurrentBuildProfile().cluster.api
 
         def params = ""
-        def ignoreTls = profile.deploy.ignore_tls
         if (ignoreTls) {
             params += "--insecure-skip-tls-verify"
         }
 
 
-        if (profile.deploy.cluster_username) {
-            sh "oc login ${clusterApi} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
+        if (BuildContext.getCurrentBuildProfile().getCluster().isDev()) {
+            sh "oc login ${clusterApi} ${params} --username=${clusterUsername} --password=${JENKINS_TOKEN}"
         } else {
             sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"
         }
 
+        //TODO: Maybe clean up as this will be ensured by helm
         // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
-        sh "oc project ${profile.deploy.namespace} || true"
+        //        sh "oc project ${namespace} || true"
 
         kubernetesToken = sh(script: "oc whoami -t", returnStdout: true).trim()
         return kubernetesToken

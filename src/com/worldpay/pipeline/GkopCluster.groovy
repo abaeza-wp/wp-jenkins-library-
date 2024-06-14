@@ -20,6 +20,10 @@ class GkopCluster {
         return environment
     }
 
+    String isDev() {
+        return environment == "dev"
+    }
+
     String getAwsRegion() {
         return awsRegion
     }

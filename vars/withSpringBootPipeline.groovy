@@ -22,9 +22,7 @@ def cronExpression() {
     return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
 }
 
-def call(arguments) {
-    String tenant = arguments.tenant
-    String component = arguments.component
+def call() {
 
     pipeline {
         agent {
@@ -136,7 +134,7 @@ def call(arguments) {
             stage("Set Build Information") {
                 steps {
                     setBuildInformation()
-                    switchEnvironment("dev")
+                    switchEnvironment("dev", "${params.awsRegion}")
                 }
             }
             stage("Build Image") {

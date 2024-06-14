@@ -1,24 +1,23 @@
+import com.worldpay.pipeline.BuildContext
+
 /*
  Used to build the container image.
  Scroll further down to the executeImageBuild function to customise the built steps.
  */
 
-def call() {
-    // Read deployment profile
-    def profile = readYaml(file: "deployment/profiles/${params.profile}.yml")
+def call(Boolean isRelease, String clusterUsername, String namespace, Boolean ignoreTls) {
 
-    // Create Kubernetes namespace (dev cluster only)
-    if (isCreateNamespace(profile)) {
-        createDevKubernetesNamespace(profile)
-    }
-
-    def kubernetesToken = kubernetesLogin()
+    def kubernetesToken = kubernetesLogin(ignoreTls, clusterUsername)
 
     def profiles = ""
 
-    if (params.release) {
+    if (isRelease) {
         profiles += "-Prelease"
     }
+
+    def cluster = BuildContext.getCurrentBuildProfile()
+    def imageTag = BuildContext.getImageTag()
+    def image = "${cluster.getCluster().getImageRegistry()}/${namespace}/${env.SERVICE_NAME}:${imageTag}"
 
     /**
      * env.GIT_COMMIT_TIMESTAMP
@@ -30,17 +29,11 @@ def call() {
      */
     sh """
             ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib -x check \
-                -Djib.to.image=${profile.build.docker_registry}/${profile.deploy.namespace}/${env.SERVICE_NAME}:${env.BUILD_APP_VERSION} \
-                -Djib.to.auth.username=${profile.deploy.ocp_username} \
+                -Djib.to.image=${image} \
+                -Djib.to.auth.username=${clusterUsername} \
                 -Djib.to.auth.password=${kubernetesToken} \
                 -Djib.container.creationTime=${env.GIT_COMMIT_TIMESTAMP} \
                 -Djib.container.filesModificationTime=${env.GIT_COMMIT_TIMESTAMP} \
                 ${profiles}
         """
-}
-
-def isCreateNamespace(profile) {
-    return profile.deploy.create_namespace != null &&
-            profile.deploy.create_namespace.enabled != null &&
-            profile.deploy.create_namespace.enabled
 }

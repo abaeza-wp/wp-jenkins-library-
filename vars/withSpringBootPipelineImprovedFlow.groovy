@@ -1,3 +1,6 @@
+import com.worldpay.pipeline.BuildContext
+import com.worldpay.pipeline.TokenHelper
+
 def getProfiles() {
     return [
         "dev-euwest1",
@@ -13,17 +16,7 @@ def getAwsRegions() {
     ]
 }
 
-def tokenNameOf(namespace, profileName) {
-    def tokenSuffix = profileName.replace('-live', '')
-            .replace('-try', '')
-
-    return "svc_token-${namespace}-${tokenSuffix}"
-}
-
-def call(arguments) {
-    String tenant = arguments.tenant
-    String component = arguments.component
-
+def call() {
     pipeline {
         agent {
             kubernetes {
@@ -56,13 +49,30 @@ def call(arguments) {
                  """
             }
         }
+        parameters {
+            choice(
+                    name: "profile",
+                    choices: getProfiles(),
+                    description: "The target deployment profile."
+                    )
+            choice(
+                    name: "awsRegion",
+                    choices: getAwsRegions(),
+                    description: "The target deployment aws region."
+                    )
+            booleanParam(
+                    name: "release",
+                    defaultValue: true,
+                    description: "Runs additional scans for release deployments, not needed for development"
+                    )
+        }
 
         environment {
             // Read Jenkins configuration
             config = readYaml(file: "deployment/jenkins.yaml")
 
             // The name of the service
-            SERVICE_NAME = "${config.service.name}"
+            SERVICE_NAME = "${BuildContext.getComponentName()}"
             FULL_APP_NAME = "${tenant}-${component}"
 
             // Checkmarx
@@ -98,38 +108,24 @@ def call(arguments) {
             REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID = "${config.reportArchiving.awsBucket.credentialId}"
 
             // Credential used for deployments
-            def profileConfig = readYaml(file: "deployment/profiles/${profile}.yml")
-            SVC_TOKEN = tokenNameOf(profileConfig.deploy.namespace, profile)
+            SVC_TOKEN = TokenHelper.tokenNameOf("dev", BuildContext.getFullName(), "${params.awsRegion}")
 
             // Slack notifications
             SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
             SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
-        }
 
-        parameters {
-            choice(
-                    name: "profile",
-                    choices: getProfiles(),
-                    description: "The target deployment profile."
-                    )
-            choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
-            booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            //Image Build (dev)
+            IMAGE_BUILD_USERNAME = "${config.ci.cluster_username}"
+            IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
+            IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignoreTls}"
         }
 
         stages {
             stage("[Dev] Set Build Information") {
                 steps {
-                    setBuildInformation()
-                    switchEnvironment("dev")
+                    setBuildInformation("${params.awsRegion}")
+                    switchEnvironment("dev", "${params.awsRegion}")
                 }
             }
 
@@ -139,7 +135,7 @@ def call(arguments) {
                     WORKSPACE = pwd()
                 }
                 steps {
-                    gradleBuildOnly()
+                    gradleBuildOnly(params.release)
                 }
             }
             stage("Archive Test Reports") {
@@ -157,7 +153,7 @@ def call(arguments) {
                     WORKSPACE = pwd()
                 }
                 steps {
-                    gradleBuildImageOnly()
+                    gradleBuildImageOnly(params.release, "${env.IMAGE_BUILD_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
                 }
             }
             stage("[Dev] Deployment") {
@@ -170,7 +166,7 @@ def call(arguments) {
                 }
                 steps {
                     script {
-                        withHelmDeploymentDynamicStage("Dev")
+                        withHelmDeploymentDynamicStage()
                     }
                 }
             }
@@ -184,7 +180,7 @@ def call(arguments) {
                             }
                         }
                         steps {
-                            scanSysdig()
+                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
                         }
                     }
 
@@ -193,7 +189,7 @@ def call(arguments) {
                             expression { env.CHECKMARX_ENABLED.toBoolean() }
                         }
                         steps {
-                            scanCheckmarx()
+                            scanCheckmarx(${env.BUILD_APP_VERSION})
                         }
                     }
 
@@ -245,7 +241,7 @@ def call(arguments) {
                 }
                 steps {
                     setBuildInformation()
-                    switchEnvironment("staging")
+                    switchEnvironment("staging", "${params.awsRegion}")
                 }
             }
             stage("[Staging] Deployment") {
@@ -260,7 +256,7 @@ def call(arguments) {
                 }
                 steps {
                     script {
-                        withHelmDeploymentDynamicStage("Staging")
+                        withHelmDeploymentDynamicStage()
                     }
                 }
             }

@@ -35,28 +35,35 @@ class PipelineRunner implements Serializable {
         callIfDefined('before:' + stage, stage)
     }
 
+    Boolean shouldSkip(String stage) {
+        def body = config.bodies.get('skip:' + stage)
+        return body != null
+    }
+
     void runWithCallbacks(String stage, Closure body) {
         def errToThrow = null
 
-        callBefore(stage)
-        try {
-            body.call()
-            callAfterSuccess(stage)
-        } catch (err) {
-            call('onStageFailure', stage)
-
-            callAfterFailure(stage)
-            throw err
-        } finally {
+        if (!shouldSkip(stage)) {
+            callBefore(stage)
             try {
-                callAfterAlways(stage)
+                body.call()
+                callAfterSuccess(stage)
             } catch (err) {
                 call('onStageFailure', stage)
-                errToThrow = err
-            }
-            callIfDefined('after:all', stage)
-            if (errToThrow != null) {
-                throw errToThrow
+
+                callAfterFailure(stage)
+                throw err
+            } finally {
+                try {
+                    callAfterAlways(stage)
+                } catch (err) {
+                    call('onStageFailure', stage)
+                    errToThrow = err
+                }
+                callIfDefined('after:all', stage)
+                if (errToThrow != null) {
+                    throw errToThrow
+                }
             }
         }
     }

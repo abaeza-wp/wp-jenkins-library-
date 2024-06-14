@@ -1,6 +1,10 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.pipeline.BuildContext
 
 def call() {
+    call(null)
+}
+
+def call(String profileName) {
     warnAboutExperimentalPipelines()
 
     env.APP_VERSION = getVersion()
@@ -10,10 +14,7 @@ def call() {
     env.GIT_COMMIT_TIMESTAMP = sh(script: 'git show -s --format=%cI HEAD', returnStdout: true).trim()
 
     env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
-    // Read Jenkins configuration
-    config = readYaml(file: "deployment/jenkins.yaml")
 
-    BuildConfigurationContext.readJenkinsConfig(config)
     echo """
             Build Information:
 
@@ -25,6 +26,8 @@ def call() {
             IS_PR_BUILD = ${env.IS_PR_BUILD}
         """
 
+    //Save Image tag in context
+    BuildContext.setImageTag("${env.BUILD_APP_VERSION}")
     // Set job title
-    currentBuild.displayName = "#${currentBuild.number} : ${params.profile} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
+    currentBuild.displayName = "#${currentBuild.number} : ${profileName} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
 }

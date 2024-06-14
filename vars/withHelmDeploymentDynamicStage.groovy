@@ -1,4 +1,5 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.pipeline.BuildContext
+import com.worldpay.pipeline.TokenHelper
 
 /**
  *
@@ -10,16 +11,15 @@ import com.worldpay.pipeline.BuildConfigurationContext
  */
 
 def call() {
-    call(null)
-}
+    def environmentName = BuildContext.getCurrentBuildProfile().getCluster().getEnvironment()
+    def awsRegion = BuildContext.getCurrentBuildProfile().getCluster().getAwsRegion()
 
-def call(environmentName) {
     def stageName = environmentName != null ? "[${environmentName}] Deploy Application" : "Deploy Application"
-    if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
-        for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
+    if (BuildContext.shouldUseFunctionalEnvironments()) {
+        for (fEnv in BuildContext.getFunctionalEnvironments()) {
             stage("${stageName} [${fEnv}]") {
                 environment {
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
+                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.getFullName(), awsRegion, fEnv)
                 }
                 helmDeployment("${fEnv}")
             }
@@ -27,7 +27,7 @@ def call(environmentName) {
     } else {
         stage("${stageName}") {
             environment {
-                SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${params.profile}"
+                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.getFullName(), awsRegion)
             }
             helmDeployment()
         }

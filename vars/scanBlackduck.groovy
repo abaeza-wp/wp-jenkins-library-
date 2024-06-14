@@ -3,7 +3,7 @@
  management.
  */
 
-def call(Closure body) {
+def call() {
     def scanDir = "blackduckscan"
 
     withCredentials([
