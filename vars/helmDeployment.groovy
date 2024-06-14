@@ -39,7 +39,7 @@ def call(String functionalEnvironment) {
     }
 
     if (env.IS_PR_BUILD) {
-        releaseName +=  "-${env.BRANCH_NAME}"
+        releaseName +=  "-${env.BRANCH_NAME}".toLowerCase()
         if (functionalEnvironment != null) {
             options.add("--set java.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
             options.add("--namespace=${appName}-${functionalEnvironment}")
