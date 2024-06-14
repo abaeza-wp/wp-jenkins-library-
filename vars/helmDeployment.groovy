@@ -16,6 +16,7 @@ def call(String functionalEnvironment) {
     def releaseName = appName
     def chartLocation = "./charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
+    def namespace = $ { appName }
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment
@@ -27,47 +28,48 @@ def call(String functionalEnvironment) {
     """
 
     def options = [
-        "--set global.awsRegion=${awsRegion}",
-        "--set global.environment=${environment}",
-        "--set global.clusterName=${clusterName}",
-        "--set java.imageTag=${appVersion}",
+    "--set global.awsRegion=${awsRegion}",
+    "--set global.environment=${environment}",
+    "--set global.clusterName=${clusterName}",
+    "--set java.imageTag=${appVersion}",
     ]
 
     if (functionalEnvironment != null) {
+        namespace = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
-        options.add("--namespace=${appName}-${functionalEnvironment}")
     }
-
     if (env.IS_PR_BUILD) {
-        releaseName +=  "-${env.BRANCH_NAME}".toLowerCase()
+        releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         if (functionalEnvironment != null) {
             options.add("--set java.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
-            options.add("--namespace=${appName}-${functionalEnvironment}")
         } else {
             options.add("--set java.fullnameOverride=${appName}-${env.BRANCH_NAME}")
-            options.add("--namespace=${appName}")
         }
     }
+    options.add("--namespace=${namespace}")
 
     def optionsString = (options + [
-        " --history-max 3 ",
-        "--install",
-        "--wait",
-        "--timeout 120s"
+    " --history-max 3 ",
+    "--install",
+    "--wait",
+    "--timeout 120s"
     ]).join(' ')
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
+
+    kubernetesLogin()
+
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-            helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
+        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
     """
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
 
     def valuesFilesFound = [
-        "${chartLocation}/values.yaml"] //This is the default values file.
+    "${chartLocation}/values.yaml"] //This is the default values file.
     //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.staging.yaml, values.prod.yaml
     if (fileExists("${chartLocation}/values.${environment}.yaml")) {
         valuesFilesFound.add("${chartLocation}/values.${environment}.yaml")
