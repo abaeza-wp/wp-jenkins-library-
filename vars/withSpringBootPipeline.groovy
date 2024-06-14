@@ -114,6 +114,7 @@ def call() {
             AWS_REGION = BuildContext.mapAwsRegionFromProfile("${params.profile}")
 
             //Image Build (dev)
+            IMAGE_BUILD_USERNAME = "${profileConfig.deploy.cluster_username}"
             IMAGE_BUILD_NAMESPACE = "${profileConfig.deploy.namespace}"
             IMAGE_BUILD_IGNORE_TLS = "${profileConfig.deploy.ignore_tls}"
         }
