@@ -15,7 +15,7 @@ def call(String imageNamespace, String clusterUsername) {
 
         def kubernetesToken = kubernetesLogin(clusterUsername)
 
-        registry = BuildContext.getCurrentBuildProfile().getCluster().getImageRegistry()
+        registry = BuildContext.currentBuildProfile.cluster.imageRegistry
         namespace = "${imageNamespace}"
         imageName = "${env.SERVICE_NAME}"
         imageTag = "${env.BUILD_APP_VERSION}"

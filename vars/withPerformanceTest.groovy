@@ -10,7 +10,7 @@ def call() {
     echo "Waiting for deployment..."
     sleep time: env.PERFORMANCE_TESTING_WAIT_SECONDS, unit: 'SECONDS'
 
-    def profileName = BuildContext.getCurrentBuildProfile().profileName
+    def profileName = BuildContext.currentBuildProfile.profileName
     // Wait for the service to become available...
     def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
     def statusUrl = "https://${profile.deploy.hostname}/status"

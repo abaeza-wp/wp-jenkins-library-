@@ -59,7 +59,7 @@ class BuildContext {
         return currentBuildProfile
     }
 
-    static Boolean shouldUseFunctionalEnvironments() {
+    static Boolean getUseFunctionalEnvironments() {
         return useFunctionalEnvironments
     }
 

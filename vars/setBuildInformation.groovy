@@ -27,7 +27,7 @@ def call(String profileName) {
         """
 
     //Save Image tag in context
-    BuildContext.setImageTag("${env.BUILD_APP_VERSION}")
+    BuildContext.imageTag = "${env.BUILD_APP_VERSION}"
     // Set job title
     currentBuild.displayName = "#${currentBuild.number} : ${profileName} : ${env.BUILD_APP_VERSION} : ${env.BUILD_COMMIT_HASH}"
 }

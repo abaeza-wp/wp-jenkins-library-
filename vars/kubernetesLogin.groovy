@@ -17,11 +17,11 @@ def call(String clusterUsername) {
 
 def call(Boolean ignoreTls, String clusterUsername, String namespace) {
     withCredentials([
-    string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
-        def clusterApi = BuildContext.getCurrentBuildProfile().cluster.api
+        def clusterApi = BuildContext.currentBuildProfile.cluster.api
 
         def params = ""
         if (ignoreTls) {
@@ -29,7 +29,7 @@ def call(Boolean ignoreTls, String clusterUsername, String namespace) {
         }
 
 
-        if (BuildContext.getCurrentBuildProfile().getCluster().isDev()) {
+        if (BuildContext.currentBuildProfile.cluster.isDev()) {
             sh "oc login ${clusterApi} ${params} --username=${clusterUsername} --password=${JENKINS_TOKEN}"
         } else {
             sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"

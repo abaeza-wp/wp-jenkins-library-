@@ -11,15 +11,15 @@ import com.worldpay.pipeline.TokenHelper
  */
 
 def call() {
-    def environmentName = BuildContext.getCurrentBuildProfile().getCluster().getEnvironment()
-    def awsRegion = BuildContext.getCurrentBuildProfile().getCluster().getAwsRegion()
+    def environmentName = BuildContext.currentBuildProfile.cluster.environment
+    def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
 
     def stageName = environmentName != null ? "[${environmentName}] Deploy Application" : "Deploy Application"
-    if (BuildContext.shouldUseFunctionalEnvironments()) {
-        for (fEnv in BuildContext.getFunctionalEnvironments()) {
+    if (BuildContext.useFunctionalEnvironments) {
+        for (fEnv in BuildContext.functionalEnvironments) {
             stage("${stageName} [${fEnv}]") {
                 environment {
-                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.getFullName(), awsRegion, fEnv)
+                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
                 }
                 helmDeployment("${fEnv}")
             }
@@ -27,7 +27,7 @@ def call() {
     } else {
         stage("${stageName}") {
             environment {
-                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.getFullName(), awsRegion)
+                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
             }
             helmDeployment()
         }

@@ -15,9 +15,9 @@ def call(Boolean isRelease, String clusterUsername, String namespace, String ign
         profiles += "-Prelease"
     }
 
-    def cluster = BuildContext.getCurrentBuildProfile()
-    def imageTag = BuildContext.getImageTag()
-    def image = "${cluster.getCluster().getImageRegistry()}/${namespace}/${env.SERVICE_NAME}:${imageTag}"
+    def profile = BuildContext.currentBuildProfile
+    def imageTag = BuildContext.imageTag
+    def image = "${profile.cluster.imageRegistry}/${namespace}/${env.SERVICE_NAME}:${imageTag}"
 
     /**
      * env.GIT_COMMIT_TIMESTAMP

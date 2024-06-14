@@ -12,7 +12,7 @@ def call(String type, String tenant, String component, List<String> functionalEn
     BuildContext.initialize(tenant, component, functionalEnvironments)
 
     def callbacks = new PipelineCallbacksConfig()
-    PipelineRunner.getRunner().setConfig(callbacks)
+    PipelineRunner.runner.setConfig(callbacks)
 
     def dsl = new AppPipelineDsl(this, callbacks)
     body.delegate = dsl

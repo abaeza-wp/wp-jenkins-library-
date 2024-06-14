@@ -12,10 +12,10 @@ def call() {
 
 def call(String functionalEnvironment) {
 
-    def appName = BuildContext.getFullName()
-    def releaseName = appName;
+    def appName = BuildContext.fullName
+    def releaseName = appName
     def chartLocation = "./charts/${appName}"
-    def appVersion = "${BuildContext.getImageTag()}"
+    def appVersion = "${BuildContext.imageTag}"
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment

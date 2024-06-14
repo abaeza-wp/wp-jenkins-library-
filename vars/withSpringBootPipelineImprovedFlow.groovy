@@ -59,8 +59,8 @@ def call() {
             config = readYaml(file: "deployment/jenkins.yaml")
 
             // The name of the service
-            SERVICE_NAME = "${BuildContext.getComponentName()}"
-            FULL_APP_NAME = "${BuildContext.getFullName()}"
+            SERVICE_NAME = "${BuildContext.componentName}"
+            FULL_APP_NAME = "${BuildContext.fullName}"
 
             // Checkmarx
             CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
