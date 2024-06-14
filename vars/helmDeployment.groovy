@@ -13,6 +13,7 @@ def call() {
 def call(String functionalEnvironment) {
 
     def appName = BuildContext.getFullName()
+    def releaseName = appName;
     def chartLocation = "./charts/${appName}"
     def appVersion = "${BuildContext.getImageTag()}"
 
@@ -38,6 +39,7 @@ def call(String functionalEnvironment) {
     }
 
     if (env.IS_PR_BUILD) {
+        releaseName +=  "-${env.BRANCH_NAME}"
         if (functionalEnvironment != null) {
             options.add("--set java.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
             options.add("--namespace=${appName}-${functionalEnvironment}")
@@ -58,7 +60,7 @@ def call(String functionalEnvironment) {
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-            helm upgrade ${appName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
+            helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
     """
 }
 
