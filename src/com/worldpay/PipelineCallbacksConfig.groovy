@@ -3,7 +3,6 @@ package com.worldpay
 class PipelineCallbacksConfig {
     Map<String, Closure> bodies = new HashMap<>()
 
-
     void registerSkip(String stage, Closure body) {
         bodies.put('skip:' + stage, body)
     }

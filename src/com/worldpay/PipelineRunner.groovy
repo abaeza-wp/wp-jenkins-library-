@@ -37,7 +37,12 @@ class PipelineRunner implements Serializable {
 
     Boolean shouldSkip(String stage) {
         def body = config.bodies.get('skip:' + stage)
-        return body != null
+        var shouldSkipFound = body != null
+        if (shouldSkipFound){
+            body.call()
+            return true
+        }
+        return false;
     }
 
     void runWithCallbacks(String stage, Closure body) {
