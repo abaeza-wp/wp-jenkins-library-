@@ -16,7 +16,7 @@ def call(String functionalEnvironment) {
     def releaseName = appName
     def chartLocation = "./charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
-    def namespace = $ { appName }
+    def namespace = "${appName}"
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment
