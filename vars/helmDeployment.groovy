@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.context.BuildContext
 
 
 def call() {
@@ -12,12 +12,15 @@ def call() {
 
 def call(String functionalEnvironment) {
 
-    def chartLocation = "./charts/${env.FULL_APP_NAME}"
-    def appVersion = "${env.BUILD_APP_VERSION}"
+    def appName = BuildContext.fullName
+    def releaseName = appName
+    def chartLocation = "./charts/${appName}"
+    def appVersion = "${BuildContext.imageTag}"
+    def namespace = "${appName}"
 
-    def awsRegion = BuildConfigurationContext.currentBuildConfig.cluster.awsRegion
-    def environment = BuildConfigurationContext.currentBuildConfig.cluster.environment
-    def clusterName = BuildConfigurationContext.currentBuildConfig.cluster.clusterName
+    def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
+    def environment = BuildContext.currentBuildProfile.cluster.environment
+    def clusterName = BuildContext.currentBuildProfile.cluster.clusterName
 
     echo "Packaging helm release..."
     sh """
@@ -32,19 +35,18 @@ def call(String functionalEnvironment) {
     ]
 
     if (functionalEnvironment != null) {
+        namespace = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
-        options.add("--namespace=${env.FULL_APP_NAME}-${functionalEnvironment}")
     }
-
     if (env.IS_PR_BUILD) {
+        releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         if (functionalEnvironment != null) {
-            options.add("--set java.fullnameOverride=${env.FULL_APP_NAME}-${functionalEnvironment}-${env.BRANCH_NAME}")
-            options.add("--namespace=${env.FULL_APP_NAME}-${functionalEnvironment}")
+            options.add("--set java.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
         } else {
-            options.add("--set java.fullnameOverride=${env.FULL_APP_NAME}-${env.BRANCH_NAME}")
-            options.add("--namespace=${env.FULL_APP_NAME}")
+            options.add("--set java.fullnameOverride=${appName}-${env.BRANCH_NAME}")
         }
     }
+    options.add("--namespace=${namespace}")
 
     def optionsString = (options + [
         " --history-max 3 ",
@@ -54,10 +56,17 @@ def call(String functionalEnvironment) {
     ]).join(' ')
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
+
+    if (BuildContext.currentBuildProfile.cluster.isDev()) {
+        kubernetesLogin("${nv.DEV_CLUSTER_USERNAME}")
+    } else {
+        kubernetesLogin()
+    }
+
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-            helm upgrade ${env.FULL_APP_NAME} ./${env.FULL_APP_NAME}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run 
+        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
     """
 }
 

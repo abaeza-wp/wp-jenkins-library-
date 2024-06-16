@@ -2,11 +2,11 @@
  Used to run gradle build only.
  */
 
-def call() {
+def call(Boolean isRelease) {
 
     def profiles = ""
 
-    if (params.release) {
+    if (isRelease) {
         profiles += "-Prelease"
     }
 

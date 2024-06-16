@@ -9,6 +9,10 @@ abstract class CommonPipelineDsl implements Serializable {
         this.steps = steps
     }
 
+    void skip(String stage, Closure body) {
+        callbacks.registerSkip(stage, body)
+    }
+
     void before(String stage, Closure body) {
         callbacks.registerBefore(stage, body)
     }

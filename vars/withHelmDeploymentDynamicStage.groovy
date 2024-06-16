@@ -1,25 +1,25 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.context.BuildContext
+import com.worldpay.utils.TokenHelper
 
 /**
  *
- * Runs the block of code if the current configuration defines functional environments
+ * Runs the helm deployment stage and detects if it should use funtional environments
  * Usage:
- * withFunctionalEnvironments {
+ * withHelmDeploymentDynamicStage {
  *   ...
  * }
  */
 
 def call() {
-    call(null)
-}
+    def environmentName = BuildContext.currentBuildProfile.cluster.environment
+    def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
 
-def call(environmentName) {
     def stageName = environmentName != null ? "[${environmentName}] Deploy Application" : "Deploy Application"
-    if (BuildConfigurationContext.shouldUseFunctionalEnvironments()) {
-        for (fEnv in BuildConfigurationContext.getFunctionalEnvironments()) {
+    if (BuildContext.useFunctionalEnvironments) {
+        for (fEnv in BuildContext.functionalEnvironments) {
             stage("${stageName} [${fEnv}]") {
                 environment {
-                    SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${fEnv}-${params.profile}"
+                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
                 }
                 helmDeployment("${fEnv}")
             }
@@ -27,7 +27,7 @@ def call(environmentName) {
     } else {
         stage("${stageName}") {
             environment {
-                SVC_TOKEN = "svc_token-${env.FULL_APP_NAME}-${params.profile}"
+                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
             }
             helmDeployment()
         }

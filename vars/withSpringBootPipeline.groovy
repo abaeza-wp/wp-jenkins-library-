@@ -1,3 +1,5 @@
+import com.worldpay.context.BuildContext
+
 def getProfiles() {
     return [
         "dev-euwest1",
@@ -5,12 +7,7 @@ def getProfiles() {
         "staging-useast1",
     ]
 }
-def getAwsRegions() {
-    return [
-        "eu-west-1",
-        "us-east-1",
-    ]
-}
+
 def tokenNameOf(namespace, profileName) {
     def tokenSuffix = profileName.replace('-live', '')
             .replace('-try', '')
@@ -18,13 +15,7 @@ def tokenNameOf(namespace, profileName) {
     return "svc_token-${namespace}-${tokenSuffix}"
 }
 
-def cronExpression() {
-    return BRANCH_NAME == "master" ? "H 0 * * 1" : ""
-}
-
-def call(arguments) {
-    String tenant = arguments.tenant
-    String component = arguments.component
+def call() {
 
     pipeline {
         agent {
@@ -58,19 +49,24 @@ def call(arguments) {
                  """
             }
         }
-
-        triggers {
-            // it automatically runs every Monday at around midnight
-            cron(cronExpression())
+        parameters {
+            choice(
+                    name: "profile",
+                    choices: getProfiles(),
+                    description: "The target deployment profile."
+                    )
+            booleanParam(
+                    name: "release",
+                    defaultValue: true,
+                    description: "Runs additional scans for release deployments, not needed for development"
+                    )
         }
-
         environment {
             // Read Jenkins configuration
             config = readYaml(file: "deployment/jenkins.yaml")
 
             // The name of the service
-            SERVICE_NAME = "${component}"
-            FULL_APP_NAME = "${tenant}-${component}"
+            SERVICE_NAME = "${BuildContext.componentName}"
 
             // Checkmarx
             CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
@@ -112,31 +108,21 @@ def call(arguments) {
             SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
             SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
-        }
 
-        parameters {
-            choice(
-                    name: "profile",
-                    choices: getProfiles(),
-                    description: "The target deployment profile."
-                    )
-            choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
-            booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            //Add AWS region from profile name to make compatible
+            AWS_REGION = BuildContext.mapAwsRegionFromProfile("${params.profile}")
+
+            //Image Build (dev)
+            IMAGE_BUILD_USERNAME = "${profileConfig.deploy.cluster_username}"
+            IMAGE_BUILD_NAMESPACE = "${profileConfig.deploy.namespace}"
+            IMAGE_BUILD_IGNORE_TLS = "${profileConfig.deploy.ignore_tls}"
         }
 
         stages {
             stage("Set Build Information") {
                 steps {
+                    switchEnvironment("dev", "${env.AWS_REGION}")
                     setBuildInformation()
-                    switchEnvironment("dev")
                 }
             }
             stage("Build Image") {
@@ -190,7 +176,7 @@ def call(arguments) {
                             }
                         }
                         steps {
-                            scanSysdig()
+                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
                         }
                     }
 

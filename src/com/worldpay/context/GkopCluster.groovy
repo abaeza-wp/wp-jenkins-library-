@@ -1,4 +1,4 @@
-package com.worldpay.pipeline
+package com.worldpay.context
 
 class GkopCluster {
 
@@ -18,6 +18,10 @@ class GkopCluster {
 
     String getEnvironment() {
         return environment
+    }
+
+    String isDev() {
+        return environment == "dev"
     }
 
     String getAwsRegion() {

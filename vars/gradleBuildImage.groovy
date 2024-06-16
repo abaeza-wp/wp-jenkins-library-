@@ -11,8 +11,8 @@ def call() {
     if (isCreateNamespace(profile)) {
         createDevKubernetesNamespace(profile)
     }
-
-    def kubernetesToken = kubernetesLogin()
+    def ignoreTlsBoolean = profile.deploy.ignore_tls as Boolean
+    def kubernetesToken = kubernetesLogin("${profile.deploy.cluster_username}", "${profile.deploy.namespace}", ignoreTlsBoolean)
 
     // Build the project, as well as the image using Google Jib
     executeImageBuild(profile, kubernetesToken)

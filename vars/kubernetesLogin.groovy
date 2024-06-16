@@ -1,4 +1,4 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.context.BuildContext
 
 /*
  Used to login to a Kubernetes (GKOP) cluster, and provide a temporary short-lived Kubernetes token (for usage with
@@ -8,32 +8,37 @@ import com.worldpay.pipeline.BuildConfigurationContext
  */
 
 def call() {
+    call(null, null, false)
+}
+
+def call(String clusterUsername) {
+    call(clusterUsername, null, false)
+}
+
+def call(String clusterUsername, String namespace, Boolean ignoreTls) {
     withCredentials([
         string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
-        def clusterApi = BuildConfigurationContext.getCurrentBuildConfig().cluster.api
-        def profileName = BuildConfigurationContext.getCurrentBuildConfig().profileName
-
-        def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
+        def clusterApi = BuildContext.currentBuildProfile.cluster.api
 
         def params = ""
-        def ignoreTls = profile.deploy.ignore_tls
         if (ignoreTls) {
             params += "--insecure-skip-tls-verify"
         }
 
 
-        if (profile.deploy.cluster_username) {
-            sh "oc login ${clusterApi} ${params} --username=${profile.deploy.cluster_username} --password=${JENKINS_TOKEN}"
+        if (clusterUsername != null) {
+            sh "oc login ${clusterApi} ${params} --username=${clusterUsername} --password=${JENKINS_TOKEN}"
         } else {
             sh "oc login ${clusterApi} ${params} --token=${JENKINS_TOKEN}"
         }
 
-        // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
-        sh "oc project ${profile.deploy.namespace} || true"
-
+        if (namespace) {
+            // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
+            sh "oc project ${namespace} || true"
+        }
         kubernetesToken = sh(script: "oc whoami -t", returnStdout: true).trim()
         return kubernetesToken
     }

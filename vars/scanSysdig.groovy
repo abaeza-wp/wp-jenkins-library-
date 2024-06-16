@@ -1,26 +1,22 @@
-import com.worldpay.pipeline.BuildConfigurationContext
+import com.worldpay.context.BuildContext
 
 /*
  Used to scan the built container image using Sysdig Secure, for the purpose of image dependency vulnerability
  management and best practices.
  */
 
-def call() {
+def call(String imageNamespace, String clusterUsername) {
     withCredentials([
         string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: "SYSDIG_API_KEY")
     ]) {
         echo "Running Sysdig scan..."
-
-        def profileName = BuildConfigurationContext.getCurrentBuildConfig().profileName
-
-        def profile = readYaml(file: "deployment/profiles/${profileName}.yml")
         def hasSysdigScanPassed = false
         def resultsUrl = ""
 
-        def kubernetesToken = kubernetesLogin()
+        def kubernetesToken = kubernetesLogin(clusterUsername)
 
-        registry = "${profile.build.docker_registry}"
-        namespace = "${profile.deploy.namespace}"
+        registry = BuildContext.currentBuildProfile.cluster.imageRegistry
+        namespace = "${imageNamespace}"
         imageName = "${env.SERVICE_NAME}"
         imageTag = "${env.BUILD_APP_VERSION}"
 
@@ -31,7 +27,7 @@ def call() {
             echo "Executing sysdig scan..."
             sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
-                REGISTRY_USER=${profile.deploy.cluster_username} \
+                REGISTRY_USER=${clusterUsername} \
                 REGISTRY_PASSWORD=${kubernetesToken} \
                 \
                 sysdig-cli-scanner \
