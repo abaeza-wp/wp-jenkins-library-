@@ -107,15 +107,12 @@ def call() {
         }
 
         stages {
-            stage('Dev') {
+            stage('Prepare Dev Build Environment') {
+                steps {
+                    switchEnvironment("dev", "${params.awsRegion}")
+                    setBuildInformation()
+                }
                 stages {
-
-                    stage("Prepare Dev Build Environment") {
-                        steps {
-                            switchEnvironment("dev", "${params.awsRegion}")
-                            setBuildInformation()
-                        }
-                    }
                     stage("Build & Test App") {
                         environment {
                             // Need full path of current workspace for setting path of nvm on $PATH
