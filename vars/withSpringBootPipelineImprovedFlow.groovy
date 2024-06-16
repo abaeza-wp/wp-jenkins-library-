@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -43,15 +43,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
@@ -106,160 +106,158 @@ def call() {
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
         }
 
-        stages {
-            stage("Prepare Dev Build Environment") {
-                steps {
-                    switchEnvironment("dev", "${params.awsRegion}")
-                    setBuildInformation()
+        stage("Prepare Dev Build Environment") {
+            steps {
+                switchEnvironment("dev", "${params.awsRegion}")
+                setBuildInformation()
+            }
+        }
+        stage("Build & Test App") {
+            environment {
+                // Need full path of current workspace for setting path of nvm on $PATH
+                WORKSPACE = pwd()
+            }
+            steps {
+                gradleBuildOnly(params.release)
+            }
+        }
+        stage("Archive Test Reports") {
+            steps {
+                archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                //Archive all HTML reports
+                archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+            }
+        }
+        stage("Build Image") {
+            environment {
+                // Need full path of current workspace for setting path of nvm on $PATH
+                WORKSPACE = pwd()
+            }
+            steps {
+                gradleBuildImageOnly(params.release, "${env.IMAGE_BUILD_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
+            }
+        }
+        stage("[Dev] Deployment") {
+            when {
+                expression { params.release }
+                anyOf {
+                    triggeredBy 'TimerTrigger'
+                    triggeredBy cause: 'UserIdCause'
                 }
             }
-            stage("Build & Test App") {
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
-                steps {
-                    gradleBuildOnly(params.release)
+            steps {
+                script {
+                    withHelmDeploymentDynamicStage()
                 }
             }
-            stage("Archive Test Reports") {
-                steps {
-                    archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
-                    archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
-                    archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                    //Archive all HTML reports
-                    archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+        }
+
+        stage("Security Testing") {
+            parallel {
+                stage("Image Scan (Sysdig)") {
+                    when {
+                        allOf {
+                            expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
+                        }
+                    }
+                    steps {
+                        scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
+                    }
+                }
+
+                stage("Static Analysis (Checkmarx)") {
+                    when {
+                        expression { env.CHECKMARX_ENABLED.toBoolean() }
+                    }
+                    steps {
+                        scanCheckmarx()
+                    }
+                }
+
+                stage("Dependency Analysis (BlackDuck)") {
+                    when {
+                        allOf {
+                            expression { env.BLACKDUCK_ENABLED.toBoolean() }
+                        }
+                    }
+                    steps {
+                        scanBlackduck()
+                    }
+                }
+
+                stage("OWASP Dependency Checker") {
+                    when {
+                        allOf {
+                            expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
+                        }
+                    }
+                    steps {
+                        scanOwaspDependency()
+                    }
                 }
             }
-            stage("Build Image") {
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
-                steps {
-                    gradleBuildImageOnly(params.release, "${env.IMAGE_BUILD_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
-                }
-            }
-            stage("[Dev] Deployment") {
-                when {
+        }
+        stage("Archive reports in S3") {
+            when {
+                allOf {
+                    expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                     expression { params.release }
                     anyOf {
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
-                    }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
+                        branch 'master'
+                        branch 'main'
                     }
                 }
             }
+            steps {
+                archiveReportsToS3()
+            }
+        }
 
-            stage("Security Testing") {
-                parallel {
-                    stage("Image Scan (Sysdig)") {
-                        when {
-                            allOf {
-                                expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
-                        }
-                    }
-
-                    stage("Static Analysis (Checkmarx)") {
-                        when {
-                            expression { env.CHECKMARX_ENABLED.toBoolean() }
-                        }
-                        steps {
-                            scanCheckmarx()
-                        }
-                    }
-
-                    stage("Dependency Analysis (BlackDuck)") {
-                        when {
-                            allOf {
-                                expression { env.BLACKDUCK_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanBlackduck()
-                        }
-                    }
-
-                    stage("OWASP Dependency Checker") {
-                        when {
-                            allOf {
-                                expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanOwaspDependency()
-                        }
+        stage("Prepare Staging Build Environment") {
+            when {
+                allOf {
+                    expression { params.release }
+                    anyOf {
+                        branch 'master'
+                        branch 'main'
                     }
                 }
             }
-            stage("Archive reports in S3") {
-                when {
-                    allOf {
-                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    archiveReportsToS3()
-                }
+            steps {
+                switchEnvironment("staging", "${params.awsRegion}")
             }
-
-            stage("Prepare Staging Build Environment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    switchEnvironment("staging", "${params.awsRegion}")
-                }
-            }
-            stage("[Staging] Deployment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
+        }
+        stage("[Staging] Deployment") {
+            when {
+                allOf {
+                    expression { params.release }
+                    anyOf {
+                        branch 'master'
+                        branch 'main'
                     }
                 }
             }
-            stage("Performance Testing") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+            steps {
+                script {
+                    withHelmDeploymentDynamicStage()
+                }
+            }
+        }
+        stage("Performance Testing") {
+            when {
+                allOf {
+                    expression { params.release }
+                    expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+                    anyOf {
+                        branch 'master'
+                        branch 'main'
                     }
                 }
-                steps {
-                    withPerformanceTest()
-                }
+            }
+            steps {
+                withPerformanceTest()
             }
         }
     }
