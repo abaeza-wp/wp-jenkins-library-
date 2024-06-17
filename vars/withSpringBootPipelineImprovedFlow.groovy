@@ -101,7 +101,7 @@ def call() {
             //Image Build (dev)
             DEV_CLUSTER_USERNAME = "${config.ci.cluster_username}"
             IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
-            IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignoreTls}"
+            IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
             // Credential used for initial image building and deployment
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
         }
@@ -137,7 +137,7 @@ def call() {
                     WORKSPACE = pwd()
                 }
                 steps {
-                    gradleBuildImageOnly(params.release, "${env.IMAGE_BUILD_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
+                    gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
                 }
             }
             stage("[Dev] Deployment") {
