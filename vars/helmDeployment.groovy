@@ -58,7 +58,7 @@ def call(String functionalEnvironment) {
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
 
     if (BuildContext.currentBuildProfile.cluster.isDev()) {
-        kubernetesLogin("${nv.DEV_CLUSTER_USERNAME}")
+        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}")
     } else {
         kubernetesLogin()
     }

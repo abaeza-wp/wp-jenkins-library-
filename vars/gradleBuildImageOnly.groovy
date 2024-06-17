@@ -30,7 +30,7 @@ def call(Boolean isRelease, String clusterUsername, String namespace, String ign
     sh """
             ./gradlew ${env.SERVICE_NAME}:clean ${env.SERVICE_NAME}:build ${env.SERVICE_NAME}:jib -x check \
                 -Djib.to.image=${image} \
-                -Djib.to.auth.username=null \
+                -Djib.to.auth.username=${clusterUsername} \
                 -Djib.to.auth.password=${kubernetesToken} \
                 -Djib.container.creationTime=${env.GIT_COMMIT_TIMESTAMP} \
                 -Djib.container.filesModificationTime=${env.GIT_COMMIT_TIMESTAMP} \
