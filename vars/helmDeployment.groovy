@@ -14,7 +14,7 @@ def call(String functionalEnvironment) {
 
     def appName = BuildContext.fullName
     def releaseName = appName
-    def chartLocation = "./charts/${appName}"
+    def chartLocation = "./deployment/charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
     def namespace = "${appName}"
 
@@ -49,7 +49,7 @@ def call(String functionalEnvironment) {
     options.add("--namespace=${namespace}")
 
     def optionsString = (options + [
-        " --history-max 3 ",
+        "--history-max 3",
         "--install",
         "--wait",
         "--timeout 120s"
