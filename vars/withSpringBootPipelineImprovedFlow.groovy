@@ -164,7 +164,7 @@ def call() {
                             }
                         }
                         steps {
-                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_USERNAME}")
+                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.DEV_CLUSTER_USERNAME}")
                         }
                     }
 
