@@ -34,8 +34,8 @@ def call(String type, String tenant, String component, List<String> functionalEn
         case "java":
             withSpringBootPipeline()
             break
-        case "java-improved-flow":
-            withSpringBootPipelineImprovedFlow()
+        case "java-old":
+            withSpringBootPipelineExampleServiceMigrated()
             break
         case "java-example-service":
             withSpringBootPipelineExampleService()

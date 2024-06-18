@@ -1,14 +1,22 @@
 import com.worldpay.context.BuildContext
-import com.worldpay.utils.TokenHelper
 
-def getAwsRegions() {
+def getProfiles() {
     return [
-        "eu-west-1",
-        "us-east-1",
+        "dev-euwest1",
+        "staging-euwest1",
+        "staging-useast1",
     ]
 }
 
+def tokenNameOf(namespace, profileName) {
+    def tokenSuffix = profileName.replace('-live', '')
+            .replace('-try', '')
+
+    return "svc_token-${namespace}-${tokenSuffix}"
+}
+
 def call() {
+
     pipeline {
         agent {
             kubernetes {
@@ -43,9 +51,9 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
+                    name: "profile",
+                    choices: getProfiles(),
+                    description: "The target deployment profile."
                     )
             booleanParam(
                     name: "release",
@@ -53,7 +61,6 @@ def call() {
                     description: "Runs additional scans for release deployments, not needed for development"
                     )
         }
-
         environment {
             // Read Jenkins configuration
             config = readYaml(file: "deployment/jenkins.yaml")
@@ -93,42 +100,29 @@ def call() {
             REPORT_ARCHIVING_BUCKET_NAME = "${config.reportArchiving.awsBucket.name}"
             REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID = "${config.reportArchiving.awsBucket.credentialId}"
 
+            // Credential used for deployments
+            def profileConfig = readYaml(file: "deployment/profiles/${profile}.yml")
+            SVC_TOKEN = tokenNameOf(profileConfig.deploy.namespace, profile)
+
             // Slack notifications
             SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
             SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
             SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
 
+            //Add AWS region from profile name to make compatible
+            AWS_REGION = BuildContext.mapAwsRegionFromProfile("${params.profile}")
+
             //Image Build (dev)
-            DEV_CLUSTER_USERNAME = "${config.ci.cluster_username}"
-            IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
-            IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
-            // Credential used for initial image building and deployment
-            SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
+            DEV_CLUSTER_USERNAME = "${profileConfig.deploy.cluster_username}"
+            IMAGE_BUILD_NAMESPACE = "${profileConfig.deploy.namespace}"
+            IMAGE_BUILD_IGNORE_TLS = "${profileConfig.deploy.ignore_tls}"
         }
 
         stages {
-            stage("Prepare Dev Build Environment") {
+            stage("Set Build Information") {
                 steps {
-                    switchEnvironment("dev", "${params.awsRegion}")
+                    switchEnvironment("dev", "${env.AWS_REGION}")
                     setBuildInformation()
-                }
-            }
-            stage("Build & Test App") {
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
-                steps {
-                    gradleBuildOnly(params.release)
-                }
-            }
-            stage("Archive Test Reports") {
-                steps {
-                    archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
-                    archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
-                    archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                    //Archive all HTML reports
-                    archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
                 }
             }
             stage("Build Image") {
@@ -137,10 +131,11 @@ def call() {
                     WORKSPACE = pwd()
                 }
                 steps {
-                    gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
+                    gradleBuildImage()
                 }
             }
-            stage("[Dev] Deployment") {
+
+            stage("Deployment") {
                 when {
                     expression { params.release }
                     anyOf {
@@ -155,12 +150,29 @@ def call() {
                 }
             }
 
+            stage("Performance") {
+                when {
+                    allOf {
+                        expression { params.release }
+                        expression { params.profile.contains("staging") }
+                        expression {
+                            env.PERFORMANCE_TESTING_ENABLED.toBoolean()
+                        }
+                    }
+                }
+                steps {
+                    withPerformanceTest()
+                }
+            }
+
             stage("Security Testing") {
                 parallel {
                     stage("Image Scan (Sysdig)") {
                         when {
                             allOf {
-                                expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
+                                expression {
+                                    env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean()
+                                }
                             }
                         }
                         steps {
@@ -170,7 +182,9 @@ def call() {
 
                     stage("Static Analysis (Checkmarx)") {
                         when {
-                            expression { env.CHECKMARX_ENABLED.toBoolean() }
+                            expression {
+                                env.CHECKMARX_ENABLED.toBoolean()
+                            }
                         }
                         steps {
                             scanCheckmarx()
@@ -180,7 +194,9 @@ def call() {
                     stage("Dependency Analysis (BlackDuck)") {
                         when {
                             allOf {
-                                expression { env.BLACKDUCK_ENABLED.toBoolean() }
+                                expression {
+                                    env.BLACKDUCK_ENABLED.toBoolean()
+                                }
                             }
                         }
                         steps {
@@ -191,23 +207,43 @@ def call() {
                     stage("OWASP Dependency Checker") {
                         when {
                             allOf {
-                                expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
+                                expression {
+                                    env.OWASP_DEPENDENCY_ENABLED.toBoolean()
+                                }
                             }
                         }
                         steps {
                             scanOwaspDependency()
                         }
                     }
+
+                    stage("Code Coverage Report") {
+                        steps {
+                            archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                        }
+                    }
+
+                    stage("Unit Tests Report") {
+                        steps {
+                            archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                        }
+                    }
+
+                    stage("BDD Report") {
+                        steps {
+                            archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                        }
+                    }
                 }
             }
+
             stage("Archive reports in S3") {
                 when {
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
+                        expression {
+                            params.profile.contains("staging")
                         }
                     }
                 }
@@ -216,49 +252,9 @@ def call() {
                 }
             }
 
-            stage("Prepare Staging Build Environment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
+            stage("Archive HTML Reports artifacts") {
                 steps {
-                    switchEnvironment("staging", "${params.awsRegion}")
-                }
-            }
-            stage("[Staging] Deployment") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
-                    }
-                }
-            }
-            stage("Performance Testing") {
-                when {
-                    allOf {
-                        expression { params.release }
-                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    withPerformanceTest()
+                    archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
                 }
             }
         }
