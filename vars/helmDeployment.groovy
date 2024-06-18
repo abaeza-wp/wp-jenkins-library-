@@ -31,7 +31,7 @@ def call(String functionalEnvironment) {
         "--set global.awsRegion=${awsRegion}",
         "--set global.environment=${environment}",
         "--set global.clusterName=${clusterName}",
-        "--set java.imageTag=${appVersion}",
+        "--set global.imageTag=${appVersion}",
     ]
 
     if (functionalEnvironment != null) {
@@ -41,9 +41,9 @@ def call(String functionalEnvironment) {
     if (env.IS_PR_BUILD) {
         releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         if (functionalEnvironment != null) {
-            options.add("--set java.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
+            options.add("--set global.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
         } else {
-            options.add("--set java.fullnameOverride=${appName}-${env.BRANCH_NAME}")
+            options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
         }
     }
     options.add("--namespace=${namespace}")
