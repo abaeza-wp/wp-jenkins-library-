@@ -33,7 +33,7 @@ def call() {
                       requests:
                         memory: 8Gi
                         cpu: 2
-                - name: jnlp
+                  - name: jnlp
                     env:
                       - name: DOCKER_HOST
                         value: tcp://localhost:2375
