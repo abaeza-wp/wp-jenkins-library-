@@ -33,6 +33,17 @@ def call() {
                       requests:
                         memory: 8Gi
                         cpu: 2
+                - name: jnlp
+                    env:
+                      - name: DOCKER_HOST
+                        value: tcp://localhost:2375
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: 0.5
+                      requests:
+                        memory: 250Mi
+                        cpu: 0.25
                   - name: docker-in-docker
                     image: docker:dind-rootless
                     env:
@@ -41,7 +52,7 @@ def call() {
                       - name: DOCKER_HOST
                         value: "unix:///var/run/user/1000/docker.sock"
                     securityContext:
-                      privileged: true
+                      privileged: false
                       runAsUser: 1000
                     volumeMounts:
                       - name: docker-in-docker
@@ -55,15 +66,6 @@ def call() {
                         memory: 2Gi
                         cpu: 1
                         ephemeral-storage: 2Gi
-                        
-                  - name: jnlp
-                    resources:
-                      limits:
-                        memory: 500Mi
-                        cpu: 0.5
-                      requests:
-                        memory: 250Mi
-                        cpu: 0.25
                  """
             }
         }
