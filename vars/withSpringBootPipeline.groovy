@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -30,6 +30,27 @@ def call() {
                       requests:
                         memory: 8Gi
                         cpu: 2
+                  - name: docker-in-docker
+                    image: docker:dind-rootless
+                    env:
+                      - name: DOCKER_TLS_CERTDIR
+                        value: ""
+                      - name: DOCKER_HOST
+                        value: "unix:///var/run/user/1000/docker.sock"
+                    securityContext:
+                      privileged: true
+                      runAsUser: 1000
+                    volumeMounts:
+                      - name: docker-in-docker
+                        mountPath: /var/lib/docker
+                    resources:
+                      limits:
+                        memory: 8Gi
+                        cpu: 4
+                      requests:
+                        memory: 8Gi
+                        cpu: 2
+                        
                   - name: jnlp
                     resources:
                       limits:
@@ -43,15 +64,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
