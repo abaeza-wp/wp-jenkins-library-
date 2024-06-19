@@ -16,6 +16,9 @@ def call() {
                 defaultContainer 'hydra'
                 yaml """
                 spec:
+                  volumes:
+                    - name: docker-in-docker
+                      emptyDir: {}
                   containers:
                   - name: hydra
                     image: artifactory.luigi.worldpay.io/docker/jenkins-agents/hydra:latest
@@ -45,11 +48,13 @@ def call() {
                         mountPath: /var/lib/docker
                     resources:
                       limits:
-                        memory: 8Gi
-                        cpu: 4
-                      requests:
-                        memory: 8Gi
+                        memory: 4Gi
                         cpu: 2
+                        ephemeral-storage: 4Gi
+                      requests:
+                        memory: 2Gi
+                        cpu: 1
+                        ephemeral-storage: 2Gi
                         
                   - name: jnlp
                     resources:
