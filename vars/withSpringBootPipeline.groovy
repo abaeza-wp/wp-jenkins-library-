@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -16,6 +16,20 @@ def call() {
                 defaultContainer 'hydra'
                 yaml """
                 spec:
+                  affinity:
+                    nodeAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                          - matchExpressions:
+                              - key: kubernetes.io/arch
+                                operator: In
+                                values:
+                                  - arm64
+                  tolerations:
+                    - key: "kubernetes.io/arch"
+                      operator: "Equal"
+                      value: "arm64"
+                      effect: "NoSchedule"
                   containers:
                   - name: hydra
                     image: artifactory.luigi.worldpay.io/docker/jenkins-agents/hydra:latest
@@ -43,15 +57,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
