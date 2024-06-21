@@ -40,6 +40,9 @@ def call(String type, String tenant, String component, List<String> functionalEn
         case "java-example-service":
             withSpringBootPipelineExampleService()
             break
+        case "test":
+            withDynamicTest()
+            break
         default:
             error "ERROR: Unsupported pipeline type used '${type}'"
             break
