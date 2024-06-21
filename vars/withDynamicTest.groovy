@@ -113,21 +113,13 @@ def call() {
 
 
                         stage("Build & Test App") {
-                            steps {
-                                echo "gradle build"
-                            }
+                            echo "gradle build"
                         }
                         stage("Archive Test Reports") {
-                            steps {
-                                echo "archive test"
-                            }
+                            echo "archive test"
                         }
                         stage("Build Image") {
-                            environment {
-                            }
-                            steps {
-                                echo "build image"
-                            }
+                            echo "build image"
                         }
                         stage("[Dev] Deployment") {
                             when {
@@ -137,123 +129,106 @@ def call() {
                                     triggeredBy cause: 'UserIdCause'
                                 }
                             }
-                            steps {
-                                script {
-                                    echo "helm deployment"
-                                }
+                            script {
+                                echo "helm deployment"
                             }
                         }
-
-                        stage("Security Testing") {
-                            parallel {
-                                stage("Image Scan (Sysdig)") {
-                                    when {
-                                        allOf {
-                                            expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
-                                        }
-                                    }
-                                    steps {
-                                        echo "sysdig"
-                                    }
-                                }
-
-                                stage("Static Analysis (Checkmarx)") {
-                                    when {
-                                        expression { env.CHECKMARX_ENABLED.toBoolean() }
-                                    }
-                                    steps {
-                                        echo "scanCheckmarx"
-                                    }
-                                }
-
-                                stage("Dependency Analysis (BlackDuck)") {
-                                    when {
-                                        allOf {
-                                            expression { env.BLACKDUCK_ENABLED.toBoolean() }
-                                        }
-                                    }
-                                    steps {
-                                        echo "scanBlackduck"
-                                    }
-                                }
-
-                                stage("OWASP Dependency Checker") {
-                                    when {
-                                        allOf {
-                                            expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
-                                        }
-                                    }
-                                    steps {
-                                        echo "scanOwaspDependency"
-                                    }
-                                }
-                            }
-                        }
-                        stage("Archive reports in S3") {
-                            when {
-                                allOf {
-                                    expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                                    expression { params.release }
-                                    anyOf {
-                                        branch 'master'
-                                        branch 'main'
-                                    }
-                                }
-                            }
-                            steps {
-                                echo "archiveReportsToS3"
-                            }
-                        }
-
-                        stage("Prepare Staging Build Environment") {
-                            when {
-                                allOf {
-                                    expression { params.release }
-                                    anyOf {
-                                        branch 'master'
-                                        branch 'main'
-                                    }
-                                }
-                            }
-                            steps {
-                                echo "switchStaging"
-                            }
-                        }
-                        stage("[Staging] Deployment") {
-                            when {
-                                allOf {
-                                    expression { params.release }
-                                    anyOf {
-                                        branch 'master'
-                                        branch 'main'
-                                    }
-                                }
-                            }
-                            steps {
-                                script {
-                                    echo "withHelmDeploymentDynamicStage"
-                                }
-                            }
-                        }
-                        stage("Performance Testing") {
-                            when {
-                                allOf {
-                                    expression { params.release }
-                                    expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                                    anyOf {
-                                        branch 'master'
-                                        branch 'main'
-                                    }
-                                }
-                            }
-                            steps {
-                                echo "withPerformanceTest"
-                            }
-                        }
-
                     }
+
+                    stage("Security Testing") {
+                        parallel {
+                            stage("Image Scan (Sysdig)") {
+                                when {
+                                    allOf {
+                                        expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
+                                    }
+                                }
+                                echo "sysdig"
+                            }
+
+                            stage("Static Analysis (Checkmarx)") {
+                                when {
+                                    expression { env.CHECKMARX_ENABLED.toBoolean() }
+                                }
+                                echo "scanCheckmarx"
+                            }
+
+                            stage("Dependency Analysis (BlackDuck)") {
+                                when {
+                                    allOf {
+                                        expression { env.BLACKDUCK_ENABLED.toBoolean() }
+                                    }
+                                }
+                                echo "scanBlackduck"
+                            }
+
+                            stage("OWASP Dependency Checker") {
+                                when {
+                                    allOf {
+                                        expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
+                                    }
+                                }
+                                echo "scanOwaspDependency"
+                            }
+                        }
+                    }
+                    stage("Archive reports in S3") {
+                        when {
+                            allOf {
+                                expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+                                expression { params.release }
+                                anyOf {
+                                    branch 'master'
+                                    branch 'main'
+                                }
+                            }
+                        }
+                        echo "archiveReportsToS3"
+                    }
+
+                    stage("Prepare Staging Build Environment") {
+                        when {
+                            allOf {
+                                expression { params.release }
+                                anyOf {
+                                    branch 'master'
+                                    branch 'main'
+                                }
+                            }
+                        }
+                        echo "switchStaging"
+                    }
+                    stage("[Staging] Deployment") {
+                        when {
+                            allOf {
+                                expression { params.release }
+                                anyOf {
+                                    branch 'master'
+                                    branch 'main'
+                                }
+                            }
+                        }
+                        script {
+                            echo "withHelmDeploymentDynamicStage"
+                        }
+                    }
+                    stage("Performance Testing") {
+                        when {
+                            allOf {
+                                expression { params.release }
+                                expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+                                anyOf {
+                                    branch 'master'
+                                    branch 'main'
+                                }
+                            }
+                        }
+                        echo "withPerformanceTest"
+                    }
+
                 }
             }
         }
     }
+}
 }
