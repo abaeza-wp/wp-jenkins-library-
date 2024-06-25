@@ -10,6 +10,9 @@ def getAwsRegions() {
 
 def call() {
     pipeline {
+        options {
+            ansiColor('xterm')
+        }
         agent {
             kubernetes {
                 label 'hydra'
