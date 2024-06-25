@@ -116,6 +116,8 @@ def call() {
             DEV_CLUSTER_USERNAME = "${profileConfig.deploy.cluster_username}"
             IMAGE_BUILD_NAMESPACE = "${profileConfig.deploy.namespace}"
             IMAGE_BUILD_IGNORE_TLS = "${profileConfig.deploy.ignore_tls}"
+
+            WORKSPACE = pwd()
         }
 
         stages {
@@ -126,10 +128,6 @@ def call() {
                 }
             }
             stage("Build Image") {
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
                 steps {
                     gradleBuildImage()
                 }
