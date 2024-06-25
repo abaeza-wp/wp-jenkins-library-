@@ -18,16 +18,18 @@ def call() {
                 curl -O ${env.BLACKDUCK_DETECT_SCRIPT_URL}
                 chmod +x ${env.BLACKDUCK_DETECT_SCRIPT}
                 JENKINS_NODE_COOKIE=dontKillMe nohup bash \\
-                ./${env.BLACKDUCK_DETECT_SCRIPT} --blackduck.url=${env.BLACKDUCK_URL} \\
-                    --blackduck.api.token=${env.BLACKDUCK_TOKEN} --blackduck.trust.cert=true \\
-                    --detect.project.name=${env.BLACKDUCK_PROJECT_NAME} \\
-                    --detect.project.version.name=${env.BUILD_APP_VERSION} \\
+                ./${env.BLACKDUCK_DETECT_SCRIPT} --blackduck.url='${env.BLACKDUCK_URL}' \\
+                    --blackduck.api.token='${env.BLACKDUCK_TOKEN}' --blackduck.trust.cert=true \\
+                    --detect.project.name='${env.BLACKDUCK_PROJECT_NAME}' \\
+                    --detect.project.version.name='${env.BUILD_APP_VERSION}' \\
                     --detect.policy.check.fail.on.severities=ALL \\
+                    --detect.source.path='${scanDir}' \\
                     --detect.timeout=900 \\
                     --detect.gradle.excluded.projects=performance-testing \\
                     --detect.gradle.excluded.configurations=bdd*,jacoco*,test*,sonarLint*,spotless* \\
                     --detect.risk.report.pdf=true \\
-                    --detect.risk.report.pdf.path=${scanDir} >blackDuckScan.log 2>&1 &
+                    --detect.risk.report.pdf.path='${scanDir}' \\
+                    --detect.cleanup=false >blackDuckScan.log 2>&1 &
             """
     }
 

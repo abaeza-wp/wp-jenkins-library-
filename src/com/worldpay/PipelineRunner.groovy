@@ -55,7 +55,6 @@ class PipelineRunner implements Serializable {
                 callAfterSuccess(stage)
             } catch (err) {
                 call('onStageFailure', stage)
-
                 callAfterFailure(stage)
                 throw err
             } finally {
