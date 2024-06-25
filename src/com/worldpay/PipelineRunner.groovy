@@ -49,8 +49,8 @@ class PipelineRunner implements Serializable {
         def errToThrow = null
 
         if (!shouldSkip(stage)) {
-            callBefore(stage)
             try {
+                callBefore(stage)
                 body.call()
                 callAfterSuccess(stage)
             } catch (err) {
