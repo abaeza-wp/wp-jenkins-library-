@@ -107,6 +107,10 @@ def call() {
             IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
             // Credential used for initial image building and deployment
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
+
+            //If namespace is provided we use that one otherwise we use <tenant>-<component-name>
+            NAMESPACE = config.cd.namespace != null ? "${config.cd.namespace}" : BuildContext.fullName
+
         }
 
         stages {

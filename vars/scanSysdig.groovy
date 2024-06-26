@@ -13,7 +13,7 @@ def call(String imageNamespace, String clusterUsername) {
         def hasSysdigScanPassed = false
         def resultsUrl = ""
 
-        def kubernetesToken = kubernetesLogin(clusterUsername)
+        def kubernetesToken = kubernetesLogin(clusterUsername, "${env.SVC_TOKEN}", imageNamespace)
 
         registry = BuildContext.currentBuildProfile.cluster.imageRegistry
         namespace = "${imageNamespace}"

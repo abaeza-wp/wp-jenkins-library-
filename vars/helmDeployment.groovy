@@ -16,7 +16,7 @@ def call(String functionalEnvironment) {
     def releaseName = appName
     def chartLocation = "./deployment/charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
-    def namespace = "${appName}"
+    def namespace = "${env.NAMESPACE}"
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment
@@ -58,15 +58,17 @@ def call(String functionalEnvironment) {
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
 
     if (BuildContext.currentBuildProfile.cluster.isDev()) {
-        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}")
+        //We login via username and password
+        kubernetesLogin(clusterUsername: "${env.DEV_CLUSTER_USERNAME}", jenkinsCredentialId: ${env.SVC_TOKEN}, namespace: namespace)
     } else {
-        kubernetesLogin()
+        //We login via token
+        kubernetesLogin(jenkinsCredentialId: ${env.SVC_TOKEN}, namespace: namespace)
     }
 
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
+        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run
     """
 }
 

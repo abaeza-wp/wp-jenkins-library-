@@ -7,21 +7,29 @@ import com.worldpay.context.BuildContext
  (oc command) can be used.
  */
 
-def call() {
-    call(null, null, false)
-}
-
 def call(String clusterUsername) {
     call(clusterUsername, null, false)
 }
 
-def call(String clusterUsername, String namespace, Boolean ignoreTls) {
+def call(String jenkinsCredentialId, String namespace) {
+    call(null, jenkinsCredentialId, namespace, false)
+}
+
+def call(String clusterUsername, String jenkinsCredentialId, String namespace) {
+    def clusterApi = BuildContext.currentBuildProfile.cluster.api
+    call(clusterUsername, clusterApi, jenkinsCredentialId, namespace, false)
+}
+
+def call(String clusterUsername, String jenkinsCredentialId, String namespace, Boolean ignoreTls) {
+    def clusterApi = BuildContext.currentBuildProfile.cluster.api
+    call(clusterUsername, clusterApi, jenkinsCredentialId, namespace, ignoreTls)
+}
+
+def call(String clusterUsername, String clusterApi, String jenkinsCredentialId, String namespace, Boolean ignoreTls) {
     withCredentials([
-        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+    string(credentialsId: jenkinsCredentialId, variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
-
-        def clusterApi = BuildContext.currentBuildProfile.cluster.api
 
         def params = ""
         if (ignoreTls) {
