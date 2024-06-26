@@ -41,7 +41,7 @@ def call() {
             SERVICE_NAME = "${BuildContext.componentName}"
 
             //If namespace is provided we use that one otherwise we use <tenant>-<component-name>
-            NAMESPACE = "${config.cd.namespace}" != null ? "${config.cd.namespace}" : BuildContext.fullName
+            NAMESPACE = "${config.cd.namespace}" ?: BuildContext.fullName
             //If an image tag was provided use that one
             if (params.imageTag != null && params.imageTag != "") {
                 BUILD_APP_VERSION = "${params.imageTag}"
