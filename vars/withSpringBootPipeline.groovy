@@ -109,7 +109,7 @@ def call() {
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
 
             //If namespace is provided we use that one otherwise we use <tenant>-<component-name>
-            NAMESPACE = config.cd.namespace != null ? "${config.cd.namespace}" : BuildContext.fullName
+            NAMESPACE = "${config.cd.namespace}" != null ? "${config.cd.namespace}" : BuildContext.fullName
 
         }
 
