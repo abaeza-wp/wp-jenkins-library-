@@ -70,6 +70,8 @@ def call(String functionalEnvironment) {
     sh """
         helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run
     """
+
+    archiveArtifacts artifacts: "${appName}-1.0.0.tgz"
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
