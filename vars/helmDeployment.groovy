@@ -27,6 +27,9 @@ def call(String functionalEnvironment) {
             helm package ${chartLocation} --dependency-update --app-version=${appVersion}
     """
 
+    def releasePackageFileName = sh(script: "printf '%s' ${appName}-*.tgz", returnStdout: true).trim()
+
+
     def options = [
         "--set global.awsRegion=${awsRegion}",
         "--set global.environment=${environment}",
@@ -68,10 +71,10 @@ def call(String functionalEnvironment) {
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString} --dry-run
+        helm upgrade ${releaseName} ./${releasePackageFileName} ${optionsString} -f ${valuesFilesString} --dry-run
     """
 
-    archiveArtifacts artifacts: "${appName}-1.0.0.tgz"
+    archiveArtifacts artifacts: "${releasePackageFileName}"
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
