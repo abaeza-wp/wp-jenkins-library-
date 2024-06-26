@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -46,15 +46,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
@@ -108,12 +108,7 @@ def call() {
             // Credential used for initial image building and deployment
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
 
-            //If namespace is provided we use that one otherwise we use <tenant>-<component-name>
-            if (config.cd.namespace != null) {
-                NAMESPACE = "${config.cd.namespace}"
-            }else {
-                NAMESPACE = BuildContext.fullName
-            }
+            NAMESPACE = "${config.cd.namespace}"
 
         }
 
