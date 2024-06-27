@@ -11,23 +11,23 @@ def call(String clusterUsername) {
     call(clusterUsername, null, false)
 }
 
-def call(String jenkinsCredentialId, String namespace) {
-    call(null, jenkinsCredentialId, namespace, false)
+def call(String credentialId, String namespace) {
+    call(null, credentialId, namespace, false)
 }
 
-def call(String clusterUsername, String jenkinsCredentialId, String namespace) {
+def call(String clusterUsername, String credentialId, String namespace) {
     def clusterApi = BuildContext.currentBuildProfile.cluster.api
-    call(clusterUsername, clusterApi, jenkinsCredentialId, namespace, false)
+    call(clusterUsername, clusterApi, credentialId, namespace, false)
 }
 
-def call(String clusterUsername, String jenkinsCredentialId, String namespace, Boolean ignoreTls) {
+def call(String clusterUsername, String credentialId, String namespace, Boolean ignoreTls) {
     def clusterApi = BuildContext.currentBuildProfile.cluster.api
-    call(clusterUsername, clusterApi, jenkinsCredentialId, namespace, ignoreTls)
+    call(clusterUsername, clusterApi, credentialId, namespace, ignoreTls)
 }
 
-def call(String clusterUsername, String clusterApi, String jenkinsCredentialId, String namespace, Boolean ignoreTls) {
+def call(String clusterUsername, String clusterApi, String credentialId, String namespace, Boolean ignoreTls) {
     withCredentials([
-    string(credentialsId: jenkinsCredentialId, variable: "JENKINS_TOKEN")
+    string(credentialsId: credentialId, variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
 
