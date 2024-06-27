@@ -8,7 +8,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
     if (BuildContext.useFunctionalEnvironments) {
         for (functionalEnvironment in BuildContext.functionalEnvironments) {
             stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
-                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, functionalEnvironment)
+                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion, functionalEnvironment)
 
                 def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
                 def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
@@ -34,7 +34,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
     } else {
         stage("[${environmentName}] Promote Image") {
 
-            def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
+            def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion)
 
             def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
             def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
