@@ -8,9 +8,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
     if (BuildContext.useFunctionalEnvironments) {
         for (functionalEnvironment in BuildContext.functionalEnvironments) {
             stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
-                environment {
-                    DESTINATION_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, functionalEnvironment)
-                }
+                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, functionalEnvironment)
 
                 def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
                 def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
@@ -22,7 +20,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
 
                 //Obtain tokens
                 def sourceRegistryToken = kubernetesLogin(clusterUsername, sourceProfile.cluster.api, sourceCredentialId, sourceNamespace, false)
-                def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
+                def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, destinationCredentialId, destinationNamespace, false)
 
                 promoteImageFromTo(
                 sourceNamespace,
@@ -35,9 +33,8 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
         }
     } else {
         stage("[${environmentName}] Promote Image") {
-            environment {
-                DESTINATION_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
-            }
+
+            def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
 
             def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
             def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
@@ -48,7 +45,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
 
             //Obtain tokens
             def sourceRegistryToken = kubernetesLogin(clusterUsername, sourceProfile.cluster.api, sourceCredentialId, sourceNamespace, false)
-            def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
+            def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, destinationCredentialId, destinationNamespace, false)
 
             promoteImageFromTo(
             sourceNamespace,

@@ -239,7 +239,7 @@ def call() {
                     switchEnvironment("staging", "${params.awsRegion}")
                 }
             }
-            stage("[Staging] Promote Image") {
+            stage("[Staging] Start Image Promotion") {
                 steps {
                     script {
                         withImagePromotionDynamicStageFromDev("dev", "staging", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
