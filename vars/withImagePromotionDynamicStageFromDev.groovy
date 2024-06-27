@@ -48,7 +48,25 @@ def call(String sourceEnvironment,String destinationEnvironment, String clusterU
             environment {
                 DESTINATION_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
             }
-            promoteImage("dev", destinationEnvironment, awsRegion)
+
+            def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
+            def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
+
+            def destinationNamespace = "${env.NAMESPACE}"
+            def sourceRegistry = sourceProfile.cluster.imageRegistry
+            def destinationRegistry = destinationProfile.cluster.imageRegistry
+
+            //Obtain tokens
+            def sourceRegistryToken = kubernetesLogin(clusterUsername, sourceProfile.cluster.api, sourceCredentialId, sourceNamespace, false)
+            def destinationRegistryToken = kubernetesLogin( null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
+
+            promoteImageFromTo(
+            sourceNamespace,
+            sourceRegistryToken,
+            sourceRegistry,
+            destinationNamespace,
+            destinationRegistryToken,
+            destinationRegistry)
         }
     }
 }
