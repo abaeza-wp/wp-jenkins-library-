@@ -62,10 +62,10 @@ def call(String functionalEnvironment) {
 
     if (BuildContext.currentBuildProfile.cluster.isDev()) {
         //We login via username and password
-        kubernetesLogin(clusterUsername: "${env.DEV_CLUSTER_USERNAME}", credentialId: "${env.SVC_TOKEN}", namespace: "${namespace}")
+        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${namespace}")
     } else {
         //We login via token
-        kubernetesLogin(credentialId: "${env.SVC_TOKEN}", namespace: "${namespace}")
+        kubernetesLogin("${env.SVC_TOKEN}", "${namespace}")
     }
 
     echo "Updating Kubernetes resources via Helm..."
