@@ -53,7 +53,7 @@ def call(String functionalEnvironment) {
         }
     }
     options.add("--set global.namespaceOverride=${namespace}")
-    options.add("--namespace=${namespace}")
+    options.add("--namespace=${namespace}") //Just for extra safety
 
     def optionsString = (options + [
         "--history-max 3",
