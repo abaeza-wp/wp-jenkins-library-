@@ -1,23 +1,13 @@
 import com.worldpay.context.BuildContext
 import com.worldpay.utils.TokenHelper
 
-/**
- *
- * Runs the helm deployment stage and detects if it should use funtional environments
- * Usage:
- * withHelmDeploymentDynamicStage {
- *   ...
- * }
- */
-
-def call(String sourceEnvironment,String destinationEnvironment, String clusterUsername, String sourceCredentialId, String sourceNamespace) {
+def call(String sourceEnvironment, String destinationEnvironment, String clusterUsername, String sourceCredentialId, String sourceNamespace) {
     def environmentName = BuildContext.currentBuildProfile.cluster.environment
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
 
-    def stageName = environmentName != null ? "[${environmentName}] Promote Image" : "Promote Image"
     if (BuildContext.useFunctionalEnvironments) {
         for (functionalEnvironment in BuildContext.functionalEnvironments) {
-            stage("${stageName} [${functionalEnvironment}]") {
+            stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
                 environment {
                     DESTINATION_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, functionalEnvironment)
                 }
@@ -32,19 +22,19 @@ def call(String sourceEnvironment,String destinationEnvironment, String clusterU
 
                 //Obtain tokens
                 def sourceRegistryToken = kubernetesLogin(clusterUsername, sourceProfile.cluster.api, sourceCredentialId, sourceNamespace, false)
-                def destinationRegistryToken = kubernetesLogin( null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
+                def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
 
                 promoteImageFromTo(
-                    sourceNamespace,
-                    sourceRegistryToken,
-                    sourceRegistry,
-                    destinationNamespace,
-                    destinationRegistryToken,
-                    destinationRegistry)
+                sourceNamespace,
+                sourceRegistryToken,
+                sourceRegistry,
+                destinationNamespace,
+                destinationRegistryToken,
+                destinationRegistry)
             }
         }
     } else {
-        stage("${stageName}") {
+        stage("[${environmentName}] Promote Image") {
             environment {
                 DESTINATION_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
             }
@@ -58,7 +48,7 @@ def call(String sourceEnvironment,String destinationEnvironment, String clusterU
 
             //Obtain tokens
             def sourceRegistryToken = kubernetesLogin(clusterUsername, sourceProfile.cluster.api, sourceCredentialId, sourceNamespace, false)
-            def destinationRegistryToken = kubernetesLogin( null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
+            def destinationRegistryToken = kubernetesLogin(null, destinationProfile.cluster.api, "${env.DESTINATION_SVC_TOKEN}", destinationNamespace, false)
 
             promoteImageFromTo(
             sourceNamespace,
