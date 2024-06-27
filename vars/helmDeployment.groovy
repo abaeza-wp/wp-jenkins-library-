@@ -12,7 +12,7 @@ def call() {
 
 def call(String functionalEnvironment) {
 
-    def appName = BuildContext.fullName
+    def appName = BuildContext.componentName
     def releaseName = appName //Note release name needs to be max 53 chars as per Helm validation https://github.com/helm/helm/blob/ff03c66d4475d9daedeee67c18884461441c2e15/pkg/chartutil/validate_name.go#L61
     def chartLocation = "./deployment/charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
