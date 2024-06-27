@@ -1,52 +1,40 @@
-import com.worldpay.context.BuildContext
-
 def call(String sourceEnvironment, String destinationEnvironment, String awsRegion) {
     call(sourceEnvironment, destinationEnvironment, awsRegion, null)
 }
 
-def call(String sourceEnvironment, String destinationEnvironment, String awsRegion, String functionalEnvironment) {
-    def namespace = "${env.NAMESPACE}"
-
-    if (functionalEnvironment != null) {
-        namespace = "${namespace}-${functionalEnvironment}"
-    }
+def call(String sourceNamespace, String sourceRegistryToken, String sourceRegistry, String destinationNamespace, String destinationRegistryToken, String destinationRegistry) {
 
     //When promoting an image the namespace should be the same
-    def sourceNamespace = namespace
-    def destinationNamespace = namespace
     def imageName = "${env.SERVICE_NAME}"
     def imageTag = "${env.BUILD_APP_VERSION}"
 
     //Detect if using functional environments
-    promoteImage(sourceEnvironment, sourceNamespace, destinationEnvironment, destinationNamespace, imageName, imageTag, awsRegion)
+    promoteImage(
+    sourceNamespace,
+    sourceRegistryToken,
+    sourceRegistry,
+    destinationNamespace,
+    destinationRegistryToken,
+    destinationRegistry,
+    imageName,
+    imageTag)
 }
 
 
-def promoteImage(String sourceEnvironment, String sourceNamespace, String destinationEnvironment, String destinationNamespace, String imageName, String imageTag, String awsRegion) {
+def promoteImage(String sourceNamespace, String sourceRegistryToken, String sourceRegistry, String destinationNamespace, String destinationRegistryToken, String destinationRegistry, String imageName, String imageTag) {
     script
     {
-        echo "Will attempt to promote image '${imageName}:${imageTag}' from '${sourceNamespace}' in '${sourceEnvironment}' to '${destinationNamespace}' in '${destinationEnvironment}'"
+        def sourceImage = "$sourceRegistry/$sourceNamespace/$imageName:$imageTag"
+        def destinationImage = "$destinationRegistry/$destinationNamespace/$imageName:$imageTag"
 
-        def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
-        def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
+        echo "Will attempt to promote image '${imageName}:${imageTag}' from '${sourceImage}' to '${destinationImage}'"
 
-        //Obtain tokens
-        def sourceRegistryToken = kubernetesLogin(null, sourceProfile.cluster.api, "${env.FROM_SVC_TOKEN}", sourceNamespace, false)
-        def destinationRegistryToken = kubernetesLogin( null, destinationProfile.cluster.api, "${env.TO_SVC_TOKEN}", destinationNamespace, false)
-
-        def sourceRegistry = sourceProfile.cluster.imageRegistry
-        def destinationRegistry = destinationProfile.cluster.imageRegistry
         // Logging to registries
         login("ocp", sourceRegistryToken, sourceRegistry)
         login("ocp", destinationRegistryToken, destinationRegistry)
 
         // Copying image
-        // Note: a promotion should be copying from one registry to another one without changing any namespaces or names
-        // therefore we can use the same image name and namespace from the config profile, this is done to be able to keep a history of changes and be able to track changes easier
-        copyImage(
-        "$sourceRegistry/$sourceNamespace/$imageName:$imageTag",
-        "$destinationRegistry/$destinationNamespace/$imageName:$imageTag"
-        )
+        copyImage(sourceImage, destinationImage)
 
         //Logout of all repositories
         logout()

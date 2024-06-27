@@ -19,7 +19,7 @@ def call(String sourceEnvironment, String destinationEnvironment) {
         for (fEnv in BuildContext.functionalEnvironments) {
             stage("${stageName} [${fEnv}]") {
                 environment {
-                    FROM_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
+                    FROM_SVC_TOKEN = TokenHelper.tokenNameOf(sourceEnvironment, BuildContext.fullName, awsRegion, fEnv)
                     TO_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
                 }
                 promoteImage(sourceEnvironment, destinationEnvironment, "${fEnv}", awsRegion)
@@ -28,7 +28,7 @@ def call(String sourceEnvironment, String destinationEnvironment) {
     } else {
         stage("${stageName}") {
             environment {
-                FROM_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion,)
+                FROM_SVC_TOKEN = TokenHelper.tokenNameOf(sourceEnvironment, BuildContext.fullName, awsRegion,)
                 TO_SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
             }
             promoteImage(sourceEnvironment, destinationEnvironment, awsRegion)

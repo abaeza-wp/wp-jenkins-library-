@@ -206,6 +206,7 @@ def call() {
                     }
                 }
             }
+
             stage("Archive reports in S3") {
                 when {
                     beforeAgent(true)
@@ -228,14 +229,21 @@ def call() {
                     beforeAgent(true)
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
                     switchEnvironment("staging", "${params.awsRegion}")
+                }
+            }
+            stage("[Staging] Promote Image") {
+                steps {
+                    script {
+                        withImagePromotionDynamicStageFromDev("dev", "staging", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
+                    }
                 }
             }
             stage("[Staging] Deployment") {
@@ -243,10 +251,10 @@ def call() {
                     beforeAgent(true)
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
