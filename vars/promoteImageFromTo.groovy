@@ -31,8 +31,8 @@ def promoteImage(String sourceEnvironment, String sourceNamespace, String destin
         def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
 
         //Obtain tokens
-        def sourceRegistryToken = kubernetesLogin(clusterUsername: null, clusterApi: sourceProfile.cluster.api, credentialId: $ { env.FROM_SVC_TOKEN }, namespace: sourceNamespace, ignoreTls: false)
-        def destinationRegistryToken = kubernetesLogin(clusterUsername: null, clusterApi: destinationProfile.cluster.api, credentialId: $ { env.TO_SVC_TOKEN }, namespace: destinationNamespace, ignoreTls: false)
+        def sourceRegistryToken = kubernetesLogin(null, sourceProfile.cluster.api, "${env.FROM_SVC_TOKEN}", sourceNamespace, false)
+        def destinationRegistryToken = kubernetesLogin( null, destinationProfile.cluster.api, "${env.TO_SVC_TOKEN}", destinationNamespace, false)
 
         def sourceRegistry = sourceProfile.cluster.imageRegistry
         def destinationRegistry = destinationProfile.cluster.imageRegistry
