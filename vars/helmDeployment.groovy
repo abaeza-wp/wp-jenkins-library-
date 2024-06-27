@@ -43,6 +43,7 @@ def call(String functionalEnvironment) {
         namespace = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
     }
+
     if (env.IS_PR_BUILD) {
         releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         if (functionalEnvironment != null) {
@@ -51,6 +52,7 @@ def call(String functionalEnvironment) {
             options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
         }
     }
+    options.add("--set global.namespaceOverride=${namespace}")
     options.add("--namespace=${namespace}")
 
     def optionsString = (options + [
