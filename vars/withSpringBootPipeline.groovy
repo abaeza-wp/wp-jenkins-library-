@@ -113,7 +113,7 @@ def call() {
         }
 
         stages {
-            stage("Prepare Dev Build Environment") {
+            stage("[dev] Prepare Build Environment") {
                 steps {
                     switchEnvironment("dev", "${params.awsRegion}")
                     setBuildInformation()
@@ -146,7 +146,7 @@ def call() {
                     gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
                 }
             }
-            stage("[Dev] Deployment") {
+            stage("[dev] Deployment") {
                 when {
                     expression { params.release }
                     anyOf {
@@ -224,7 +224,7 @@ def call() {
                 }
             }
 
-            stage("Prepare Stage Build Environment") {
+            stage("[stage] Prepare Build Environment") {
                 when {
                     beforeAgent(true)
                     allOf {
@@ -239,14 +239,14 @@ def call() {
                     switchEnvironment("stage", "${params.awsRegion}")
                 }
             }
-            stage("[Stage] Start Image Promotion") {
+            stage("[stage] Start Image Promotion") {
                 steps {
                     script {
                         withImagePromotionDynamicStageFromDev("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
                     }
                 }
             }
-            stage("[Stage] Deployment") {
+            stage("[stage] Deployment") {
                 when {
                     beforeAgent(true)
                     allOf {
