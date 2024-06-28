@@ -9,10 +9,10 @@ def getProfiles() {
     return [
         "dev-euwest1-try",
         "dev-euwest1-live",
-        "staging-euwest1-try",
-        "staging-euwest1-live",
-        "staging-useast1-try",
-        "staging-useast1-live"
+        "stage-euwest1-try",
+        "stage-euwest1-live",
+        "stage-useast1-try",
+        "stage-useast1-live"
     ]
 }
 
@@ -131,7 +131,7 @@ def call() {
                         when {
                             allOf {
                                 expression { params.release }
-                                expression { params.profile.contains("staging") }
+                                expression { params.profile.contains("stage") }
                                 expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
                             }
                         }
@@ -226,7 +226,7 @@ def call() {
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
-                        expression { params.profile.contains("staging") }
+                        expression { params.profile.contains("stage") }
                     }
                 }
                 steps {

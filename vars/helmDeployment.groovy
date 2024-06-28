@@ -82,7 +82,7 @@ String getAllValuesFilesIfExist(String chartLocation, String environment, String
 
     def valuesFilesFound = [
         "${chartLocation}/values.yaml"] //This is the default values file.
-    //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.staging.yaml, values.prod.yaml
+    //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.stage.yaml, values.prod.yaml
     if (fileExists("${chartLocation}/values.${environment}.yaml")) {
         valuesFilesFound.add("${chartLocation}/values.${environment}.yaml")
     }

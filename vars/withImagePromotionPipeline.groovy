@@ -47,7 +47,7 @@ def call() {
         }
 
         stages {
-            stage("Prepare Staging Build Environment") {
+            stage("Prepare Stage Build Environment") {
 //                when {
 //                    beforeAgent(true)
 //                    allOf {
@@ -59,18 +59,18 @@ def call() {
 //                    }
 //                }
                 steps {
-                    switchEnvironment("staging", "${params.awsRegion}")
+                    switchEnvironment("stage", "${params.awsRegion}")
                     setBuildInformation()
                 }
             }
-            stage("[Staging] Promote Image") {
+            stage("[Stage] Promote Image") {
                 steps {
                     script {
-                        withImagePromotionDynamicStage("staging", "staging", "${params.imageTag}")
+                        withImagePromotionDynamicStage("stage", "stage", "${params.imageTag}")
                     }
                 }
             }
-            stage("[Staging] Deployment") {
+            stage("[Stage] Deployment") {
 //                when {
 //                    beforeAgent(true)
 //                    allOf {
@@ -104,7 +104,7 @@ def call() {
             stage("[Production] Promote Image") {
                 steps {
                     script {
-                        withImagePromotionDynamicStage("staging", "prod", "${params.imageTag}")
+                        withImagePromotionDynamicStage("stage", "prod", "${params.imageTag}")
                     }
                 }
             }

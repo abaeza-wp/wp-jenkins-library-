@@ -224,7 +224,7 @@ def call() {
                 }
             }
 
-            stage("Prepare Staging Build Environment") {
+            stage("Prepare Stage Build Environment") {
                 when {
                     beforeAgent(true)
                     allOf {
@@ -236,17 +236,17 @@ def call() {
                     }
                 }
                 steps {
-                    switchEnvironment("staging", "${params.awsRegion}")
+                    switchEnvironment("stage", "${params.awsRegion}")
                 }
             }
-            stage("[Staging] Start Image Promotion") {
+            stage("[Stage] Start Image Promotion") {
                 steps {
                     script {
-                        withImagePromotionDynamicStageFromDev("dev", "staging", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
+                        withImagePromotionDynamicStageFromDev("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
                     }
                 }
             }
-            stage("[Staging] Deployment") {
+            stage("[Stage] Deployment") {
                 when {
                     beforeAgent(true)
                     allOf {

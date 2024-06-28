@@ -3,8 +3,8 @@ import com.worldpay.context.BuildContext
 def getProfiles() {
     return [
         "dev-euwest1",
-        "staging-euwest1",
-        "staging-useast1",
+        "stage-euwest1",
+        "stage-useast1",
     ]
 }
 
@@ -152,7 +152,7 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        expression { params.profile.contains("staging") }
+                        expression { params.profile.contains("stage") }
                         expression {
                             env.PERFORMANCE_TESTING_ENABLED.toBoolean()
                         }
@@ -241,7 +241,7 @@ def call() {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
                         expression {
-                            params.profile.contains("staging")
+                            params.profile.contains("stage")
                         }
                     }
                 }
