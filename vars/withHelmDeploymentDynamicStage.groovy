@@ -19,7 +19,7 @@ def call() {
         for (fEnv in BuildContext.functionalEnvironments) {
             stage("${stageName} [${fEnv}]") {
                 environment {
-                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
+                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion, fEnv)
                 }
                 helmDeployment("${fEnv}")
             }
@@ -27,7 +27,7 @@ def call() {
     } else {
         stage("${stageName}") {
             environment {
-                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
+                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion)
             }
             helmDeployment()
         }

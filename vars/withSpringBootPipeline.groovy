@@ -209,7 +209,7 @@ def call() {
 
             stage("Archive reports in S3") {
                 when {
-                    beforeAgent(true)
+
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
@@ -226,7 +226,7 @@ def call() {
 
             stage("[stage] Prepare Build Environment") {
                 when {
-                    beforeAgent(true)
+
                     allOf {
                         expression { params.release }
 //                        anyOf {
@@ -248,7 +248,7 @@ def call() {
             }
             stage("[stage] Deployment") {
                 when {
-                    beforeAgent(true)
+
                     allOf {
                         expression { params.release }
 //                        anyOf {
@@ -265,7 +265,7 @@ def call() {
             }
             stage("Performance Testing") {
                 when {
-                    beforeAgent(true)
+
                     allOf {
                         expression { params.release }
                         expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
