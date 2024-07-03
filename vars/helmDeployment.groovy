@@ -45,6 +45,13 @@ def call(String functionalEnvironment) {
         } else {
             options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
         }
+
+        //On PR Builds we clean up the previous PR deployment before re-installing
+        echo "Cleaning up previous release..."
+        //--ignore-not-found is used to make helm succeed in the case where ea previous helm chart was not installed
+        sh """
+            helm uninstall ${releaseName} --ignore-not-found
+        """
     }
     options.add("--namespace=${namespace}")
 
