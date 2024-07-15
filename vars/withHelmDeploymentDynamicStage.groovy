@@ -21,7 +21,7 @@ def call() {
             stage("${stageName} [${fEnv}]") {
                 namespace = "${namespace}-${fEnv}"
 
-                def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion, fEnv)
+                def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
                 helmDeployment("${fEnv}", namespace, token)
             }
         }
