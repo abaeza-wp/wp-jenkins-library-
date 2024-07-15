@@ -108,7 +108,6 @@ def call() {
             // Credential used for initial image building and deployment
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
 
-            NAMESPACE = "${config.cd.namespace}"
         }
 
         stages {

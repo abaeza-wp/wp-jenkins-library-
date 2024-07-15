@@ -17,9 +17,6 @@ def call() {
 
     env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
 
-    if (env.NAMESPACE == null) {
-        env.NAMESPACE = BuildContext.fullName
-    }
     echo """
             Build Information:
 
@@ -28,8 +25,6 @@ def call() {
             BUILD_APP_VERSION: ${env.BUILD_APP_VERSION}
             BUILD_COMMIT_HASH: ${env.BUILD_COMMIT_HASH}
             GIT_COMMIT_TIMESTAMP: ${env.GIT_COMMIT_TIMESTAMP}
-            
-            NAMESPACE: ${env.NAMESPACE}
             
             IS_PR_BUILD = ${env.IS_PR_BUILD}
         """
