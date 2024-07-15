@@ -61,7 +61,7 @@ def call(String functionalEnvironment, String token) {
         echo "Cleaning up previous release..."
         //--ignore-not-found is used to make helm succeed in the case where ea previous helm chart was not installed
         sh """
-            helm uninstall ${relaseName} --ignore-not-found
+            helm uninstall ${releaseName} --ignore-not-found
         """
     }
 
