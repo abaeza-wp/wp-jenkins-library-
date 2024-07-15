@@ -18,7 +18,7 @@ def call() {
     env.IS_PR_BUILD = env.BRANCH_NAME.startsWith("PR-")
 
     if (env.NAMESPACE == null) {
-        NAMESPACE = BuildContext.fullName
+        env.NAMESPACE = BuildContext.fullName
     }
     echo """
             Build Information:
