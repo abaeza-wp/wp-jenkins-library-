@@ -1,13 +1,8 @@
 import com.worldpay.context.BuildContext
 
 
-def call() {
-    //convenience call when not using functional environments
-    call(null)
-}
-
-def call(String token) {
-    call(null, token)
+def call(String namespace, String token) {
+    call(null, namespace, token)
 }
 
 
@@ -15,14 +10,13 @@ def call(String token) {
  Used to update the Kubernetes resources, in all environments (including production).
  */
 
-def call(String functionalEnvironment, String token) {
+def call(String functionalEnvironment, namespace, String token) {
 
     def appName = BuildContext.fullName
     def releaseName = appName
     //Note release name needs to be max 53 chars as per Helm validation https://github.com/helm/helm/blob/ff03c66d4475d9daedeee67c18884461441c2e15/pkg/chartutil/validate_name.go#L61
     def chartLocation = "./deployment/charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
-    def namespace = "${env.NAMESPACE}"
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment
@@ -48,7 +42,6 @@ def call(String functionalEnvironment, String token) {
     if (functionalEnvironment != null) {
         //Append functional environment to app name
         appName = "${appName}-${functionalEnvironment}"
-        namespace = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
     }
 

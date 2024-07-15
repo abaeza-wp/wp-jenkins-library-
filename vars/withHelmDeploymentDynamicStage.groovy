@@ -22,13 +22,13 @@ def call() {
                 namespace = "${namespace}-${fEnv}"
 
                 def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion, fEnv)
-                helmDeployment("${fEnv}", token)
+                helmDeployment("${fEnv}", namespace, token)
             }
         }
     } else {
         stage("${stageName}") {
             def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
-            helmDeployment(token)
+            helmDeployment(namespace,token)
         }
     }
 }

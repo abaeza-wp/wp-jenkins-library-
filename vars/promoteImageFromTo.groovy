@@ -10,20 +10,19 @@ def call(String sourceNamespace, String sourceRegistryToken, String sourceRegist
 
     //Detect if using functional environments
     promoteImage(
-    sourceNamespace,
-    sourceRegistryToken,
-    sourceRegistry,
-    destinationNamespace,
-    destinationRegistryToken,
-    destinationRegistry,
-    imageName,
-    imageTag)
+            sourceNamespace,
+            sourceRegistryToken,
+            sourceRegistry,
+            destinationNamespace,
+            destinationRegistryToken,
+            destinationRegistry,
+            imageName,
+            imageTag)
 }
 
 
 def promoteImage(String sourceNamespace, String sourceRegistryToken, String sourceRegistry, String destinationNamespace, String destinationRegistryToken, String destinationRegistry, String imageName, String imageTag) {
-    script
-    {
+    script {
         def sourceImage = "$sourceRegistry/$sourceNamespace/$imageName:$imageTag"
         def destinationImage = "$destinationRegistry/$destinationNamespace/$imageName:$imageTag"
 
@@ -42,8 +41,7 @@ def promoteImage(String sourceNamespace, String sourceRegistryToken, String sour
 }
 
 def copyImage(srcImage, destImage) {
-    script
-    {
+    script {
         copyImage(srcImage, null, destImage, null)
     }
 }
@@ -56,8 +54,7 @@ def copyImage(srcImage, destImage) {
  * @param destToken The token to use to authenticate against the destination repository. Can be null, if null is used no 'dest-registry-token' argument is added to skopeo, useful when a registry is public.
  */
 def copyImage(srcImage, srcToken, destImage, destToken) {
-    script
-    {
+    script {
         echo "Copying Image from source repository to destination"
 
         def args = ""
@@ -77,8 +74,7 @@ def copyImage(srcImage, srcToken, destImage, destToken) {
 }
 
 def login(username, password, registry) {
-    script
-    {
+    script {
         echo "Attempting to login to registry '${registry}'"
         sh """
               export REGISTRY_AUTH_FILE=~/auth.json
@@ -88,8 +84,7 @@ def login(username, password, registry) {
 }
 
 def logout() {
-    script
-    {
+    script {
         echo "Attempting to logout from all registries"
         sh """
              export REGISTRY_AUTH_FILE=~/auth.json
@@ -99,4 +94,3 @@ def logout() {
 }
 
 return this
-
