@@ -222,13 +222,12 @@ def call() {
 
             stage("Prepare Staging Build Environment") {
                 when {
-                    beforeAgent(true)
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
@@ -237,13 +236,12 @@ def call() {
             }
             stage("[Staging] Deployment") {
                 when {
-                    beforeAgent(true)
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
@@ -254,7 +252,6 @@ def call() {
             }
             stage("Performance Testing") {
                 when {
-                    beforeAgent(true)
                     allOf {
                         expression { params.release }
                         expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
