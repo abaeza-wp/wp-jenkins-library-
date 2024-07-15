@@ -107,10 +107,12 @@ def call() {
             IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
             // Credential used for initial image building and deployment
             SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
+
+            NAMESPACE = "${config.cd.namespace}"
         }
 
         stages {
-            stage("Prepare Dev Build Environment") {
+            stage("[dev] Prepare Build Environment") {
                 steps {
                     switchEnvironment("dev", "${params.awsRegion}")
                     setBuildInformation()
@@ -124,14 +126,17 @@ def call() {
                 steps {
                     gradleBuildOnly(params.release)
                 }
-            }
-            stage("Archive Test Reports") {
-                steps {
-                    archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
-                    archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
-                    archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                    //Archive all HTML reports
-                    archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+                post {
+                    always {
+                        echo "Archiving test reports"
+                        //Archive all HTML reports
+                        archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+
+                        //Archive as PDF reports
+                        archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                        archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                        archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                    }
                 }
             }
             stage("Build Image") {
@@ -143,7 +148,7 @@ def call() {
                     gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
                 }
             }
-            stage("[Dev] Deployment") {
+            stage("[dev] Deployment") {
                 when {
                     expression { params.release }
                     anyOf {
@@ -205,7 +210,7 @@ def call() {
             }
             stage("Archive reports in S3") {
                 when {
-                    beforeAgent(true)
+
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
@@ -220,28 +225,35 @@ def call() {
                 }
             }
 
-            stage("Prepare Staging Build Environment") {
+            stage("[stage] Prepare Build Environment") {
                 when {
                     allOf {
                         expression { params.release }
-//                        anyOf {
-//                            branch 'master'
-//                            branch 'main'
-//                        }
+                        //                        anyOf {
+                        //                            branch 'master'
+                        //                            branch 'main'
+                        //                        }
                     }
                 }
                 steps {
-                    switchEnvironment("staging", "${params.awsRegion}")
+                    switchEnvironment("stage", "${params.awsRegion}")
                 }
             }
-            stage("[Staging] Deployment") {
+            stage("[stage] Start Image Promotion") {
+                steps {
+                    script {
+                        withImagePromotionDynamicStageFromDev("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
+                    }
+                }
+            }
+            stage("[stage] Deployment") {
                 when {
                     allOf {
                         expression { params.release }
-//                        anyOf {
-//                            branch 'master'
-//                            branch 'main'
-//                        }
+                        //                        anyOf {
+                        //                            branch 'master'
+                        //                            branch 'main'
+                        //                        }
                     }
                 }
                 steps {

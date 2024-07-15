@@ -3,7 +3,7 @@ import com.worldpay.utils.TokenHelper
 
 /**
  *
- * Runs the helm deployment stage and detects if it should use funtional environments
+ * Runs the helm deployment stage and detects if it should use functional environments
  * Usage:
  * withHelmDeploymentDynamicStage {
  *   ...
@@ -18,18 +18,14 @@ def call() {
     if (BuildContext.useFunctionalEnvironments) {
         for (fEnv in BuildContext.functionalEnvironments) {
             stage("${stageName} [${fEnv}]") {
-                environment {
-                    SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion, fEnv)
-                }
-                helmDeployment("${fEnv}")
+                def token = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion, fEnv)
+                helmDeployment("${fEnv}", token)
             }
         }
     } else {
         stage("${stageName}") {
-            environment {
-                SVC_TOKEN = TokenHelper.tokenNameOf(environmentName, BuildContext.fullName, awsRegion)
-            }
-            helmDeployment()
+            def token = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion)
+            helmDeployment(token)
         }
     }
 }
