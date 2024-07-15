@@ -242,7 +242,7 @@ def call() {
             stage("[stage] Start Image Promotion") {
                 steps {
                     script {
-                        withImagePromotionDynamicStageFromDev("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
+                        withImagePromotionDynamicStage("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
                     }
                 }
             }
