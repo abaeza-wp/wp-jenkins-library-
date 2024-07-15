@@ -4,16 +4,19 @@ import com.worldpay.utils.TokenHelper
 def call(String sourceEnvironment, String destinationEnvironment, String clusterUsername, String sourceCredentialId, String sourceNamespace) {
     def environmentName = BuildContext.currentBuildProfile.cluster.environment
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
+    def namespace = BuildContext.fullName
 
     if (BuildContext.useFunctionalEnvironments) {
         for (functionalEnvironment in BuildContext.functionalEnvironments) {
             stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
+                namespace = "${namespace}-${functionalEnvironment}"
+
                 def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, BuildContext.componentName, awsRegion, functionalEnvironment)
 
                 def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
                 def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
 
-                def destinationNamespace = "${env.NAMESPACE}-${functionalEnvironment}"
+                def destinationNamespace = namespace
 
                 def sourceRegistry = sourceProfile.cluster.imageRegistry
                 def destinationRegistry = destinationProfile.cluster.imageRegistry
@@ -39,7 +42,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
             def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
             def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
 
-            def destinationNamespace = "${env.NAMESPACE}"
+            def destinationNamespace = namespace
             def sourceRegistry = sourceProfile.cluster.imageRegistry
             def destinationRegistry = destinationProfile.cluster.imageRegistry
 

@@ -27,7 +27,7 @@ def call() {
         }
     } else {
         stage("${stageName}") {
-            def token = TokenHelper.tokenNameOf(environmentName, "${env.NAMESPACE}", awsRegion)
+            def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
             helmDeployment(token)
         }
     }
