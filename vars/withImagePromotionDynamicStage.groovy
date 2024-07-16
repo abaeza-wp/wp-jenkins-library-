@@ -11,7 +11,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
             stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
                 def destinationNamespace = "${namespace}-${functionalEnvironment}"
 
-                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
+                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
 
                 def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
                 def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
