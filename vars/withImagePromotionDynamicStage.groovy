@@ -9,14 +9,12 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
     if (BuildContext.useFunctionalEnvironments) {
         for (functionalEnvironment in BuildContext.functionalEnvironments) {
             stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
-                namespace = "${namespace}-${functionalEnvironment}"
+                def destinationNamespace = "${namespace}-${functionalEnvironment}"
 
                 def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
 
                 def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
                 def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
-
-                def destinationNamespace = namespace
 
                 def sourceRegistry = sourceProfile.cluster.imageRegistry
                 def destinationRegistry = destinationProfile.cluster.imageRegistry

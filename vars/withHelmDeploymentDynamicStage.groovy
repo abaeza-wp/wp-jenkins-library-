@@ -17,12 +17,12 @@ def call() {
 
     def stageName = environmentName != null ? "[${environmentName}] Deploy Application" : "Deploy Application"
     if (BuildContext.useFunctionalEnvironments) {
-        for (fEnv in BuildContext.functionalEnvironments) {
-            stage("${stageName} [${fEnv}]") {
-                namespace = "${namespace}-${fEnv}"
+        for (functionalEnvironment in BuildContext.functionalEnvironments) {
+            stage("${stageName} [${functionalEnvironment}]") {
+                def destinationNamespace = "${namespace}-${functionalEnvironment}"
 
-                def token = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
-                helmDeployment("${fEnv}", namespace, token)
+                def token = TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
+                helmDeployment("${functionalEnvironment}", namespace, token)
             }
         }
     } else {
