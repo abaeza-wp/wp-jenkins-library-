@@ -22,7 +22,7 @@ def call() {
                 def destinationNamespace = "${namespace}-${functionalEnvironment}"
 
                 def token = TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
-                helmDeployment("${functionalEnvironment}", namespace, token)
+                helmDeployment("${functionalEnvironment}", destinationNamespace, token)
             }
         }
     } else {
