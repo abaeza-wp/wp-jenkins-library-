@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+    "eu-west-1",
+    "us-east-1",
     ]
 }
 
@@ -46,15 +46,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: "awsRegion",
-                    choices: getAwsRegions(),
-                    description: "The target deployment aws region."
-                    )
+            name: "awsRegion",
+            choices: getAwsRegions(),
+            description: "The target deployment aws region."
+            )
             booleanParam(
-                    name: "release",
-                    defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
-                    )
+            name: "release",
+            defaultValue: true,
+            description: "Runs additional scans for release deployments, not needed for development"
+            )
         }
 
         environment {
@@ -228,10 +228,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        //                        anyOf {
-                        //                            branch 'master'
-                        //                            branch 'main'
-                        //                        }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
@@ -249,10 +249,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        //                        anyOf {
-                        //                            branch 'master'
-                        //                            branch 'main'
-                        //                        }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
                     }
                 }
                 steps {
