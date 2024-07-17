@@ -157,19 +157,20 @@ def call() {
                             gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
                         }
                     }
-                    stage("[dev] Deployment") {
-                        when {
-                            expression { params.release }
-                            anyOf {
-                                triggeredBy 'TimerTrigger'
-                                triggeredBy cause: 'UserIdCause'
-                            }
-                        }
-                        steps {
-                            script {
-                                withHelmDeploymentDynamicStage()
-                            }
-                        }
+                }
+            }
+
+            stage("[dev] Deployment") {
+                when {
+                    expression { params.release }
+                    anyOf {
+                        triggeredBy 'TimerTrigger'
+                        triggeredBy cause: 'UserIdCause'
+                    }
+                }
+                steps {
+                    script {
+                        withHelmDeploymentDynamicStage()
                     }
                 }
             }
