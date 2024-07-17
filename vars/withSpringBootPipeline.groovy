@@ -116,55 +116,60 @@ def call() {
                     setBuildInformation()
                 }
             }
-            stage("Build & Test App") {
-                agent {
-                    kubernetes {
-                        cloud 'kubernetes-ephemeral-agents'
-                        inheritFrom 'hydra-dind'
-                        defaultContainer 'hydra-dind'
-                        label 'hydra-dind'
-                    }
-                }
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
-                steps {
-                    gradleBuildOnly(params.release)
-                }
-                post {
-                    always {
-                        echo "Archiving test reports"
-                        //Archive all HTML reports
-                        archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+            stage("Build & Check App") {
+                parallel {
+                    stage("Build & Test App") {
 
-                        //Archive as PDF reports
-                        archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
-                        archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                        archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                        agent {
+                            kubernetes {
+                                cloud 'kubernetes-ephemeral-agents'
+                                inheritFrom 'hydra-dind'
+                                defaultContainer 'hydra-dind'
+                                label 'hydra-dind'
+                            }
+                        }
+                        environment {
+                            // Need full path of current workspace for setting path of nvm on $PATH
+                            WORKSPACE = pwd()
+                        }
+                        steps {
+                            gradleBuildOnly(params.release)
+                        }
+                        post {
+                            always {
+                                echo "Archiving test reports"
+                                //Archive all HTML reports
+                                archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+
+                                //Archive as PDF reports
+                                archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                                archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                                archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                            }
+                        }
                     }
-                }
-            }
-            stage("Build Image") {
-                environment {
-                    // Need full path of current workspace for setting path of nvm on $PATH
-                    WORKSPACE = pwd()
-                }
-                steps {
-                    gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
-                }
-            }
-            stage("[dev] Deployment") {
-                when {
-                    expression { params.release }
-                    anyOf {
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
+                    stage("Build Image") {
+                        environment {
+                            // Need full path of current workspace for setting path of nvm on $PATH
+                            WORKSPACE = pwd()
+                        }
+                        steps {
+                            gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
+                        }
                     }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
+                    stage("[dev] Deployment") {
+                        when {
+                            expression { params.release }
+                            anyOf {
+                                triggeredBy 'TimerTrigger'
+                                triggeredBy cause: 'UserIdCause'
+                            }
+                        }
+                        steps {
+                            script {
+                                withHelmDeploymentDynamicStage()
+                            }
+                        }
                     }
                 }
             }
