@@ -40,8 +40,6 @@ def call(String functionalEnvironment, namespace, String token) {
     ]
 
     if (functionalEnvironment != null) {
-        //Append functional environment to app name
-        appName = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
     }
 
