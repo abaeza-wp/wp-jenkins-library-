@@ -251,6 +251,15 @@ def call() {
                 }
             }
             stage("[stage] Start Image Promotion") {
+                when {
+                    allOf {
+                        expression { params.release }
+                        anyOf {
+                            branch 'master'
+                            branch 'main'
+                        }
+                    }
+                }
                 steps {
                     script {
                         withImagePromotionDynamicStage("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
