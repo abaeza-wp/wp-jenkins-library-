@@ -6,22 +6,25 @@ import com.worldpay.context.BuildContext
  This will also login the current build agent to the target Kubernetes cluster, so that the OpenShift client
  (oc command) can be used.
  */
-
-def call() {
-    call(null, null, false)
+def call(String credentialId, String namespace) {
+    call(null, credentialId, namespace, false)
 }
 
-def call(String clusterUsername) {
-    call(clusterUsername, null, false)
+def call(String clusterUsername, String credentialId, String namespace) {
+    def clusterApi = BuildContext.currentBuildProfile.cluster.api
+    call(clusterApi, clusterUsername, credentialId, namespace, false)
 }
 
-def call(String clusterUsername, String namespace, Boolean ignoreTls) {
+def call(String clusterUsername, String credentialId, String namespace, Boolean ignoreTls) {
+    def clusterApi = BuildContext.currentBuildProfile.cluster.api
+    call(clusterApi, clusterUsername, credentialId, namespace, ignoreTls)
+}
+
+def call(String clusterApi, String clusterUsername, String credentialId, String namespace, Boolean ignoreTls) {
     withCredentials([
-        string(credentialsId: "${env.SVC_TOKEN}", variable: "JENKINS_TOKEN")
+        string(credentialsId: credentialId, variable: "JENKINS_TOKEN")
     ]) {
         echo "Logging into cluster..."
-
-        def clusterApi = BuildContext.currentBuildProfile.cluster.api
 
         def params = ""
         if (ignoreTls) {

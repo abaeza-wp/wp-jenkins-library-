@@ -4,12 +4,9 @@ class TokenHelper {
     static String devTokenName(namespace, awsRegion) {
         return tokenNameOf("dev", namespace, awsRegion)
     }
-    static String tokenNameOf(environment, appName, awsRegion, String functionalEnvironment) {
-        return tokenNameOf(environment, "${appName}-${functionalEnvironment}", awsRegion)
-    }
 
-    static String tokenNameOf(environment, appName, awsRegion) {
+    static String tokenNameOf(environment, namespace, awsRegion) {
         def awsRegionString = awsRegion.replace('-', '')
-        return "svc_token-${appName}-${environment}-${awsRegionString}"
+        return "svc_token-${namespace}-${environment}-${awsRegionString}"
     }
 }

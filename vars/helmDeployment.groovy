@@ -1,22 +1,22 @@
 import com.worldpay.context.BuildContext
 
 
-def call() {
-    //convenience call when not using functional environments
-    call(null)
+def call(String namespace, String token) {
+    call(null, namespace, token)
 }
+
 
 /*
  Used to update the Kubernetes resources, in all environments (including production).
  */
 
-def call(String functionalEnvironment) {
+def call(String functionalEnvironment, namespace, String token) {
 
     def appName = BuildContext.fullName
     def releaseName = appName
+    //Note release name needs to be max 53 chars as per Helm validation https://github.com/helm/helm/blob/ff03c66d4475d9daedeee67c18884461441c2e15/pkg/chartutil/validate_name.go#L61
     def chartLocation = "./deployment/charts/${appName}"
     def appVersion = "${BuildContext.imageTag}"
-    def namespace = "${appName}"
 
     def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
     def environment = BuildContext.currentBuildProfile.cluster.environment
@@ -27,6 +27,11 @@ def call(String functionalEnvironment) {
             helm package ${chartLocation} --dependency-update --app-version=${appVersion}
     """
 
+    def releasePackageFileName = sh(script: "printf '%s' ${appName}-*.tgz", returnStdout: true).trim()
+
+    echo "Archiving Helm release..."
+    archiveArtifacts artifacts: "${releasePackageFileName}"
+
     def options = [
         "--set global.awsRegion=${awsRegion}",
         "--set global.environment=${environment}",
@@ -35,16 +40,15 @@ def call(String functionalEnvironment) {
     ]
 
     if (functionalEnvironment != null) {
-        namespace = "${appName}-${functionalEnvironment}"
+        //Append functional environment to app name
+        appName = "${appName}-${functionalEnvironment}"
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
     }
+
     if (env.IS_PR_BUILD) {
+        //Will append the branch name in the form of "-pr-XXX"
         releaseName += "-${env.BRANCH_NAME}".toLowerCase()
-        if (functionalEnvironment != null) {
-            options.add("--set global.fullnameOverride=${appName}-${functionalEnvironment}-${env.BRANCH_NAME}")
-        } else {
-            options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
-        }
+        options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
 
         //On PR Builds we clean up the previous PR deployment before re-installing
         echo "Cleaning up previous release..."
@@ -53,7 +57,9 @@ def call(String functionalEnvironment) {
             helm uninstall ${releaseName} --ignore-not-found
         """
     }
-    options.add("--namespace=${namespace}")
+
+    options.add("--set global.namespaceOverride=${namespace}")
+    options.add("--namespace=${namespace}") //Just for extra safety
 
     def optionsString = (options + [
         "--history-max 3",
@@ -64,16 +70,21 @@ def call(String functionalEnvironment) {
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
 
+
+    def kubernetesToken = token ? token : "${env.SVC_TOKEN}"
+
     if (BuildContext.currentBuildProfile.cluster.isDev()) {
-        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}")
+        //We login via username and password
+        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}", "${kubernetesToken}", "${namespace}")
     } else {
-        kubernetesLogin()
+        //We login via token
+        kubernetesLogin("${kubernetesToken}", "${namespace}")
     }
 
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
     sh """
-        helm upgrade ${releaseName} ./${appName}-1.0.0.tgz ${optionsString} -f ${valuesFilesString}
+        helm upgrade ${releaseName} ./${releasePackageFileName} ${optionsString} -f ${valuesFilesString}
     """
 }
 
@@ -81,7 +92,7 @@ String getAllValuesFilesIfExist(String chartLocation, String environment, String
 
     def valuesFilesFound = [
         "${chartLocation}/values.yaml"] //This is the default values file.
-    //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.staging.yaml, values.prod.yaml
+    //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.stage.yaml, values.prod.yaml
     if (fileExists("${chartLocation}/values.${environment}.yaml")) {
         valuesFilesFound.add("${chartLocation}/values.${environment}.yaml")
     }
