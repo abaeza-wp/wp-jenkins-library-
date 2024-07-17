@@ -11,6 +11,17 @@ def call(String namespace, String token) {
  */
 
 def call(String functionalEnvironment, namespace, String token) {
+    //Login to cluster to ensure credentials are valid and that all operations are performed under the correct namespace
+    def kubernetesToken = token ? token : "${env.SVC_TOKEN}"
+
+    if (BuildContext.currentBuildProfile.cluster.isDev()) {
+        //We login via username and password
+        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}", "${kubernetesToken}", "${namespace}")
+    } else {
+        //We login via token
+        kubernetesLogin("${kubernetesToken}", "${namespace}")
+    }
+
 
     def appName = BuildContext.fullName
     def releaseName = appName
@@ -67,17 +78,6 @@ def call(String functionalEnvironment, namespace, String token) {
     ]).join(' ')
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
-
-
-    def kubernetesToken = token ? token : "${env.SVC_TOKEN}"
-
-    if (BuildContext.currentBuildProfile.cluster.isDev()) {
-        //We login via username and password
-        kubernetesLogin("${env.DEV_CLUSTER_USERNAME}", "${kubernetesToken}", "${namespace}")
-    } else {
-        //We login via token
-        kubernetesLogin("${kubernetesToken}", "${namespace}")
-    }
 
     echo "Updating Kubernetes resources via Helm..."
     // Install or upgrade via helm
