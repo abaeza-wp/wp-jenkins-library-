@@ -27,6 +27,8 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
                     // If a source namespace is not provided then we assume we are promoting from a namespace to the same namespace in another environment
                     sourceNamespace = "${namespace}-${functionalEnvironment}"
                 }
+                echo "Source credentialId: ${sourceCredentialId}"
+                echo "Source credential: ${destinationCredentialId}"
                 //Obtain tokens
                 def sourceRegistryToken = kubernetesLogin(sourceProfile.cluster.api, clusterUsername, sourceCredentialId, sourceNamespace, false)
                 def destinationRegistryToken = kubernetesLogin(destinationProfile.cluster.api, null, destinationCredentialId, destinationNamespace, false)

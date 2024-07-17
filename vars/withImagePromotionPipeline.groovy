@@ -61,9 +61,6 @@ def call() {
         }
 
         environment {
-            // Read Jenkins configuration
-            config = readYaml(file: "deployment/jenkins.yaml")
-
             // The name of the service
             SERVICE_NAME = "${BuildContext.componentName}"
 
