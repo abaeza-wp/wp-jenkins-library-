@@ -117,6 +117,14 @@ def call() {
                 }
             }
             stage("Build & Test App") {
+                agent {
+                    kubernetes {
+                        cloud 'kubernetes-ephemeral-agents'
+                        inheritFrom 'hydra-dind'
+                        defaultContainer 'hydra-dind'
+                        label 'hydra-dind'
+                    }
+                }
                 environment {
                     // Need full path of current workspace for setting path of nvm on $PATH
                     WORKSPACE = pwd()
