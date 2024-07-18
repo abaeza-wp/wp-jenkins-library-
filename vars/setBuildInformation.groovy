@@ -15,6 +15,8 @@ def call() {
     env.BUILD_COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
     env.GIT_COMMIT_TIMESTAMP = sh(script: 'git show -s --format=%cI HEAD', returnStdout: true).trim()
 
+    //Note: env.BRANCH_NAME will only work with multibranch pipelines
+
     env.IS_PR_BUILD = env.BRANCH_NAME == null ? false : env.BRANCH_NAME.startsWith("PR-")
 
     echo """

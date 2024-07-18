@@ -238,10 +238,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
@@ -252,10 +252,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
@@ -268,10 +268,10 @@ def call() {
                 when {
                     allOf {
                         expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
+//                        anyOf {
+//                            branch 'master'
+//                            branch 'main'
+//                        }
                     }
                 }
                 steps {
