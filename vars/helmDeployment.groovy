@@ -33,9 +33,14 @@ def call(String functionalEnvironment, namespace, String token) {
     def environment = BuildContext.currentBuildProfile.cluster.environment
     def clusterName = BuildContext.currentBuildProfile.cluster.clusterName
 
+    echo "Updating helm dependencies..."
+    sh """
+            helm dependency update ${chartLocation}
+    """
+
     echo "Packaging helm release..."
     sh """
-            helm package ${chartLocation} --dependency-update --app-version=${appVersion}
+            helm package ${chartLocation} --app-version=${appVersion}
     """
 
     def releasePackageFileName = sh(script: "printf '%s' ${appName}-*.tgz", returnStdout: true).trim()

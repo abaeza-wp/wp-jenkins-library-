@@ -13,8 +13,36 @@ def call() {
         {
             kubernetes
             {
-                label "cd-agent"
-                defaultContainer "cd-agent"
+//                label "cd-agent"
+//                defaultContainer "cd-agent"
+//TODO: USing hydra since cd-agent is not yet available
+                label 'hydra'
+                defaultContainer 'hydra'
+                yaml """
+                spec:
+                  containers:
+                  - name: hydra
+                    image: artifactory.luigi.worldpay.io/docker/jenkins-agents/hydra:latest
+                    imagePullPolicy: Always
+                    command:
+                    - cat
+                    tty: true
+                    resources:
+                      limits:
+                        memory: 8Gi
+                        cpu: 4
+                      requests:
+                        memory: 8Gi
+                        cpu: 2
+                  - name: jnlp
+                    resources:
+                      limits:
+                        memory: 500Mi
+                        cpu: 0.5
+                      requests:
+                        memory: 250Mi
+                        cpu: 0.25
+                 """
             }
         }
 
