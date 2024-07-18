@@ -59,7 +59,7 @@ def call(String functionalEnvironment, namespace, String token) {
         options.add("--set global.functionalEnvironment=${functionalEnvironment}")
     }
 
-    if (env.IS_PR_BUILD) {
+    if (env.IS_PR_BUILD == true) {
         //Will append the branch name in the form of "-pr-XXX"
         releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
