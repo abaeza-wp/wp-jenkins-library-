@@ -79,7 +79,7 @@ def call(String functionalEnvironment, namespace, String token) {
         "--history-max 3",
         "--install",
         "--wait",
-        "--timeout 120s"
+        "--timeout 180s"
     ]).join(' ')
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
