@@ -33,10 +33,6 @@ def call(String functionalEnvironment, namespace, String token) {
     def environment = BuildContext.currentBuildProfile.cluster.environment
     def clusterName = BuildContext.currentBuildProfile.cluster.clusterName
 
-    echo "Updating Chart information via helm repo update..."
-    sh """
-            helm repo update
-    """
     echo "Packaging helm release..."
     sh """
             helm package ${chartLocation} --dependency-update --app-version=${appVersion}
