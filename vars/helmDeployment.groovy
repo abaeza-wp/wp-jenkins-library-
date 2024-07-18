@@ -60,6 +60,9 @@ def call(String functionalEnvironment, namespace, String token) {
     }
 
     if (env.IS_PR_BUILD == 'true') {
+
+        //TODO: When using a PR deployment maybe reduce replicas to 1
+
         //Will append the branch name in the form of "-pr-XXX"
         releaseName += "-${env.BRANCH_NAME}".toLowerCase()
         options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
