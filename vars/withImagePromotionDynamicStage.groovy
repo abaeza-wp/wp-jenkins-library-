@@ -26,8 +26,7 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
                 def sourceNamespaceValue = (sourceNamespace != null) ? sourceNamespace : "${namespace}-${functionalEnvironment}"
 
                 // If a sourceCredentialId is not provided then we assume we are promoting from a namespace to the same namespace in another environment
-                def sourceCredentialIdValue = (sourceCredentialId != null) ? sourceCredentialId : TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
-
+                def sourceCredentialIdValue = (sourceCredentialId != null) ? sourceCredentialId : TokenHelper.tokenNameOf(sourceEnvironment, destinationNamespace, awsRegion)
 
                 //Obtain tokens
                 def sourceRegistryToken = kubernetesLogin(sourceProfile.cluster.api, clusterUsername, sourceCredentialIdValue, sourceNamespaceValue, false)
