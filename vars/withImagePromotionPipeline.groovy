@@ -67,24 +67,12 @@ def call() {
 
         stages {
             stage("[stage] Prepare Build Environment") {
-//                when {
-//                    anyOf {
-//                        branch 'master'
-//                        branch 'main'
-//                    }
-//                }
                 steps {
                     switchEnvironment("stage", "${params.awsRegion}")
                     setBuildInformation()
                 }
             }
             stage("[stage] Promote Image") {
-//                when {
-//                    anyOf {
-//                        branch 'master'
-//                        branch 'main'
-//                    }
-//                }
                 steps {
                     script {
                         withImagePromotionDynamicStage("stage", "stage")
@@ -92,14 +80,6 @@ def call() {
                 }
             }
             stage("[stage] Deployment") {
-//                when {
-//                    allOf {
-//                        anyOf {
-//                            branch 'master'
-//                            branch 'main'
-//                        }
-//                    }
-//                }
                 steps {
                     script {
                         withHelmDeploymentDynamicStage()
@@ -107,23 +87,11 @@ def call() {
                 }
             }
             stage("[prod] Prepare Build Environment") {
-//                when {
-//                    anyOf {
-//                        branch 'master'
-//                        branch 'main'
-//                    }
-//                }
                 steps {
                     switchEnvironment("prod", "${params.awsRegion}")
                 }
             }
             stage("[prod] Promote Image") {
-//                when {
-//                    anyOf {
-//                        branch 'master'
-//                        branch 'main'
-//                    }
-//                }
                 steps {
                     script {
                         withImagePromotionDynamicStage("stage", "prod")
@@ -131,12 +99,6 @@ def call() {
                 }
             }
             stage("[prod] Deployment") {
-//                when {
-//                    anyOf {
-//                        branch 'master'
-//                        branch 'main'
-//                    }
-//                }
                 steps {
                     script {
                         withHelmDeploymentDynamicStage()
