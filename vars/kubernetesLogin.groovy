@@ -24,7 +24,7 @@ def call(String clusterApi, String clusterUsername, String credentialId, String 
     withCredentials([
         string(credentialsId: credentialId, variable: "JENKINS_TOKEN")
     ]) {
-        echo "Logging into cluster..."
+        echo "Logging into cluster using credentialId: ${credentialId} ..."
 
         def params = ""
         if (ignoreTls) {
