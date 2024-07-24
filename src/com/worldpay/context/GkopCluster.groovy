@@ -21,7 +21,7 @@ class GkopCluster {
     }
 
     String isDev() {
-        return environment == "dev"
+        return environment == 'dev'
     }
 
     String getAwsRegion() {
@@ -32,7 +32,6 @@ class GkopCluster {
         return clusterName
     }
 
-
     String getApi() {
         return api
     }
@@ -40,4 +39,5 @@ class GkopCluster {
     String getImageRegistry() {
         return imageRegistry
     }
+
 }

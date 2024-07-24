@@ -3,7 +3,6 @@ def call(String sourceEnvironment, String destinationEnvironment, String awsRegi
 }
 
 def call(String sourceNamespace, String sourceRegistryToken, String sourceRegistry, String destinationNamespace, String destinationRegistryToken, String destinationRegistry) {
-
     //When promoting an image the namespace should be the same
     def imageName = "${env.SERVICE_NAME}"
     def imageTag = "${env.BUILD_APP_VERSION}"
@@ -20,7 +19,6 @@ def call(String sourceNamespace, String sourceRegistryToken, String sourceRegist
             imageTag)
 }
 
-
 def promoteImage(String sourceNamespace, String sourceRegistryToken, String sourceRegistry, String destinationNamespace, String destinationRegistryToken, String destinationRegistry, String imageName, String imageTag) {
     script {
         def sourceImage = "$sourceRegistry/$sourceNamespace/$imageName:$imageTag"
@@ -29,8 +27,8 @@ def promoteImage(String sourceNamespace, String sourceRegistryToken, String sour
         echo "Will attempt to promote image '${imageName}:${imageTag}' from '${sourceImage}' to '${destinationImage}'"
 
         // Logging to registries
-        login("ocp", sourceRegistryToken, sourceRegistry)
-        login("ocp", destinationRegistryToken, destinationRegistry)
+        login('ocp', sourceRegistryToken, sourceRegistry)
+        login('ocp', destinationRegistryToken, destinationRegistry)
 
         // Copying image
         copyImage(sourceImage, destinationImage)
@@ -55,9 +53,9 @@ def copyImage(srcImage, destImage) {
  */
 def copyImage(srcImage, srcToken, destImage, destToken) {
     script {
-        echo "Copying Image from source repository to destination"
+        echo 'Copying Image from source repository to destination'
 
-        def args = ""
+        def args = ''
         if (srcToken != null) {
             args += "--src-registry-token=\"${srcToken}\""
         }
@@ -85,11 +83,11 @@ def login(username, password, registry) {
 
 def logout() {
     script {
-        echo "Attempting to logout from all registries"
-        sh """
+        echo 'Attempting to logout from all registries'
+        sh '''
              export REGISTRY_AUTH_FILE=~/auth.json
              skopeo logout --all
-            """
+            '''
     }
 }
 

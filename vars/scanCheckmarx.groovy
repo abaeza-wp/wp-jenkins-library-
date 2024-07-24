@@ -3,26 +3,26 @@
  */
 
 def call() {
-    def projectName = env.BRANCH_NAME == "master" ? "${env.SERVICE_NAME}_prod" : "${env.SERVICE_NAME}_dev"
+    def projectName = env.BRANCH_NAME == 'master' ? "${env.SERVICE_NAME}_prod" : "${env.SERVICE_NAME}_dev"
 
     // Run Checkmarx scanner using Jenkins plugin
-    step([$class                       : "CxScanBuilder",
+    step([$class                       : 'CxScanBuilder',
         comment                      : "version: ${env.BUILD_APP_VERSION}",
         credentialsId                : "${env.CHECKMARX_API_CREDENTIAL_ID}",
-        excludeFolders               : "!*.class, !*.jar, !*.sql, **/.gradle, .gradle, !*.gradle, **/build, **/target, **/src/test, .git, deployment, docs, openapi, **/node_modules, **/nvd, **/blackduckscan, **/native-libs, performance-testing",
+        excludeFolders               : '!*.class, !*.jar, !*.sql, **/.gradle, .gradle, !*.gradle, **/build, **/target, **/src/test, .git, deployment, docs, openapi, **/node_modules, **/nvd, **/blackduckscan, **/native-libs, performance-testing',
         generatePdfReport            : true,
         vulnerabilityThresholdEnabled: true,
-        highThreshold                : "0",
-        mediumThreshold              : "0",
-        lowThreshold                 : "0",
+        highThreshold                : '0',
+        mediumThreshold              : '0',
+        lowThreshold                 : '0',
         projectName                  : projectName,
-        serverUrl                    : "https://worldpay.checkmarx.net",
-        sourceEncoding               : "1",
+        serverUrl                    : 'https://worldpay.checkmarx.net',
+        sourceEncoding               : '1',
         useOwnServerCredentials      : true,
         teamPath                     : "${env.CHECKMARX_TEAM_PATH}",
         incremental                  : false,
-        preset                       : "100003",
-        filterPattern                : "!*.class, !*.jar, !*.war",
+        preset                       : '100003',
+        filterPattern                : '!*.class, !*.jar, !*.war',
         waitForResultsEnabled        : true
     ])
 

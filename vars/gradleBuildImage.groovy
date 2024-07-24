@@ -18,17 +18,16 @@ def call() {
     executeImageBuild(profile, kubernetesToken)
 }
 
-
 /*
  Used to execute the container build.
  If you really need to deviate with building the image, change the function below...
  */
 
 def executeImageBuild(profile, kubernetesToken) {
-    def profiles = ""
+    def profiles = ''
 
     if (params.release) {
-        profiles += "-Prelease"
+        profiles += '-Prelease'
     }
 
     /**

@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        "eu-west-1",
-        "us-east-1",
+        'eu-west-1',
+        'us-east-1',
     ]
 }
 
@@ -14,7 +14,7 @@ def call() {
             kubernetes {
                 label 'hydra'
                 defaultContainer 'hydra'
-                yaml """
+                yaml '''
                 spec:
                   containers:
                   - name: hydra
@@ -38,25 +38,25 @@ def call() {
                       requests:
                         memory: 250Mi
                         cpu: 0.25
-                 """
+                 '''
             }
         }
         parameters {
             choice(
-                    name: "awsRegion",
+                    name: 'awsRegion',
                     choices: getAwsRegions(),
-                    description: "The target deployment aws region."
+                    description: 'The target deployment aws region.'
                     )
             booleanParam(
-                    name: "release",
+                    name: 'release',
                     defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
+                    description: 'Runs additional scans for release deployments, not needed for development'
                     )
         }
 
         environment {
             // Read Jenkins configuration
-            config = readYaml(file: "deployment/jenkins.yaml")
+            config = readYaml(file: 'deployment/jenkins.yaml')
 
             // The name of the service
             SERVICE_NAME = "${BuildContext.componentName}"
@@ -69,9 +69,9 @@ def call() {
             // Blackduck
             BLACKDUCK_ENABLED = "${config.blackduck.enabled}"
             BLACKDUCK_PROJECT_NAME = "${config.blackduck.projectName}"
-            BLACKDUCK_URL = "https://fis2.app.blackduck.com"
-            BLACKDUCK_DETECT_SCRIPT_URL = "https://detect.synopsys.com/detect8.sh"
-            BLACKDUCK_DETECT_SCRIPT = "detect8.sh"
+            BLACKDUCK_URL = 'https://fis2.app.blackduck.com'
+            BLACKDUCK_DETECT_SCRIPT_URL = 'https://detect.synopsys.com/detect8.sh'
+            BLACKDUCK_DETECT_SCRIPT = 'detect8.sh'
             BLACKDUCK_FATJAR = "${env.SERVICE_NAME}/build/libs/${env.SERVICE_NAME}-0.0-SNAPSHOT.jar"
             BLACKDUCK_API_CREDENTIAL_ID = "${config.blackduck.api.credentialId}"
 
@@ -107,16 +107,15 @@ def call() {
         }
 
         stages {
-            stage("[dev] Prepare Build Environment") {
+            stage('[dev] Prepare Build Environment') {
                 steps {
-                    switchEnvironment("dev", "${params.awsRegion}")
+                    switchEnvironment('dev', "${params.awsRegion}")
                     setBuildInformation()
                 }
             }
-            stage("Build & Check App") {
+            stage('Build & Check App') {
                 parallel {
-                    stage("Build & Test App") {
-
+                    stage('Build & Test App') {
                         agent {
                             kubernetes {
                                 cloud 'kubernetes-ephemeral-agents'
@@ -134,18 +133,18 @@ def call() {
                         }
                         post {
                             always {
-                                echo "Archiving test reports"
+                                echo 'Archiving test reports'
                                 //Archive all HTML reports
                                 archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
 
                                 //Archive as PDF reports
-                                archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
-                                archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
-                                archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                                archiveReportAsPdf('Unit', "${env.SERVICE_NAME}/build/reports/tests/test", 'index.html', 'unit-test-report.pdf', false)
+                                archiveReportAsPdf('Code Coverage', "${env.SERVICE_NAME}/build/reports/jacoco/test/html", 'index.html', 'coverage-report.pdf', false)
+                                archiveReportAsPdf('BDD', "${env.SERVICE_NAME}/build/reports/tests/bddTest", 'index.html', 'bdd-report.pdf', true)
                             }
                         }
                     }
-                    stage("Build Image") {
+                    stage('Build Image') {
                         environment {
                             // Need full path of current workspace for setting path of nvm on $PATH
                             WORKSPACE = pwd()
@@ -157,7 +156,7 @@ def call() {
                 }
             }
 
-            stage("[dev] Deployment") {
+            stage('[dev] Deployment') {
                 when {
                     expression { params.release }
                     anyOf {
@@ -172,9 +171,9 @@ def call() {
                 }
             }
 
-            stage("Security Testing") {
+            stage('Security Testing') {
                 parallel {
-                    stage("Image Scan (Sysdig)") {
+                    stage('Image Scan (Sysdig)') {
                         when {
                             allOf {
                                 expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
@@ -185,7 +184,7 @@ def call() {
                         }
                     }
 
-                    stage("Static Analysis (Checkmarx)") {
+                    stage('Static Analysis (Checkmarx)') {
                         when {
                             expression { env.CHECKMARX_ENABLED.toBoolean() }
                         }
@@ -194,7 +193,7 @@ def call() {
                         }
                     }
 
-                    stage("Dependency Analysis (BlackDuck)") {
+                    stage('Dependency Analysis (BlackDuck)') {
                         when {
                             allOf {
                                 expression { env.BLACKDUCK_ENABLED.toBoolean() }
@@ -205,7 +204,7 @@ def call() {
                         }
                     }
 
-                    stage("OWASP Dependency Checker") {
+                    stage('OWASP Dependency Checker') {
                         when {
                             allOf {
                                 expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
@@ -217,9 +216,8 @@ def call() {
                     }
                 }
             }
-            stage("Archive reports in S3") {
+            stage('Archive reports in S3') {
                 when {
-
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
@@ -234,7 +232,7 @@ def call() {
                 }
             }
 
-            stage("[stage] Prepare Build Environment") {
+            stage('[stage] Prepare Build Environment') {
                 when {
                     allOf {
                         expression { params.release }
@@ -245,10 +243,10 @@ def call() {
                     }
                 }
                 steps {
-                    switchEnvironment("stage", "${params.awsRegion}")
+                    switchEnvironment('stage', "${params.awsRegion}")
                 }
             }
-            stage("[stage] Start Image Promotion") {
+            stage('[stage] Start Image Promotion') {
                 when {
                     allOf {
                         expression { params.release }
@@ -260,11 +258,11 @@ def call() {
                 }
                 steps {
                     script {
-                        withImagePromotionDynamicStage("dev", "stage", "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
+                        withImagePromotionDynamicStage('dev', 'stage', "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
                     }
                 }
             }
-            stage("[stage] Deployment") {
+            stage('[stage] Deployment') {
                 when {
                     allOf {
                         expression { params.release }
@@ -280,7 +278,7 @@ def call() {
                     }
                 }
             }
-            stage("Performance Testing") {
+            stage('Performance Testing') {
                 when {
                     allOf {
                         expression { params.release }

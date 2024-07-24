@@ -1,6 +1,7 @@
 package com.worldpay
 
 class PipelineCallbacksConfig {
+
     Map<String, Closure> bodies = new HashMap<>()
 
     void registerSkip(String stage, Closure body) {
@@ -34,4 +35,5 @@ class PipelineCallbacksConfig {
     void registerAfterAll(Closure body) {
         bodies.put('after:all', body)
     }
+
 }

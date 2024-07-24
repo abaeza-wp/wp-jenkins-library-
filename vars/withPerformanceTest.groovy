@@ -5,9 +5,8 @@ import com.worldpay.context.BuildContext
  */
 
 def call() {
-
     // Initially sleep to give time for the deployment...
-    echo "Waiting for deployment..."
+    echo 'Waiting for deployment...'
     sleep time: env.PERFORMANCE_TESTING_WAIT_SECONDS, unit: 'SECONDS'
 
     def profileName = BuildContext.currentBuildProfile.profileName
@@ -16,10 +15,10 @@ def call() {
     def statusUrl = "https://${profile.deploy.hostname}/status"
 
     retry(6) {
-        echo "Checking deployment ready..."
+        echo 'Checking deployment ready...'
 
         def response = sh(script: "curl -sl ${statusUrl} | grep -i OK", returnStdout: true)
-        if (!response.contains("OK")) {
+        if (!response.contains('OK')) {
             sleep time: 30, unit: 'SECONDS'
             error "Deployment not ready for performance testing, url: ${statusUrl}, response: ${response}"
         }
@@ -41,11 +40,11 @@ def call() {
 def publishPerformanceTest() {
     catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
         // Rename the report folder
-        sh """
+        sh '''
                 mv build/reports/gatling/performance* build/reports/gatling/performance
-            """
+            '''
 
         // Archive it as a PDF
-        archiveReportAsPdf("Performance Testing", "build/reports/gatling/performance", "index.html", "performance-tests.pdf", true)
+        archiveReportAsPdf('Performance Testing', 'build/reports/gatling/performance', 'index.html', 'performance-tests.pdf', true)
     }
 }

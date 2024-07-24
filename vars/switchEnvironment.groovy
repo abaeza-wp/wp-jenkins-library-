@@ -5,8 +5,8 @@ def call(String environment, String awsRegion) {
     echo """
     Successfully switched environment context to:
 
-			Environment: ${currentBuildConfig.cluster.environment}
-			AWS Region: ${currentBuildConfig.cluster.awsRegion}
-			Profile Name: ${currentBuildConfig.profileName}
-		"""
+            Environment: ${currentBuildConfig.cluster.environment}
+            AWS Region: ${currentBuildConfig.cluster.awsRegion}
+            Profile Name: ${currentBuildConfig.profileName}
+        """
 }

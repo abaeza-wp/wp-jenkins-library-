@@ -2,9 +2,9 @@ import com.worldpay.context.BuildContext
 
 def getProfiles() {
     return [
-        "dev-euwest1",
-        "staging-euwest1",
-        "staging-useast1",
+        'dev-euwest1',
+        'staging-euwest1',
+        'staging-useast1',
     ]
 }
 
@@ -16,13 +16,12 @@ def tokenNameOf(namespace, profileName) {
 }
 
 def call() {
-
     pipeline {
         agent {
             kubernetes {
                 label 'hydra'
                 defaultContainer 'hydra'
-                yaml """
+                yaml '''
                 spec:
                   containers:
                   - name: hydra
@@ -46,24 +45,24 @@ def call() {
                       requests:
                         memory: 250Mi
                         cpu: 0.25
-                 """
+                 '''
             }
         }
         parameters {
             choice(
-                    name: "profile",
+                    name: 'profile',
                     choices: getProfiles(),
-                    description: "The target deployment profile."
+                    description: 'The target deployment profile.'
                     )
             booleanParam(
-                    name: "release",
+                    name: 'release',
                     defaultValue: true,
-                    description: "Runs additional scans for release deployments, not needed for development"
+                    description: 'Runs additional scans for release deployments, not needed for development'
                     )
         }
         environment {
             // Read Jenkins configuration
-            config = readYaml(file: "deployment/jenkins.yaml")
+            config = readYaml(file: 'deployment/jenkins.yaml')
 
             // The name of the service
             SERVICE_NAME = "${BuildContext.componentName}"
@@ -76,9 +75,9 @@ def call() {
             // Blackduck
             BLACKDUCK_ENABLED = "${config.blackduck.enabled}"
             BLACKDUCK_PROJECT_NAME = "${config.blackduck.projectName}"
-            BLACKDUCK_URL = "https://fis2.app.blackduck.com"
-            BLACKDUCK_DETECT_SCRIPT_URL = "https://detect.synopsys.com/detect8.sh"
-            BLACKDUCK_DETECT_SCRIPT = "detect8.sh"
+            BLACKDUCK_URL = 'https://fis2.app.blackduck.com'
+            BLACKDUCK_DETECT_SCRIPT_URL = 'https://detect.synopsys.com/detect8.sh'
+            BLACKDUCK_DETECT_SCRIPT = 'detect8.sh'
             BLACKDUCK_FATJAR = "${env.SERVICE_NAME}/build/libs/${env.SERVICE_NAME}-0.0-SNAPSHOT.jar"
             BLACKDUCK_API_CREDENTIAL_ID = "${config.blackduck.api.credentialId}"
 
@@ -121,19 +120,19 @@ def call() {
         }
 
         stages {
-            stage("Set Build Information") {
+            stage('Set Build Information') {
                 steps {
-                    switchEnvironment("dev", "${env.AWS_REGION}")
+                    switchEnvironment('dev', "${env.AWS_REGION}")
                     setBuildInformation()
                 }
             }
-            stage("Build Image") {
+            stage('Build Image') {
                 steps {
                     gradleBuildImage()
                 }
             }
 
-            stage("Deployment") {
+            stage('Deployment') {
                 when {
                     expression { params.release }
                     anyOf {
@@ -148,11 +147,11 @@ def call() {
                 }
             }
 
-            stage("Performance") {
+            stage('Performance') {
                 when {
                     allOf {
                         expression { params.release }
-                        expression { params.profile.contains("staging") }
+                        expression { params.profile.contains('staging') }
                         expression {
                             env.PERFORMANCE_TESTING_ENABLED.toBoolean()
                         }
@@ -163,9 +162,9 @@ def call() {
                 }
             }
 
-            stage("Security Testing") {
+            stage('Security Testing') {
                 parallel {
-                    stage("Image Scan (Sysdig)") {
+                    stage('Image Scan (Sysdig)') {
                         when {
                             allOf {
                                 expression {
@@ -178,7 +177,7 @@ def call() {
                         }
                     }
 
-                    stage("Static Analysis (Checkmarx)") {
+                    stage('Static Analysis (Checkmarx)') {
                         when {
                             expression {
                                 env.CHECKMARX_ENABLED.toBoolean()
@@ -189,7 +188,7 @@ def call() {
                         }
                     }
 
-                    stage("Dependency Analysis (BlackDuck)") {
+                    stage('Dependency Analysis (BlackDuck)') {
                         when {
                             allOf {
                                 expression {
@@ -202,7 +201,7 @@ def call() {
                         }
                     }
 
-                    stage("OWASP Dependency Checker") {
+                    stage('OWASP Dependency Checker') {
                         when {
                             allOf {
                                 expression {
@@ -215,33 +214,33 @@ def call() {
                         }
                     }
 
-                    stage("Code Coverage Report") {
+                    stage('Code Coverage Report') {
                         steps {
-                            archiveReportAsPdf("Code Coverage", "${env.SERVICE_NAME}/build/reports/jacoco/test/html", "index.html", "coverage-report.pdf", false)
+                            archiveReportAsPdf('Code Coverage', "${env.SERVICE_NAME}/build/reports/jacoco/test/html", 'index.html', 'coverage-report.pdf', false)
                         }
                     }
 
-                    stage("Unit Tests Report") {
+                    stage('Unit Tests Report') {
                         steps {
-                            archiveReportAsPdf("Unit", "${env.SERVICE_NAME}/build/reports/tests/test", "index.html", "unit-test-report.pdf", false)
+                            archiveReportAsPdf('Unit', "${env.SERVICE_NAME}/build/reports/tests/test", 'index.html', 'unit-test-report.pdf', false)
                         }
                     }
 
-                    stage("BDD Report") {
+                    stage('BDD Report') {
                         steps {
-                            archiveReportAsPdf("BDD", "${env.SERVICE_NAME}/build/reports/tests/bddTest", "index.html", "bdd-report.pdf", true)
+                            archiveReportAsPdf('BDD', "${env.SERVICE_NAME}/build/reports/tests/bddTest", 'index.html', 'bdd-report.pdf', true)
                         }
                     }
                 }
             }
 
-            stage("Archive reports in S3") {
+            stage('Archive reports in S3') {
                 when {
                     allOf {
                         expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
                         expression { params.release }
                         expression {
-                            params.profile.contains("staging")
+                            params.profile.contains('staging')
                         }
                     }
                 }
@@ -250,7 +249,7 @@ def call() {
                 }
             }
 
-            stage("Archive HTML Reports artifacts") {
+            stage('Archive HTML Reports artifacts') {
                 steps {
                     archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
                 }

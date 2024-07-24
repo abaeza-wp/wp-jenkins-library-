@@ -22,15 +22,14 @@ def call(String clusterUsername, String credentialId, String namespace, Boolean 
 
 def call(String clusterApi, String clusterUsername, String credentialId, String namespace, Boolean ignoreTls) {
     withCredentials([
-        string(credentialsId: credentialId, variable: "JENKINS_TOKEN")
+        string(credentialsId: credentialId, variable: 'JENKINS_TOKEN')
     ]) {
         echo "Logging into cluster using credentialId: ${credentialId} ..."
 
-        def params = ""
+        def params = ''
         if (ignoreTls) {
-            params += "--insecure-skip-tls-verify"
+            params += '--insecure-skip-tls-verify'
         }
-
 
         if (clusterUsername != null) {
             sh "oc login ${clusterApi} ${params} --username=${clusterUsername} --password=${JENKINS_TOKEN}"
@@ -42,7 +41,7 @@ def call(String clusterApi, String clusterUsername, String credentialId, String 
             // Set namespace for service (fail-safe) - allowed to fail as may not exist yet
             sh "oc project ${namespace} || true"
         }
-        kubernetesToken = sh(script: "oc whoami -t", returnStdout: true).trim()
+        kubernetesToken = sh(script: 'oc whoami -t', returnStdout: true).trim()
         return kubernetesToken
     }
 }

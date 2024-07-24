@@ -1,6 +1,7 @@
 package com.worldpay.context
 
 class BuildProfile {
+
     private Object profileName
     private GkopCluster cluster
 
@@ -16,4 +17,5 @@ class BuildProfile {
     GkopCluster getCluster() {
         return cluster
     }
+
 }

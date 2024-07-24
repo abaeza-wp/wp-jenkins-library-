@@ -16,7 +16,6 @@ def call(String type, String tenant, String component, Closure body) {
 }
 
 def call(String type, String tenant, String component, List<String> functionalEnvironments, Closure body) {
-
     BuildContext.initialize(tenant, component, functionalEnvironments)
 
     def callbacks = new PipelineCallbacksConfig()
@@ -26,12 +25,12 @@ def call(String type, String tenant, String component, List<String> functionalEn
     body.delegate = dsl
     body.call() // register pipeline config with callbacks
 
-    dsl.onStageFailure() {
-        currentBuild.result = "FAILURE"
+    dsl.onStageFailure {
+        currentBuild.result = 'FAILURE'
     }
 
     switch (type) {
-        case "java":
+        case 'java':
             withImagePromotionPipeline()
             break
         default:

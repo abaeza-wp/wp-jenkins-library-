@@ -5,11 +5,10 @@
  */
 
 def call(profile) {
-
-    echo "Creating namespace..."
+    echo 'Creating namespace...'
 
     // Create the namespace (allowed to fail)
-    def labels = ""
+    def labels = ''
     if (profile.deploy.create_namespace.buc_code != null) {
         labels += "--description=\"${profile.deploy.create_namespace.buc_code}\""
     }
@@ -29,6 +28,6 @@ def call(profile) {
 
     if (fileExists('deployment/dev-namespace.yaml')) {
         // Setup namespace secrets
-        sh "cat \"deployment/dev-namespace.yaml\" | envsubst | oc apply -f -"
+        sh 'cat \"deployment/dev-namespace.yaml\" | envsubst | oc apply -f -'
     }
 }

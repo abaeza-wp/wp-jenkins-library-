@@ -9,10 +9,10 @@ def call(Boolean isRelease, String clusterUsername, String namespace, String ign
     def ignoreTlsBoolean = ignoreTls as Boolean
     def kubernetesToken = kubernetesLogin(clusterUsername, "${env.SVC_TOKEN}", namespace, ignoreTlsBoolean)
 
-    def profiles = ""
+    def profiles = ''
 
     if (isRelease) {
-        profiles += "-Prelease"
+        profiles += '-Prelease'
     }
 
     def profile = BuildContext.currentBuildProfile
