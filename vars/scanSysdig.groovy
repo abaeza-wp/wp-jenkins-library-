@@ -7,11 +7,11 @@ import com.worldpay.context.BuildContext
 
 def call(String imageNamespace, String clusterUsername) {
     withCredentials([
-        string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: "SYSDIG_API_KEY")
+        string(credentialsId: "${env.SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID}", variable: 'SYSDIG_API_KEY')
     ]) {
-        echo "Running Sysdig scan..."
+        echo 'Running Sysdig scan...'
         def hasSysdigScanPassed = false
-        def resultsUrl = ""
+        def resultsUrl = ''
 
         def kubernetesToken = kubernetesLogin(clusterUsername, "${env.SVC_TOKEN}", imageNamespace)
 
@@ -24,7 +24,7 @@ def call(String imageNamespace, String clusterUsername) {
         echo "Image URL: ${imageUrl}"
 
         try {
-            echo "Executing sysdig scan..."
+            echo 'Executing sysdig scan...'
             sh """
                 SECURE_API_TOKEN=${SYSDIG_API_KEY} \
                 REGISTRY_USER=${clusterUsername} \
@@ -44,20 +44,20 @@ def call(String imageNamespace, String clusterUsername) {
             """
             archiveArtifacts artifacts: "${env.SERVICE_NAME}-sysdig-scan-result.json"
 
-            echo "Checking status.policy in the sysdig report"
+            echo 'Checking status.policy in the sysdig report'
             def scanOutput = readJSON file: "./${env.SERVICE_NAME}-sysdig-scan-result.json"
 
-            hasSysdigScanPassed = scanOutput.policies.status == "accepted" || scanOutput.policies.status == "passed"
+            hasSysdigScanPassed = scanOutput.policies.status == 'accepted' || scanOutput.policies.status == 'passed'
             echo "Report URL: ${scanOutput.info.resultURL}"
             resultsUrl = scanOutput.info.resultURL
 
             if (!hasSysdigScanPassed) {
-                unstable("Sysdig scan failed - policy violation")
+                unstable('Sysdig scan failed - policy violation')
             }
         }
         catch (err) {
             echo "Caught: ${err}"
-            unstable("Sysdig scan failed")
+            unstable('Sysdig scan failed')
         }
         finally {
             sendSlackNotificationSysdig(hasSysdigScanPassed, resultsUrl)

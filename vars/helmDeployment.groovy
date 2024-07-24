@@ -1,10 +1,8 @@
 import com.worldpay.context.BuildContext
 
-
 def call(String namespace, String token) {
     call(null, namespace, token)
 }
-
 
 /*
  Used to update the Kubernetes resources, in all environments (including production).
@@ -22,7 +20,6 @@ def call(String functionalEnvironment, namespace, String token) {
         kubernetesLogin("${kubernetesToken}", "${namespace}")
     }
 
-
     def appName = BuildContext.fullName
     def releaseName = appName
     //Note release name needs to be max 53 chars as per Helm validation https://github.com/helm/helm/blob/ff03c66d4475d9daedeee67c18884461441c2e15/pkg/chartutil/validate_name.go#L61
@@ -33,19 +30,19 @@ def call(String functionalEnvironment, namespace, String token) {
     def environment = BuildContext.currentBuildProfile.cluster.environment
     def clusterName = BuildContext.currentBuildProfile.cluster.clusterName
 
-    echo "Updating helm dependencies..."
+    echo 'Updating helm dependencies...'
     sh """
             helm dependency update ${chartLocation}
     """
 
-    echo "Packaging helm release..."
+    echo 'Packaging helm release...'
     sh """
             helm package ${chartLocation} --app-version=${appVersion}
     """
 
     def releasePackageFileName = sh(script: "printf '%s' ${appName}-*.tgz", returnStdout: true).trim()
 
-    echo "Archiving Helm release..."
+    echo 'Archiving Helm release...'
     archiveArtifacts artifacts: "${releasePackageFileName}"
 
     def options = [
@@ -60,7 +57,6 @@ def call(String functionalEnvironment, namespace, String token) {
     }
 
     if (env.IS_PR_BUILD == 'true') {
-
         //TODO: When using a PR deployment maybe reduce replicas to 1
 
         //Will append the branch name in the form of "-pr-XXX"
@@ -68,7 +64,7 @@ def call(String functionalEnvironment, namespace, String token) {
         options.add("--set global.fullnameOverride=${appName}-${env.BRANCH_NAME}")
 
         //On PR Builds we clean up the previous PR deployment before re-installing
-        echo "Cleaning up previous release..."
+        echo 'Cleaning up previous release...'
         //--ignore-not-found is used to make helm succeed in the case where ea previous helm chart was not installed
         sh """
             helm uninstall ${releaseName} --ignore-not-found
@@ -79,15 +75,15 @@ def call(String functionalEnvironment, namespace, String token) {
     options.add("--namespace=${namespace}") //Just for extra safety
 
     def optionsString = (options + [
-    "--history-max 3",
-    "--install",
-    "--wait",
-    "--timeout 180s"
+    '--history-max 3',
+    '--install',
+    '--wait',
+    '--timeout 180s'
     ]).join(' ')
 
     def valuesFilesString = getAllValuesFilesIfExist(chartLocation, environment, functionalEnvironment, awsRegion)
 
-    echo "Updating Kubernetes resources via Helm..."
+    echo 'Updating Kubernetes resources via Helm...'
     // Install or upgrade via helm
     sh """
         helm upgrade ${releaseName} ./${releasePackageFileName} ${optionsString} -f ${valuesFilesString}
@@ -95,7 +91,6 @@ def call(String functionalEnvironment, namespace, String token) {
 }
 
 String getAllValuesFilesIfExist(String chartLocation, String environment, String functionalEnvironment, String awsRegion) {
-
     def valuesFilesFound = ["${chartLocation}/values.yaml"] //This is the default values file.
     //Support for environment specific values.<env>.yaml e.g values.dev.yaml, values.stage.yaml, values.prod.yaml
     if (fileExists("${chartLocation}/values.${environment}.yaml")) {

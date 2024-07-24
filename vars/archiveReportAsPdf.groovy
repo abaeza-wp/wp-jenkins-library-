@@ -3,10 +3,10 @@ def call(reportName, reportDir, htmlReportFile, outputPdf, waitForJS) {
     publishHtmlReport(reportDir, htmlReportFile, reportName)
 
     // Convert HTML report to PDF
-    jsParams = ""
+    jsParams = ''
 
     if (waitForJS) {
-        jsParams += "--javascript-delay 10000"
+        jsParams += '--javascript-delay 10000'
     }
 
     //Set log level to FATAL only to reduce noise

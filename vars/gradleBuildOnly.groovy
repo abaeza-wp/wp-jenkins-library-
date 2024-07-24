@@ -3,11 +3,10 @@
  */
 
 def call(Boolean isRelease) {
-
-    def profiles = ""
+    def profiles = ''
 
     if (isRelease) {
-        profiles += "-Prelease"
+        profiles += '-Prelease'
     }
 
     sh """

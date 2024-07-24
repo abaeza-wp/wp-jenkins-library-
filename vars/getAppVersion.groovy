@@ -9,11 +9,11 @@
 
 def call() {
     // Ensure we use hyphens rather than dots, as this is used for image names etc
-    def app_version = sh(script: "git describe --always --tags --abbrev=5", returnStdout: true).trim().replaceAll('\\.', '-')
+    def app_version = sh(script: 'git describe --always --tags --abbrev=5', returnStdout: true).trim().replaceAll('\\.', '-')
 
     // Validate the version is present, otherwise immediately fail the job
     if (app_version == null || app_version.length() == 0) {
-        error("Unable to determine application version")
+        error('Unable to determine application version')
     }
 
     echo "Application version: ${app_version}"
