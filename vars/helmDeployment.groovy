@@ -6,7 +6,7 @@ import com.worldpay.context.GkopCluster
  */
 
 def call(Map parameters) {
-	def CLUSTER = parameters.functionalEnvironment as GkopCluster
+	def CLUSTER = parameters.targetCluster as GkopCluster
 	def CLUSTER_USERNAME = parameters.username as String
 	def CLUSTER_PASSWORD = parameters.credentialId as String //Either Token or Password
 	def FUNCTIONAL_ENVIRONMENT = parameters.functionalEnvironment as String
