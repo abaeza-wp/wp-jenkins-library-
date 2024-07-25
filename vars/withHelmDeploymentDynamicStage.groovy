@@ -12,9 +12,9 @@ import com.worldpay.utils.TokenHelper
  */
 
 def call(Map parameters) {
-	def TARGET_CLUSTER = parameters.cluster as GkopCluster
+	def TARGET_CLUSTER = parameters.targetCluster as GkopCluster
 	def TARGET_CLUSTER_USERNAME = parameters.clusterUsername as String
-	def TARGET_NAMESPACE = parameters.clusterCredentialId as String
+	def TARGET_NAMESPACE = parameters.namespace as String
 
 	def environmentName = TARGET_CLUSTER.environment
 	def awsRegion = TARGET_CLUSTER.awsRegion
