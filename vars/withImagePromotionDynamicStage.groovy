@@ -33,12 +33,12 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
                 def destinationRegistryToken = kubernetesLogin(destinationProfile.cluster.api, null, destinationCredentialId, destinationNamespace, false)
 
                 promoteImageFromTo(
-                sourceNamespaceValue,
-                sourceRegistryToken,
-                sourceRegistry,
-                destinationNamespace,
-                destinationRegistryToken,
-                destinationRegistry)
+                        sourceNamespaceValue,
+                        sourceRegistryToken,
+                        sourceRegistry,
+                        destinationNamespace,
+                        destinationRegistryToken,
+                        destinationRegistry)
             }
         }
     } else {
@@ -63,12 +63,12 @@ def call(String sourceEnvironment, String destinationEnvironment, String cluster
             def destinationRegistryToken = kubernetesLogin(destinationProfile.cluster.api, null, destinationCredentialId, destinationNamespace, false)
 
             promoteImageFromTo(
-            sourceNamespaceValue,
-            sourceRegistryToken,
-            sourceRegistry,
-            destinationNamespace,
-            destinationRegistryToken,
-            destinationRegistry)
+                    sourceNamespaceValue,
+                    sourceRegistryToken,
+                    sourceRegistry,
+                    destinationNamespace,
+                    destinationRegistryToken,
+                    destinationRegistry)
         }
     }
 }

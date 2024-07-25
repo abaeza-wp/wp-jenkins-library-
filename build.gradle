@@ -38,17 +38,18 @@ sourceSets {
 }
 
 spotless {
-    groovy {
-        // Use the default importOrder configuration
+    java {
+        target '*.groovy' // default target of groovyGradle
         importOrder()
-        // removes semicolons at the end of lines
-        removeSemicolons()
-        // the Groovy Eclipse formatter extends the Java Eclipse formatter,
-        // so it formats Java files by default (unless `excludeJava` is used).
-        greclipse().configFile rootProject.files('greclipse.properties')
+        removeUnusedImports()
 
-        // excludes all Java sources within the Groovy source dirs from formatting
-        excludeJava()
+        cleanthat()
+        googleJavaFormat()
+        formatAnnotations()
+
+        indentWithTabs(2)
+        indentWithSpaces(4)
+        endWithNewline()
     }
     groovyGradle {
         target '*.gradle' // default target of groovyGradle

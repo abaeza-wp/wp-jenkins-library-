@@ -3,8 +3,8 @@ import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
     return [
-        'eu-west-1',
-        'us-east-1',
+    'eu-west-1',
+    'us-east-1',
     ]
 }
 
@@ -43,15 +43,15 @@ def call() {
         }
         parameters {
             choice(
-                    name: 'awsRegion',
-                    choices: getAwsRegions(),
-                    description: 'The target deployment aws region.'
-                    )
+            name: 'awsRegion',
+            choices: getAwsRegions(),
+            description: 'The target deployment aws region.'
+            )
             booleanParam(
-                    name: 'release',
-                    defaultValue: true,
-                    description: 'Runs additional scans for release deployments, not needed for development'
-                    )
+            name: 'release',
+            defaultValue: true,
+            description: 'Runs additional scans for release deployments, not needed for development'
+            )
         }
 
         environment {
@@ -124,12 +124,15 @@ def call() {
                                 label 'hydra-dind'
                             }
                         }
+
                         environment {
                             // Need full path of current workspace for setting path of nvm on $PATH
                             WORKSPACE = pwd()
                         }
                         steps {
-                            gradleBuildOnly(params.release)
+                            gradleBuildOnly(
+                            serviceName: "${env.SERVICE_NAME}"
+                            )
                         }
                         post {
                             always {
@@ -150,7 +153,14 @@ def call() {
                             WORKSPACE = pwd()
                         }
                         steps {
-                            gradleBuildImageOnly(params.release, "${env.DEV_CLUSTER_USERNAME}", "${env.IMAGE_BUILD_NAMESPACE}", "${env.IMAGE_BUILD_IGNORE_TLS}")
+                            gradleBuildImageOnly(
+                            serviceName: "${env.SERVICE_NAME}",
+                            isRelease: params.release,
+                            clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+                            clusterCredentialId: "${env.SVC_TOKEN}",
+                            namespace: "${env.IMAGE_BUILD_NAMESPACE}",
+                            ignoreTls: "${env.IMAGE_BUILD_IGNORE_TLS}"
+                            )
                         }
                     }
                 }
@@ -166,7 +176,14 @@ def call() {
                 }
                 steps {
                     script {
-                        withHelmDeploymentDynamicStage()
+                        def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
+                        def BASE_NAMESPACE = BuildContext.fullName
+
+                        withHelmDeploymentDynamicStage(
+                        targetCluster: PROFILE.cluster,
+                        clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+                        namespace: BASE_NAMESPACE,
+                        )
                     }
                 }
             }
