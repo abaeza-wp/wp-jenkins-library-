@@ -153,15 +153,17 @@ def call() {
 							WORKSPACE = pwd()
 						}
 						steps {
-							def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
-							gradleBuildImageOnly(
-									targetCluster: PROFILE.cluster,
-									serviceName: "${env.SERVICE_NAME}",
-									clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
-									clusterCredentialId: "${env.SVC_TOKEN}",
-									namespace: "${env.IMAGE_BUILD_NAMESPACE}",
-									isRelease: params.release,
-									)
+							script {
+								def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
+								gradleBuildImageOnly(
+										targetCluster: PROFILE.cluster,
+										serviceName: "${env.SERVICE_NAME}",
+										clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+										clusterCredentialId: "${env.SVC_TOKEN}",
+										namespace: "${env.IMAGE_BUILD_NAMESPACE}",
+										isRelease: params.release,
+										)
+							}
 						}
 					}
 				}
@@ -344,12 +346,14 @@ def call() {
 					}
 				}
 				steps {
-					def PROFILE = BuildContext.getBuildProfileForAwsRegion('stage', "${params.awsRegion}")
+					script {
+						def PROFILE = BuildContext.getBuildProfileForAwsRegion('stage', "${params.awsRegion}")
 
-					withPerformanceTest(
-							profile: PROFILE,
-							waitSeconds: "${env.PERFORMANCE_TESTING_WAIT_SECONDS}"
-							)
+						withPerformanceTest(
+								profile: PROFILE,
+								waitSeconds: "${env.PERFORMANCE_TESTING_WAIT_SECONDS}"
+								)
+					}
 				}
 			}
 		}
