@@ -1,11 +1,12 @@
 package com.worldpay
 
 class PipelineRunner implements Serializable {
+
     private PipelineCallbacksConfig config
     private static PipelineRunner instance
 
     private PipelineRunner() {
-        //Private constructor to prevent instantiation
+    //Private constructor to prevent instantiation
     }
 
     static PipelineRunner getRunner() {
@@ -38,7 +39,7 @@ class PipelineRunner implements Serializable {
     Boolean shouldSkip(String stage) {
         def body = config.bodies.get('skip:' + stage)
         def shouldSkipFound = body != null
-        if (shouldSkipFound){
+        if (shouldSkipFound) {
             body.call()
             return true
         }
@@ -76,10 +77,11 @@ class PipelineRunner implements Serializable {
         callIfDefined(callback, stage)
     }
 
-    private def callIfDefined(String key, String stage) {
+    private callIfDefined(String key, String stage) {
         def body = config.bodies.get(key)
         if (body != null) {
             body.call(stage)
         }
     }
+
 }

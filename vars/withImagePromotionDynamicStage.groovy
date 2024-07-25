@@ -1,75 +1,89 @@
 import com.worldpay.context.BuildContext
+import com.worldpay.context.GkopCluster
 import com.worldpay.utils.TokenHelper
 
-def call(String sourceEnvironment, String destinationEnvironment) {
-    call(sourceEnvironment, destinationEnvironment, null, null, null)
-}
+//def call(String sourceEnvironment, String destinationEnvironment, String clusterUsername, String sourceCredentialId, String sourceNamespace) {
+def call(Map parameters) {
 
-def call(String sourceEnvironment, String destinationEnvironment, String clusterUsername, String sourceCredentialId, String sourceNamespace) {
-    def environmentName = BuildContext.currentBuildProfile.cluster.environment
-    def awsRegion = BuildContext.currentBuildProfile.cluster.awsRegion
-    def namespace = BuildContext.fullName
+	def SOURCE_CLUSTER = parameters.sourceCluster as GkopCluster
+	def SOURCE_CLUSTER_USERNAME = parameters.sourceClusterUsername as String
+	def SOURCE_CLUSTER_PASSWORD_CREDENTIAL_ID = parameters.sourceClusterPasswordCredentialId as String
+	def SOURCE_NAMESPACE = parameters.sourceNamespace as String
 
-    if (BuildContext.useFunctionalEnvironments) {
-        for (functionalEnvironment in BuildContext.functionalEnvironments) {
-            stage("[${environmentName}] [${functionalEnvironment}] Promote Image") {
-                def destinationNamespace = "${namespace}-${functionalEnvironment}"
-                def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
+	def DESTINATION_CLUSTER = parameters.destinationCluster as GkopCluster
+	def DESTINATION_NAMESPACE = parameters.destinationNamespace as String
 
-                def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
-                def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
+	def sourceEnvironment = SOURCE_CLUSTER.environment
+	def destinationEnvironment = DESTINATION_CLUSTER.environment
 
-                def sourceRegistry = sourceProfile.cluster.imageRegistry
-                def destinationRegistry = destinationProfile.cluster.imageRegistry
+	def awsRegion = DESTINATION_CLUSTER.awsRegion
 
-                // If a source namespace is not provided then we assume we are promoting from a namespace to the same namespace in another environment
-                def sourceNamespaceValue = (sourceNamespace != null) ? sourceNamespace : "${namespace}-${functionalEnvironment}"
 
-                // If a sourceCredentialId is not provided then we assume we are promoting from a namespace to the same namespace in another environment
-                def sourceCredentialIdValue = (sourceCredentialId != null) ? sourceCredentialId : TokenHelper.tokenNameOf(sourceEnvironment, destinationNamespace, awsRegion)
+	if (BuildContext.useFunctionalEnvironments) {
+		for (functionalEnvironment in BuildContext.functionalEnvironments) {
+			stage("[${destinationEnvironment}] [${functionalEnvironment}] Promote Image") {
+				def destinationNamespace = "${DESTINATION_NAMESPACE}-${functionalEnvironment}"
+				def destinationCredentialId = TokenHelper.tokenNameOf(destinationEnvironment, destinationNamespace, awsRegion)
 
-                //Obtain tokens
-                def sourceRegistryToken = kubernetesLogin(sourceProfile.cluster.api, clusterUsername, sourceCredentialIdValue, sourceNamespaceValue, false)
-                def destinationRegistryToken = kubernetesLogin(destinationProfile.cluster.api, null, destinationCredentialId, destinationNamespace, false)
+				// If a source namespace is not provided then we assume we are promoting from a namespace to the same namespace in another environment
+				def sourceNamespaceValue = (SOURCE_NAMESPACE != null) ? SOURCE_NAMESPACE : "${DESTINATION_NAMESPACE}-${functionalEnvironment}"
 
-                promoteImageFromTo(
-                sourceNamespaceValue,
-                sourceRegistryToken,
-                sourceRegistry,
-                destinationNamespace,
-                destinationRegistryToken,
-                destinationRegistry)
-            }
-        }
-    } else {
-        stage("[${environmentName}] Promote Image") {
+				// If a sourceCredentialId is not provided then we assume we are promoting from a namespace to the same namespace in another environment
+				def sourceCredentialIdValue = (SOURCE_CLUSTER_PASSWORD_CREDENTIAL_ID != null) ? SOURCE_CLUSTER_PASSWORD_CREDENTIAL_ID : TokenHelper.tokenNameOf(sourceEnvironment, destinationNamespace, awsRegion)
 
-            def destinationCredentialId = TokenHelper.tokenNameOf(environmentName, namespace, awsRegion)
+				//Obtain tokens
+				def sourceRegistryToken = kubernetesLogin(
+						cluster: SOURCE_CLUSTER,
+						username: "${SOURCE_CLUSTER_USERNAME}",
+						passwordCredentialId: "${sourceCredentialIdValue}",
+						namespace: "${sourceNamespaceValue}")
 
-            def sourceProfile = BuildContext.getBuildProfileForAwsRegion(sourceEnvironment, awsRegion)
-            def destinationProfile = BuildContext.getBuildProfileForAwsRegion(destinationEnvironment, awsRegion)
+				def destinationRegistryToken = kubernetesLogin(
+						cluster: DESTINATION_CLUSTER,
+						passwordCredentialId: "${destinationCredentialId}",
+						namespace: "${destinationNamespace}")
 
-            def destinationNamespace = namespace
-            def sourceRegistry = sourceProfile.cluster.imageRegistry
-            def destinationRegistry = destinationProfile.cluster.imageRegistry
+				promoteImageFromTo(
+						sourceRegistry: SOURCE_CLUSTER.imageRegistry,
+						sourceNamespace: sourceNamespaceValue,
+						sourceRegistryToken: sourceRegistryToken,
+						destinationRegistry: DESTINATION_CLUSTER.imageRegistry,
+						destinationNamespace: destinationNamespace,
+						destinationRegistryToken: destinationRegistryToken
+						)
+			}
+		}
+	} else {
+		stage("[${destinationEnvironment}] Promote Image") {
+			def destinationCredentialId = TokenHelper.tokenNameOf(destinationEnvironment, DESTINATION_NAMESPACE, awsRegion)
 
-            // If a source namespace is not provided then we assume we are promoting from a namespace to the same namespace in another environment
-            def sourceNamespaceValue = (sourceNamespace != null) ? sourceNamespace : "${namespace}"
+			def destinationNamespace = DESTINATION_NAMESPACE
 
-            // If a sourceCredentialId is not provided then we assume we are promoting from a namespace to the same namespace in another environment
-            def sourceCredentialIdValue = (sourceCredentialId != null) ? sourceCredentialId : TokenHelper.tokenNameOf(environmentName, destinationNamespace, awsRegion)
+			// If a source namespace is not provided then we assume we are promoting from a namespace to the same namespace in another environment
+			def sourceNamespaceValue = (SOURCE_NAMESPACE != null) ? SOURCE_NAMESPACE : "${DESTINATION_NAMESPACE}"
 
-            //Obtain tokens
-            def sourceRegistryToken = kubernetesLogin(sourceProfile.cluster.api, clusterUsername, sourceCredentialIdValue, sourceNamespaceValue, false)
-            def destinationRegistryToken = kubernetesLogin(destinationProfile.cluster.api, null, destinationCredentialId, destinationNamespace, false)
+			// If a sourceCredentialId is not provided then we assume we are promoting from a namespace to the same namespace in another environment
+			def sourceCredentialIdValue = (SOURCE_CLUSTER_PASSWORD_CREDENTIAL_ID != null) ? SOURCE_CLUSTER_PASSWORD_CREDENTIAL_ID : TokenHelper.tokenNameOf(destinationEnvironment, destinationNamespace, awsRegion)
 
-            promoteImageFromTo(
-            sourceNamespaceValue,
-            sourceRegistryToken,
-            sourceRegistry,
-            destinationNamespace,
-            destinationRegistryToken,
-            destinationRegistry)
-        }
-    }
+			//Obtain tokens
+			def sourceRegistryToken = kubernetesLogin(
+					cluster: SOURCE_CLUSTER,
+					username: "${SOURCE_CLUSTER_USERNAME}",
+					passwordCredentialId: "${sourceCredentialIdValue}",
+					namespace: "${sourceNamespaceValue}"
+					)
+			def destinationRegistryToken = kubernetesLogin(
+					cluster: DESTINATION_CLUSTER,
+					passwordCredentialId: "${destinationCredentialId}",
+					namespace: "${destinationNamespace}"
+					)
+			promoteImageFromTo(
+					sourceRegistry: SOURCE_CLUSTER.imageRegistry,
+					sourceNamespace: sourceNamespaceValue,
+					sourceRegistryToken: sourceRegistryToken,
+					destinationRegistry: DESTINATION_CLUSTER.imageRegistry,
+					destinationNamespace: destinationNamespace,
+					destinationRegistryToken: destinationRegistryToken)
+		}
+	}
 }

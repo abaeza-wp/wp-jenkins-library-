@@ -1,8 +1,9 @@
 package com.worldpay
 
 abstract class CommonPipelineDsl implements Serializable {
+
     final PipelineCallbacksConfig callbacks
-    def final steps
+    final steps
 
     CommonPipelineDsl(Object steps, PipelineCallbacksConfig callbacks) {
         this.callbacks = callbacks
@@ -44,4 +45,5 @@ abstract class CommonPipelineDsl implements Serializable {
     void onSuccess(Closure body) {
         callbacks.registerOnSuccess(body)
     }
+
 }

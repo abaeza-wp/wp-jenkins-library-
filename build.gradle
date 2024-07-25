@@ -14,15 +14,12 @@ test {
 	useJUnitPlatform()
 }
 
-
 dependencies {
-
 	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.21'
 	implementation group: 'com.cloudbees', name: 'groovy-cps', version: '3894.3896.vca_2c931e7935', ext: 'jar'
 	implementation group: 'org.jenkinsci.plugins', name: 'pipeline-model-definition', version: '2.2198.v41dd8ef6dd56', ext: 'jar'
 	// https://mvnrepository.com/artifact/org.jenkinsci.plugins/pipeline-model-api
 }
-
 
 sourceSets {
 	main {
@@ -41,20 +38,8 @@ sourceSets {
 }
 
 spotless {
-	groovy {
-		// Use the default importOrder configuration
-		importOrder()
-		// removes semicolons at the end of lines
-		removeSemicolons()
-		// the Groovy Eclipse formatter extends the Java Eclipse formatter,
-		// so it formats Java files by default (unless `excludeJava` is used).
-		greclipse().configFile rootProject.files('greclipse.properties')
-
-		// excludes all Java sources within the Groovy source dirs from formatting
-		excludeJava()
-	}
 	groovyGradle {
-		target '*.gradle' // default target of groovyGradle
+		target('*.gradle', 'vars/**/*.groovy') // default target of groovyGradle
 		greclipse()
 	}
 }
