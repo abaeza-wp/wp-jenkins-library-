@@ -3,9 +3,9 @@
  */
 
 def call(Map parameters) {
-    def SERVICE_NAME = parameters.serviceName as String
+	def SERVICE_NAME = parameters.serviceName as String
 
-    sh """
+	sh """
             ./gradlew ${SERVICE_NAME}:clean ${SERVICE_NAME}:build
     """
 }

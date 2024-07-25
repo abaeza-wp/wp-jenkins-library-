@@ -2,19 +2,19 @@ import com.worldpay.context.BuildContext
 import com.worldpay.utils.TokenHelper
 
 def getAwsRegions() {
-    return [
-    'eu-west-1',
-    'us-east-1',
-    ]
+	return [
+		'eu-west-1',
+		'us-east-1',
+	]
 }
 
 def call() {
-    pipeline {
-        agent {
-            kubernetes {
-                label 'hydra'
-                defaultContainer 'hydra'
-                yaml '''
+	pipeline {
+		agent {
+			kubernetes {
+				label 'hydra'
+				defaultContainer 'hydra'
+				yaml '''
                 spec:
                   containers:
                   - name: hydra
@@ -39,277 +39,319 @@ def call() {
                         memory: 250Mi
                         cpu: 0.25
                  '''
-            }
-        }
-        parameters {
-            choice(
-            name: 'awsRegion',
-            choices: getAwsRegions(),
-            description: 'The target deployment aws region.'
-            )
-            booleanParam(
-            name: 'release',
-            defaultValue: true,
-            description: 'Runs additional scans for release deployments, not needed for development'
-            )
-        }
+			}
+		}
+		parameters {
+			choice(
+					name: 'awsRegion',
+					choices: getAwsRegions(),
+					description: 'The target deployment aws region.'
+					)
+			booleanParam(
+					name: 'release',
+					defaultValue: true,
+					description: 'Runs additional scans for release deployments, not needed for development'
+					)
+		}
 
-        environment {
-            // Read Jenkins configuration
-            config = readYaml(file: 'deployment/jenkins.yaml')
+		environment {
+			// Read Jenkins configuration
+			config = readYaml(file: 'deployment/jenkins.yaml')
 
-            // The name of the service
-            SERVICE_NAME = "${BuildContext.componentName}"
+			// The name of the service
+			SERVICE_NAME = "${BuildContext.componentName}"
 
-            // Checkmarx
-            CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
-            CHECKMARX_TEAM_PATH = "${config.checkmarx.teamPath}"
-            CHECKMARX_API_CREDENTIAL_ID = "${config.checkmarx.api.credentialId}"
+			// Checkmarx
+			CHECKMARX_ENABLED = "${config.checkmarx.enabled}"
+			CHECKMARX_TEAM_PATH = "${config.checkmarx.teamPath}"
+			CHECKMARX_API_CREDENTIAL_ID = "${config.checkmarx.api.credentialId}"
 
-            // Blackduck
-            BLACKDUCK_ENABLED = "${config.blackduck.enabled}"
-            BLACKDUCK_PROJECT_NAME = "${config.blackduck.projectName}"
-            BLACKDUCK_URL = 'https://fis2.app.blackduck.com'
-            BLACKDUCK_DETECT_SCRIPT_URL = 'https://detect.synopsys.com/detect8.sh'
-            BLACKDUCK_DETECT_SCRIPT = 'detect8.sh'
-            BLACKDUCK_FATJAR = "${env.SERVICE_NAME}/build/libs/${env.SERVICE_NAME}-0.0-SNAPSHOT.jar"
-            BLACKDUCK_API_CREDENTIAL_ID = "${config.blackduck.api.credentialId}"
+			// Blackduck
+			BLACKDUCK_ENABLED = "${config.blackduck.enabled}"
+			BLACKDUCK_PROJECT_NAME = "${config.blackduck.projectName}"
+			BLACKDUCK_URL = 'https://fis2.app.blackduck.com'
+			BLACKDUCK_DETECT_SCRIPT_URL = 'https://detect.synopsys.com/detect8.sh'
+			BLACKDUCK_DETECT_SCRIPT = 'detect8.sh'
+			BLACKDUCK_FATJAR = "${env.SERVICE_NAME}/build/libs/${env.SERVICE_NAME}-0.0-SNAPSHOT.jar"
+			BLACKDUCK_API_CREDENTIAL_ID = "${config.blackduck.api.credentialId}"
 
-            // OWASP Dependency Checker
-            OWASP_DEPENDENCY_ENABLED = "${config.owaspDependencyChecker.enabled}"
-            OWASP_DEPENDENCY_NVD_BUCKET_NAME = "${config.owaspDependencyChecker.awsBucket.name}"
-            OWASP_DEPENDENCY_NVD_BUCKET_CREDENTIAL_ID = "${config.owaspDependencyChecker.awsBucket.credentialId}"
+			// OWASP Dependency Checker
+			OWASP_DEPENDENCY_ENABLED = "${config.owaspDependencyChecker.enabled}"
+			OWASP_DEPENDENCY_NVD_BUCKET_NAME = "${config.owaspDependencyChecker.awsBucket.name}"
+			OWASP_DEPENDENCY_NVD_BUCKET_CREDENTIAL_ID = "${config.owaspDependencyChecker.awsBucket.credentialId}"
 
-            // Sysdig Image Scanning
-            SYSDIG_IMAGE_SCANNING_ENABLED = "${config.sysdigImageScanning.enabled}"
-            SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID = "${config.sysdigImageScanning.api.credentialId}"
+			// Sysdig Image Scanning
+			SYSDIG_IMAGE_SCANNING_ENABLED = "${config.sysdigImageScanning.enabled}"
+			SYSDIG_IMAGE_SCANNING_API_CREDENTIAL_ID = "${config.sysdigImageScanning.api.credentialId}"
 
-            // Performance testing
-            PERFORMANCE_TESTING_ENABLED = "${config.performanceTesting.enabled}"
-            PERFORMANCE_TESTING_WAIT_SECONDS = "${config.performanceTesting.initialWaitSeconds}"
+			// Performance testing
+			PERFORMANCE_TESTING_ENABLED = "${config.performanceTesting.enabled}"
+			PERFORMANCE_TESTING_WAIT_SECONDS = "${config.performanceTesting.initialWaitSeconds}"
 
-            // Report Archiving
-            REPORT_ARCHIVING_ENABLED = "${config.reportArchiving.enabled}"
-            REPORT_ARCHIVING_BUCKET_NAME = "${config.reportArchiving.awsBucket.name}"
-            REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID = "${config.reportArchiving.awsBucket.credentialId}"
+			// Report Archiving
+			REPORT_ARCHIVING_ENABLED = "${config.reportArchiving.enabled}"
+			REPORT_ARCHIVING_BUCKET_NAME = "${config.reportArchiving.awsBucket.name}"
+			REPORT_ARCHIVING_BUCKET_CREDENTIAL_ID = "${config.reportArchiving.awsBucket.credentialId}"
 
-            // Slack notifications
-            SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
-            SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
-            SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
+			// Slack notifications
+			SLACK_WEBHOOK_URL = "${config.slack.webhookUrl}"
+			SLACK_BLACKDUCK_CHANNEL = "$config.slack.channels.blackduck"
+			SLACK_SYSDIG_CHANNEL = "$config.slack.channels.sysdig"
 
-            //Image Build (dev)
-            DEV_CLUSTER_USERNAME = "${config.ci.cluster_username}"
-            IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
-            IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
-            // Credential used for initial image building and deployment
-            SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
-        }
+			//Image Build (dev)
+			DEV_CLUSTER_USERNAME = "${config.ci.cluster_username}"
+			IMAGE_BUILD_NAMESPACE = "${config.ci.namespace}"
+			IMAGE_BUILD_IGNORE_TLS = "${config.ci.ignore_tls}"
+			// Credential used for initial image building and deployment
+			SVC_TOKEN = TokenHelper.devTokenName("${config.ci.namespace}", "${params.awsRegion}")
+		}
 
-        stages {
-            stage('[dev] Prepare Build Environment') {
-                steps {
-                    switchEnvironment('dev', "${params.awsRegion}")
-                    setBuildInformation()
-                }
-            }
-            stage('Build & Check App') {
-                parallel {
-                    stage('Build & Test App') {
-                        agent {
-                            kubernetes {
-                                cloud 'kubernetes-ephemeral-agents'
-                                inheritFrom 'hydra-dind'
-                                defaultContainer 'hydra-dind'
-                                label 'hydra-dind'
-                            }
-                        }
+		stages {
+			stage('[dev] Prepare Build Environment') {
+				steps {
+					switchEnvironment('dev', "${params.awsRegion}")
+					setBuildInformation()
+				}
+			}
+			stage('Build & Check App') {
+				parallel {
+					stage('Build & Test App') {
+						agent {
+							kubernetes {
+								cloud 'kubernetes-ephemeral-agents'
+								inheritFrom 'hydra-dind'
+								defaultContainer 'hydra-dind'
+								label 'hydra-dind'
+							}
+						}
 
-                        environment {
-                            // Need full path of current workspace for setting path of nvm on $PATH
-                            WORKSPACE = pwd()
-                        }
-                        steps {
-                            gradleBuildOnly(
-                            serviceName: "${env.SERVICE_NAME}"
-                            )
-                        }
-                        post {
-                            always {
-                                echo 'Archiving test reports'
-                                //Archive all HTML reports
-                                archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
+						environment {
+							// Need full path of current workspace for setting path of nvm on $PATH
+							WORKSPACE = pwd()
+						}
+						steps {
+							gradleBuildOnly(
+									serviceName: "${env.SERVICE_NAME}"
+									)
+						}
+						post {
+							always {
+								echo 'Archiving test reports'
+								//Archive all HTML reports
+								archiveArtifacts artifacts: "${env.SERVICE_NAME}/build/reports/**/*.*"
 
-                                //Archive as PDF reports
-                                archiveReportAsPdf('Unit', "${env.SERVICE_NAME}/build/reports/tests/test", 'index.html', 'unit-test-report.pdf', false)
-                                archiveReportAsPdf('Code Coverage', "${env.SERVICE_NAME}/build/reports/jacoco/test/html", 'index.html', 'coverage-report.pdf', false)
-                                archiveReportAsPdf('BDD', "${env.SERVICE_NAME}/build/reports/tests/bddTest", 'index.html', 'bdd-report.pdf', true)
-                            }
-                        }
-                    }
-                    stage('Build Image') {
-                        environment {
-                            // Need full path of current workspace for setting path of nvm on $PATH
-                            WORKSPACE = pwd()
-                        }
-                        steps {
-                            gradleBuildImageOnly(
-                            serviceName: "${env.SERVICE_NAME}",
-                            isRelease: params.release,
-                            clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
-                            clusterCredentialId: "${env.SVC_TOKEN}",
-                            namespace: "${env.IMAGE_BUILD_NAMESPACE}",
-                            ignoreTls: "${env.IMAGE_BUILD_IGNORE_TLS}"
-                            )
-                        }
-                    }
-                }
-            }
+								//Archive as PDF reports
+								archiveReportAsPdf('Unit', "${env.SERVICE_NAME}/build/reports/tests/test", 'index.html', 'unit-test-report.pdf', false)
+								archiveReportAsPdf('Code Coverage', "${env.SERVICE_NAME}/build/reports/jacoco/test/html", 'index.html', 'coverage-report.pdf', false)
+								archiveReportAsPdf('BDD', "${env.SERVICE_NAME}/build/reports/tests/bddTest", 'index.html', 'bdd-report.pdf', true)
+							}
+						}
+					}
+					stage('Build Image') {
+						environment {
+							// Need full path of current workspace for setting path of nvm on $PATH
+							WORKSPACE = pwd()
+						}
+						steps {
+							def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
+							gradleBuildImageOnly(
+									targetCluster: PROFILE.cluster,
+									serviceName: "${env.SERVICE_NAME}",
+									clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+									clusterCredentialId: "${env.SVC_TOKEN}",
+									namespace: "${env.IMAGE_BUILD_NAMESPACE}",
+									isRelease: params.release,
+									)
+						}
+					}
+				}
+			}
 
-            stage('[dev] Deployment') {
-                when {
-                    expression { params.release }
-                    anyOf {
-                        triggeredBy 'TimerTrigger'
-                        triggeredBy cause: 'UserIdCause'
-                    }
-                }
-                steps {
-                    script {
-                        def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
-                        def BASE_NAMESPACE = BuildContext.fullName
+			stage('[dev] Deployment') {
+				when {
+					expression { params.release }
+					anyOf {
+						triggeredBy 'TimerTrigger'
+						triggeredBy cause: 'UserIdCause'
+					}
+				}
+				steps {
+					script {
+						def PROFILE = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
+						def NAMESPACE = BuildContext.fullName
 
-                        withHelmDeploymentDynamicStage(
-                        targetCluster: PROFILE.cluster,
-                        clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
-                        namespace: BASE_NAMESPACE,
-                        )
-                    }
-                }
-            }
+						withHelmDeploymentDynamicStage(
+								targetCluster: PROFILE.cluster,
+								clusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+								namespace: NAMESPACE,
+								)
+					}
+				}
+			}
 
-            stage('Security Testing') {
-                parallel {
-                    stage('Image Scan (Sysdig)') {
-                        when {
-                            allOf {
-                                expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.DEV_CLUSTER_USERNAME}")
-                        }
-                    }
+			stage('Security Testing') {
+				parallel {
+					stage('Image Scan (Sysdig)') {
+						when {
+							allOf {
+								expression { env.SYSDIG_IMAGE_SCANNING_ENABLED.toBoolean() }
+							}
+						}
+						steps {
+							scanSysdig("${env.IMAGE_BUILD_NAMESPACE}", "${env.DEV_CLUSTER_USERNAME}")
+						}
+					}
 
-                    stage('Static Analysis (Checkmarx)') {
-                        when {
-                            expression { env.CHECKMARX_ENABLED.toBoolean() }
-                        }
-                        steps {
-                            scanCheckmarx()
-                        }
-                    }
+					stage('Static Analysis (Checkmarx)') {
+						when {
+							expression { env.CHECKMARX_ENABLED.toBoolean() }
+						}
+						steps {
+							scanCheckmarx(
+									serviceName: "${env.SERVICE_NAME}",
+									checkmarxCredentialsId: "${env.CHECKMARX_API_CREDENTIAL_ID}",
+									teamPath: "${env.CHECKMARX_API_CREDENTIAL_ID}"
+									)
+						}
+					}
 
-                    stage('Dependency Analysis (BlackDuck)') {
-                        when {
-                            allOf {
-                                expression { env.BLACKDUCK_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanBlackduck()
-                        }
-                    }
+					stage('Dependency Analysis (BlackDuck)') {
+						when {
+							allOf {
+								expression { env.BLACKDUCK_ENABLED.toBoolean() }
+							}
+						}
+						steps {
+							scanBlackduck(
+									serviceName: "${env.SERVICE_NAME}",
+									fatjar: "${env.BLACKDUCK_FATJAR}",
+									detectScriptUrl: "${env.BLACKDUCK_DETECT_SCRIPT_URL}",
+									detectScript: "${env.BLACKDUCK_DETECT_SCRIPT}",
+									blackduckApiCredentialId: "${env.BLACKDUCK_API_CREDENTIAL_ID}",
+									blackduckUrl: "${env.BLACKDUCK_URL}",
+									blackduckProjectName: "${env.BLACKDUCK_PROJECT_NAME}",
+									slackChannel: "$env.SLACK_BLACKDUCK_CHANNEL",
+									slackWebhookUrl: "$env.SLACK_WEBHOOK_URL",
+									)
+						}
+					}
 
-                    stage('OWASP Dependency Checker') {
-                        when {
-                            allOf {
-                                expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
-                            }
-                        }
-                        steps {
-                            scanOwaspDependency()
-                        }
-                    }
-                }
-            }
-            stage('Archive reports in S3') {
-                when {
-                    allOf {
-                        expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    archiveReportsToS3()
-                }
-            }
+					stage('OWASP Dependency Checker') {
+						when {
+							allOf {
+								expression { env.OWASP_DEPENDENCY_ENABLED.toBoolean() }
+							}
+						}
+						steps {
+							scanOwaspDependency(
+									serviceName: "${env.SERVICE_NAME}",
+									owaspCredentialId: "${env.OWASP_DEPENDENCY_NVD_BUCKET_CREDENTIAL_ID}",
+									owaspNvdBucketName: "${env.OWASP_DEPENDENCY_NVD_BUCKET_NAME}"
+									)
+						}
+					}
+				}
+			}
+			stage('Archive reports in S3') {
+				when {
+					allOf {
+						expression { env.REPORT_ARCHIVING_ENABLED.toBoolean() }
+						expression { params.release }
+						anyOf {
+							branch 'master'
+							branch 'main'
+						}
+					}
+				}
+				steps {
+					archiveReportsToS3()
+				}
+			}
 
-            stage('[stage] Prepare Build Environment') {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    switchEnvironment('stage', "${params.awsRegion}")
-                }
-            }
-            stage('[stage] Start Image Promotion') {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    script {
-                        withImagePromotionDynamicStage('dev', 'stage', "${env.DEV_CLUSTER_USERNAME}", "${env.SVC_TOKEN}", "${env.IMAGE_BUILD_NAMESPACE}")
-                    }
-                }
-            }
-            stage('[stage] Deployment') {
-                when {
-                    allOf {
-                        expression { params.release }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    script {
-                        withHelmDeploymentDynamicStage()
-                    }
-                }
-            }
-            stage('Performance Testing') {
-                when {
-                    allOf {
-                        expression { params.release }
-                        expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
-                        anyOf {
-                            branch 'master'
-                            branch 'main'
-                        }
-                    }
-                }
-                steps {
-                    withPerformanceTest()
-                }
-            }
-        }
-    }
+			stage('[stage] Prepare Build Environment') {
+				when {
+					allOf {
+						expression { params.release }
+						anyOf {
+							branch 'master'
+							branch 'main'
+						}
+					}
+				}
+				steps {
+					switchEnvironment('stage', "${params.awsRegion}")
+				}
+			}
+			stage('[stage] Start Image Promotion') {
+				when {
+					allOf {
+						expression { params.release }
+						anyOf {
+							branch 'master'
+							branch 'main'
+						}
+					}
+				}
+				steps {
+					script {
+						def SOURCE_CLUSTER = BuildContext.getBuildProfileForAwsRegion('dev', "${params.awsRegion}")
+						def DESTINATION_CLUSTER = BuildContext.getBuildProfileForAwsRegion('stage', "${params.awsRegion}")
+
+						def NAMESPACE = BuildContext.fullName
+
+						withImagePromotionDynamicStage(
+								sourceCluster: SOURCE_CLUSTER.cluster,
+								sourceClusterUsername: "${env.DEV_CLUSTER_USERNAME}",
+								sourceClusterPasswordCredentialId: "${env.SVC_TOKEN}",
+								sourceNamespace: "${env.IMAGE_BUILD_NAMESPACE}",
+								destinationCluster: DESTINATION_CLUSTER.cluster,
+								destinationNamespace: NAMESPACE,
+								)
+					}
+				}
+			}
+			stage('[stage] Deployment') {
+				when {
+					allOf {
+						expression { params.release }
+						anyOf {
+							branch 'master'
+							branch 'main'
+						}
+					}
+				}
+				steps {
+					script {
+						def PROFILE = BuildContext.getBuildProfileForAwsRegion('stage', "${params.awsRegion}")
+						def NAMESPACE = BuildContext.fullName
+
+						withHelmDeploymentDynamicStage(
+								targetCluster: PROFILE.cluster,
+								namespace: NAMESPACE
+								)
+					}
+				}
+			}
+			stage('Performance Testing') {
+				when {
+					allOf {
+						expression { params.release }
+						expression { env.PERFORMANCE_TESTING_ENABLED.toBoolean() }
+						anyOf {
+							branch 'master'
+							branch 'main'
+						}
+					}
+				}
+				steps {
+					def PROFILE = BuildContext.getBuildProfileForAwsRegion('stage', "${params.awsRegion}")
+
+					withPerformanceTest(
+							profile: PROFILE,
+							waitSeconds: "${env.PERFORMANCE_TESTING_WAIT_SECONDS}"
+							)
+				}
+			}
+		}
+	}
 }
